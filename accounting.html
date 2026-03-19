@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>會計庫存系統 · Google Sheets 同步</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; }
+        body { background: #f1f5f9; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { color: #0f172a; font-weight: 500; margin-bottom: 6px; }
+        .sub { color: #475569; margin-bottom: 25px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 16px; margin-bottom: 30px; }
+        .card { background: white; border-radius: 28px; padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.02); border: 1px solid #e9eef3; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .card-header h2 { font-size: 1.3rem; font-weight: 500; color: #1e293b; }
+        .btn { background: white; border: 1px solid #cbd5e1; border-radius: 30px; padding: 6px 16px; cursor: pointer; }
+        .btn-primary { background: #1e3a5f; color: white; border: none; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { text-align: left; padding: 10px 6px; color: #475569; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 8px 6px; border-bottom: 1px solid #f1f5f9; }
+        .badge { background: #dbeafe; padding: 2px 10px; border-radius: 30px; font-size: 0.75rem; }
+        .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-top: 15px; }
+        .form-group { flex: 1 1 150px; }
+        .form-group label { font-size: 0.7rem; text-transform: uppercase; color: #64748b; }
+        .form-control { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 30px; }
+        .summary-card { background: white; border-radius: 20px; padding: 16px; }
+        .summary-label { font-size: 0.75rem; color: #64748b; }
+        .summary-number { font-size: 1.8rem; font-weight: 600; }
+        .mt-4 { margin-top: 20px; }
+        .tab { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab button { background: #e2e8f0; border: none; padding: 8px 20px; border-radius: 40px; cursor: pointer; }
+        .tab button.active { background: #1e3a5f; color: white; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .text-right { text-align: right; }
+        .delete-btn { color: #b91c1c; background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <h1>🧾 會計庫存管理 · 雲端同步</h1>
+    <div class="sub">資料自動備份至 Google 試算表</div>
+
+    <!-- 頁籤導航 -->
+    <div class="tab">
+        <button class="active" data-tab="dashboard">📊 儀表板</button>
+        <button data-tab="accounts">📋 會計科目</button>
+        <button data-tab="transactions">📆 交易分錄</button>
+        <button data-tab="products">📦 點貨系統</button>
+        <button data-tab="sell">🛒 銷售產品</button>
+        <button data-tab="income">💇 手動收入</button>
+        <button data-tab="import">📂 CSV 匯入</button>
+    </div>
+
+    <!-- 儀表板面板 -->
+    <div id="dashboard" class="panel active">
+        <div class="grid" id="summaryCards"></div>
+        <div class="card">
+            <h3>📈 產品銷售統計</h3>
+            <div id="productStats"></div>
+        </div>
+        <div class="card mt-4">
+            <h3>🧮 預測消耗</h3>
+            <div class="form-row">
+                <div class="form-group"><label>預計客量</label><input type="number" id="forecastCustomers" class="form-control" value="10"></div>
+                <button class="btn btn-primary" id="forecastBtn">計算預測用量</button>
+            </div>
+            <div id="forecastResult"></div>
+        </div>
+    </div>
+
+    <!-- 會計科目面板 -->
+    <div id="accounts" class="panel">
+        <div class="card">
+            <div class="card-header"><h2>科目列表</h2><button class="btn btn-primary" id="showAddAccount">新增科目</button></div>
+            <div id="addAccountForm" style="display:none; background:#f8fafc; padding:15px; border-radius:30px; margin-bottom:15px;">
+                <div class="form-row">
+                    <div class="form-group"><label>科目名稱</label><input type="text" id="accName" class="form-control"></div>
+                    <div class="form-group"><label>類型</label><select id="accType" class="form-control"><option value="asset">資產</option><option value="liability">負債</option><option value="equity">權益</option><option value="income">收入</option><option value="expense">費用</option></select></div>
+                    <div><button class="btn btn-primary" id="saveAccount">儲存</button><button class="btn" id="cancelAddAccount">取消</button></div>
+                </div>
+            </div>
+            <table id="accountsTable"><thead><tr><th>科目</th><th>類型</th><th>借方餘額</th><th>貸方餘額</th><th></th></tr></thead><tbody></tbody></table>
+        </div>
+    </div>
+
+    <!-- 交易分錄面板 -->
+    <div id="transactions" class="panel">
+        <div class="card">
+            <div class="card-header"><h2>交易分錄</h2><button class="btn btn-primary" id="showAddTrans">新增分錄</button></div>
+            <div id="addTransForm" style="display:none; background:#f8fafc; padding:15px; border-radius:30px; margin-bottom:15px;">
+                <div class="form-row">
+                    <div class="form-group"><label>日期</label><input type="date" id="transDate" class="form-control"></div>
+                    <div class="form-group"><label>摘要</label><input type="text" id="transDesc" class="form-control"></div>
+                    <div class="form-group"><label>借方</label><select id="debitAcc" class="form-control"></select></div>
+                    <div class="form-group"><label>貸方</label><select id="creditAcc" class="form-control"></select></div>
+                    <div class="form-group"><label>金額</label><input type="number" id="transAmount" class="form-control" value="100"></div>
+                    <div><button class="btn btn-primary" id="saveTrans">儲存</button><button class="btn" id="cancelAddTrans">取消</button></div>
+                </div>
+            </div>
+            <div id="transactionsList"></div>
+        </div>
+    </div>
+
+    <!-- 點貨系統 (產品庫存) -->
+    <div id="products" class="panel">
+        <div class="card">
+            <div class="card-header"><h2>產品庫存</h2><button class="btn btn-primary" id="showAddProduct">新增產品</button></div>
+            <div id="addProductForm" style="display:none; background:#f8fafc; padding:15px; border-radius:30px; margin-bottom:15px;">
+                <div class="form-row">
+                    <div class="form-group"><label>產品名稱</label><input type="text" id="prodName" class="form-control"></div>
+                    <div class="form-group"><label>單價</label><input type="number" id="prodPrice" class="form-control" step="0.01"></div>
+                    <div class="form-group"><label>庫存數量</label><input type="number" id="prodStock" class="form-control"></div>
+                    <div><button class="btn btn-primary" id="saveProduct">儲存</button><button class="btn" id="cancelAddProduct">取消</button></div>
+                </div>
+            </div>
+            <table id="productsTable"><thead><tr><th>名稱</th><th>單價</th><th>庫存</th><th>庫存總值</th><th></th></tr></thead><tbody></tbody></table>
+        </div>
+    </div>
+
+    <!-- 銷售產品 -->
+    <div id="sell" class="panel">
+        <div class="card">
+            <h3>銷售產品</h3>
+            <div class="form-row">
+                <div class="form-group"><label>日期</label><input type="date" id="sellDate" class="form-control"></div>
+                <div class="form-group"><label>髮型師</label><input type="text" id="sellStylist" class="form-control"></div>
+                <div class="form-group"><label>產品</label><select id="sellProduct" class="form-control"></select></div>
+                <div class="form-group"><label>數量</label><input type="number" id="sellQty" class="form-control" min="1" value="1"></div>
+                <div class="form-group"><label>支付方式</label><select id="sellPayment" class="form-control"><option value="cash">現金</option><option value="credit">信用卡</option><option value="transfer">轉帳</option></select></div>
+                <div><button class="btn btn-primary" id="sellBtn">確認銷售</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 手動收入 -->
+    <div id="income" class="panel">
+        <div class="card">
+            <h3>手動收入（服務費）</h3>
+            <div class="form-row">
+                <div class="form-group"><label>日期</label><input type="date" id="incDate" class="form-control"></div>
+                <div class="form-group"><label>髮型師</label><input type="text" id="incStylist" class="form-control"></div>
+                <div class="form-group"><label>金額</label><input type="number" id="incAmount" class="form-control" step="0.01"></div>
+                <div class="form-group"><label>支付方式</label><select id="incPayment" class="form-control"><option value="cash">現金</option><option value="credit">信用卡</option><option value="transfer">轉帳</option></select></div>
+                <div class="form-group"><label>備註</label><input type="text" id="incNote" class="form-control"></div>
+                <div><button class="btn btn-primary" id="incBtn">記錄收入</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CSV 匯入 -->
+    <div id="import" class="panel">
+        <div class="card">
+            <h3>匯入 CSV 檔案</h3>
+            <p>將 Excel 另存為 CSV，選擇要匯入的資料類型後上傳。</p>
+            <div class="form-row">
+                <div class="form-group"><label>目標工作表</label><select id="importSheet" class="form-control"><option value="產品庫存">產品庫存</option><option value="科目">科目</option><option value="交易分錄">交易分錄</option></select></div>
+                <div><input type="file" id="csvFile" accept=".csv"></div>
+                <div><button class="btn btn-primary" id="importBtn">上傳並匯入</button></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== 設定 ==========
+    // 您提供的正確 Web App 網址
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhMFhXz5CjiggUOrOM261fSklNuh-2Ms4hvKV1SdFrdTbARQlDLP8olVhJovkrm4Na/exec';
+    
+    const SHEET_NAMES = {
+        ACCOUNTS: '科目',
+        TRANSACTIONS: '交易分錄',
+        PRODUCTS: '產品庫存',
+        SALES: '銷售記錄',
+        MANUAL_INCOME: '手動收入'
+    };
+
+    // 資料儲存 (記憶體)
+    let accounts = [];
+    let transactions = [];
+    let products = [];
+    let sales = [];
+    let manualIncomes = [];
+
+    // 目前頁籤
+    let currentTab = 'dashboard';
+
+    // ========== 跨域通訊 ==========
+    function loadAllData() {
+        // 使用 JSONP 取得所有工作表資料
+        const callbackName = 'jsonp_cb_' + Date.now();
+        window[callbackName] = function(data) {
+            if (data.error) { console.error('載入失敗', data.error); return; }
+            // data 會是一個物件，key 為工作表名稱
+            accounts = data[SHEET_NAMES.ACCOUNTS] || [];
+            transactions = data[SHEET_NAMES.TRANSACTIONS] || [];
+            products = data[SHEET_NAMES.PRODUCTS] || [];
+            sales = data[SHEET_NAMES.SALES] || [];
+            manualIncomes = data[SHEET_NAMES.MANUAL_INCOME] || [];
+            renderAll();
+            delete window[callbackName];
+        };
+        const script = document.createElement('script');
+        script.src = `${SCRIPT_URL}?action=getAll&callback=${callbackName}`;
+        document.body.appendChild(script);
+    }
+
+    // 儲存整個工作表 (覆蓋)
+    function saveSheet(sheetName, dataArray, callback) {
+        const iframeId = 'iframe_' + Date.now();
+        const iframe = document.createElement('iframe');
+        iframe.name = iframeId;
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+
+        // 監聽 postMessage
+        function listener(event) {
+            if (event.data === 'success') {
+                if (callback) callback(true);
+            } else if (typeof event.data === 'string' && event.data.startsWith('error')) {
+                alert('儲存失敗：' + event.data);
+                if (callback) callback(false);
+            }
+            window.removeEventListener('message', listener);
+            setTimeout(() => iframe.remove(), 1000);
+        }
+        window.addEventListener('message', listener);
+
+        // 建立表單並提交
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = SCRIPT_URL;
+        form.target = iframeId;
+        form.style.display = 'none';
+        form.innerHTML = `
+            <input name="action" value="overwrite">
+            <input name="sheet" value="${sheetName}">
+            <input name="data" value='${JSON.stringify(dataArray)}'>
+        `;
+        document.body.appendChild(form);
+        form.submit();
+        setTimeout(() => form.remove(), 1000);
+    }
+
+    // ========== 介面渲染 ==========
+    function renderAll() {
+        renderSummary();
+        renderAccounts();
+        renderTransactions();
+        renderProducts();
+        renderProductStats();
+        renderForecast();
+        populateDropdowns();
+    }
+
+    function renderSummary() {
+        // 計算總資產、收入、費用、利潤、庫存總值
+        const assetAccounts = accounts.filter(a => a.type === 'asset');
+        let totalAssets = 0;
+        // 簡易餘額計算（依交易分錄）
+        const balances = calculateBalances();
+        assetAccounts.forEach(acc => { totalAssets += balances[acc.id]?.debitBalance || 0; });
+        
+        const incomeTotal = transactions.filter(t => {
+            const creditAcc = accounts.find(a => a.id === t.creditId);
+            return creditAcc && creditAcc.type === 'income';
+        }).reduce((s, t) => s + t.amount, 0);
+        const expenseTotal = transactions.filter(t => {
+            const debitAcc = accounts.find(a => a.id === t.debitId);
+            return debitAcc && debitAcc.type === 'expense';
+        }).reduce((s, t) => s + t.amount, 0);
+        const profit = incomeTotal - expenseTotal;
+
+        const inventoryValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
+
+        document.getElementById('summaryCards').innerHTML = `
+            <div class="summary-card"><div class="summary-label">總資產</div><div class="summary-number">${totalAssets.toFixed(2)}</div></div>
+            <div class="summary-card"><div class="summary-label">總收入</div><div class="summary-number">${incomeTotal.toFixed(2)}</div></div>
+            <div class="summary-card"><div class="summary-label">總費用</div><div class="summary-number">${expenseTotal.toFixed(2)}</div></div>
+            <div class="summary-card"><div class="summary-label">淨利</div><div class="summary-number">${profit.toFixed(2)}</div></div>
+            <div class="summary-card"><div class="summary-label">庫存總值</div><div class="summary-number">${inventoryValue.toFixed(2)}</div></div>
+        `;
+    }
+
+    function calculateBalances() {
+        let debitMap = {}, creditMap = {};
+        accounts.forEach(a => { debitMap[a.id] = 0; creditMap[a.id] = 0; });
+        transactions.forEach(t => {
+            if (debitMap[t.debitId] !== undefined) debitMap[t.debitId] += t.amount;
+            if (creditMap[t.creditId] !== undefined) creditMap[t.creditId] += t.amount;
+        });
+        let result = {};
+        accounts.forEach(a => {
+            const debit = debitMap[a.id] || 0;
+            const credit = creditMap[a.id] || 0;
+            if (a.type === 'asset' || a.type === 'expense') {
+                const net = debit - credit;
+                result[a.id] = { debitBalance: net > 0 ? net : 0, creditBalance: net < 0 ? -net : 0 };
+            } else {
+                const net = credit - debit;
+                result[a.id] = { debitBalance: net < 0 ? -net : 0, creditBalance: net > 0 ? net : 0 };
+            }
+        });
+        return result;
+    }
+
+    function renderAccounts() {
+        const tbody = document.querySelector('#accountsTable tbody');
+        const balances = calculateBalances();
+        tbody.innerHTML = accounts.map(acc => `
+            <tr>
+                <td>${acc.name}</td>
+                <td>${acc.type}</td>
+                <td>${balances[acc.id]?.debitBalance?.toFixed(2) || ''}</td>
+                <td>${balances[acc.id]?.creditBalance?.toFixed(2) || ''}</td>
+                <td><button class="delete-btn" data-type="account" data-id="${acc.id}">🗑️</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function renderTransactions() {
+        const div = document.getElementById('transactionsList');
+        if (!transactions.length) { div.innerHTML = '<p>暫無交易</p>'; return; }
+        div.innerHTML = transactions.map(t => {
+            const debitName = accounts.find(a => a.id === t.debitId)?.name || t.debitId;
+            const creditName = accounts.find(a => a.id === t.creditId)?.name || t.creditId;
+            return `<div style="background:white; margin:8px 0; padding:10px 18px; border-radius:40px; display:flex; justify-content:space-between;">
+                <span>${t.date} ${t.description} 借:${debitName} 貸:${creditName} $${t.amount}</span>
+                <button class="delete-btn" data-type="transaction" data-id="${t.id}">🗑️</button>
+            </div>`;
+        }).join('');
+    }
+
+    function renderProducts() {
+        const tbody = document.querySelector('#productsTable tbody');
+        tbody.innerHTML = products.map(p => `
+            <tr>
+                <td>${p.name}</td>
+                <td>$${p.price}</td>
+                <td>${p.stock}</td>
+                <td>$${(p.price * p.stock).toFixed(2)}</td>
+                <td><button class="delete-btn" data-type="product" data-id="${p.id}">🗑️</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function renderProductStats() {
+        // 計算各產品銷售數量
+        const productSales = {};
+        sales.forEach(s => {
+            if (!productSales[s.productId]) productSales[s.productId] = { qty: 0, rev: 0 };
+            productSales[s.productId].qty += s.quantity;
+            productSales[s.productId].rev += s.amount;
+        });
+        let html = '<table><tr><th>產品</th><th>總銷售量</th><th>總銷售額</th></tr>';
+        products.forEach(p => {
+            const stat = productSales[p.id] || { qty: 0, rev: 0 };
+            html += `<tr><td>${p.name}</td><td>${stat.qty}</td><td>$${stat.rev.toFixed(2)}</td></tr>`;
+        });
+        html += '</table>';
+        document.getElementById('productStats').innerHTML = html;
+    }
+
+    function renderForecast() {
+        const customers = document.getElementById('forecastCustomers').value;
+        // 計算平均每單用量
+        const usage = {};
+        sales.forEach(s => {
+            if (!usage[s.productId]) usage[s.productId] = { totalQty: 0, count: 0 };
+            usage[s.productId].totalQty += s.quantity;
+            usage[s.productId].count += 1;
+        });
+        let forecastHtml = '<p>預測消耗：</p><ul>';
+        products.forEach(p => {
+            const avg = usage[p.id] ? usage[p.id].totalQty / usage[p.id].count : 0;
+            const predicted = avg * customers;
+            forecastHtml += `<li>${p.name} : ${predicted.toFixed(2)} 單位</li>`;
+        });
+        forecastHtml += '</ul>';
+        document.getElementById('forecastResult').innerHTML = forecastHtml;
+    }
+
+    function populateDropdowns() {
+        const debitSel = document.getElementById('debitAcc');
+        const creditSel = document.getElementById('creditAcc');
+        const productSel = document.getElementById('sellProduct');
+        if (debitSel) {
+            debitSel.innerHTML = accounts.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+        }
+        if (creditSel) {
+            creditSel.innerHTML = accounts.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+        }
+        if (productSel) {
+            productSel.innerHTML = products.map(p => `<option value="${p.id}">${p.name} ($${p.price})</option>`).join('');
+        }
+    }
+
+    // ========== 新增 / 刪除 / 儲存事件 ==========
+    function attachEvents() {
+        // 頁籤切換
+        document.querySelectorAll('.tab button').forEach(btn => {
+            btn.addEventListener('click', e => {
+                document.querySelectorAll('.tab button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                document.getElementById(btn.dataset.tab).classList.add('active');
+                currentTab = btn.dataset.tab;
+            });
+        });
+
+        // 顯示新增科目表單
+        document.getElementById('showAddAccount').addEventListener('click', () => {
+            document.getElementById('addAccountForm').style.display = 'block';
+        });
+        document.getElementById('cancelAddAccount').addEventListener('click', () => {
+            document.getElementById('addAccountForm').style.display = 'none';
+        });
+        document.getElementById('saveAccount').addEventListener('click', () => {
+            const name = document.getElementById('accName').value;
+            const type = document.getElementById('accType').value;
+            if (!name) return alert('請輸入名稱');
+            const newId = 'acc_' + Date.now() + '_' + Math.random().toString(36);
+            accounts.push({ id: newId, name, type });
+            saveSheet(SHEET_NAMES.ACCOUNTS, accounts, () => {
+                document.getElementById('addAccountForm').style.display = 'none';
+                document.getElementById('accName').value = '';
+                renderAll();
+            });
+        });
+
+        // 顯示新增交易表單
+        document.getElementById('showAddTrans').addEventListener('click', () => {
+            document.getElementById('addTransForm').style.display = 'block';
+        });
+        document.getElementById('cancelAddTrans').addEventListener('click', () => {
+            document.getElementById('addTransForm').style.display = 'none';
+        });
+        document.getElementById('saveTrans').addEventListener('click', () => {
+            const date = document.getElementById('transDate').value;
+            const desc = document.getElementById('transDesc').value;
+            const debit = document.getElementById('debitAcc').value;
+            const credit = document.getElementById('creditAcc').value;
+            const amount = parseFloat(document.getElementById('transAmount').value);
+            if (!date || !desc || !debit || !credit || amount <= 0) return alert('請填寫完整');
+            const newId = 'tr_' + Date.now();
+            transactions.push({ id: newId, date, description: desc, debitId: debit, creditId: credit, amount });
+            saveSheet(SHEET_NAMES.TRANSACTIONS, transactions, () => {
+                document.getElementById('addTransForm').style.display = 'none';
+                document.getElementById('transDesc').value = '';
+                renderAll();
+            });
+        });
+
+        // 顯示新增產品
+        document.getElementById('showAddProduct').addEventListener('click', () => {
+            document.getElementById('addProductForm').style.display = 'block';
+        });
+        document.getElementById('cancelAddProduct').addEventListener('click', () => {
+            document.getElementById('addProductForm').style.display = 'none';
+        });
+        document.getElementById('saveProduct').addEventListener('click', () => {
+            const name = document.getElementById('prodName').value;
+            const price = parseFloat(document.getElementById('prodPrice').value);
+            const stock = parseInt(document.getElementById('prodStock').value, 10);
+            if (!name || isNaN(price) || isNaN(stock)) return alert('請填寫完整');
+            const newId = 'prod_' + Date.now();
+            products.push({ id: newId, name, price, stock });
+            saveSheet(SHEET_NAMES.PRODUCTS, products, () => {
+                document.getElementById('addProductForm').style.display = 'none';
+                document.getElementById('prodName').value = '';
+                renderAll();
+            });
+        });
+
+        // 銷售產品
+        document.getElementById('sellBtn').addEventListener('click', () => {
+            const date = document.getElementById('sellDate').value;
+            const stylist = document.getElementById('sellStylist').value;
+            const productId = document.getElementById('sellProduct').value;
+            const qty = parseInt(document.getElementById('sellQty').value, 10);
+            const payment = document.getElementById('sellPayment').value;
+            if (!date || !stylist || !productId || qty <= 0) return alert('請填寫完整');
+            const product = products.find(p => p.id === productId);
+            if (!product || product.stock < qty) return alert('庫存不足');
+            const amount = product.price * qty;
+
+            // 扣庫存
+            product.stock -= qty;
+            // 產生銷售記錄
+            const saleId = 'sale_' + Date.now();
+            sales.push({ id: saleId, date, stylist, productId, quantity: qty, amount, paymentMethod: payment });
+            
+            // 產生會計分錄：借：現金(或應收)  貸：產品收入
+            // 同時產生成本分錄：借：銷售成本  貸：庫存商品
+            const revenueAcc = accounts.find(a => a.type === 'income' && a.name.includes('產品')) || accounts.find(a => a.type === 'income');
+            const cogsAcc = accounts.find(a => a.type === 'expense' && a.name.includes('成本')) || accounts.find(a => a.type === 'expense');
+            const inventoryAcc = accounts.find(a => a.id === 'inventory') || accounts.find(a => a.type === 'asset' && a.name.includes('庫存'));
+            
+            if (revenueAcc && inventoryAcc && cogsAcc) {
+                const transId1 = 'tr_' + Date.now() + 'a';
+                const transId2 = 'tr_' + Date.now() + 'b';
+                transactions.push({ id: transId1, date, description: `銷售產品 ${product.name}`, debitId: payment === 'cash' ? 'cash' : 'bank', creditId: revenueAcc.id, amount });
+                transactions.push({ id: transId2, date, description: `銷售成本 ${product.name}`, debitId: cogsAcc.id, creditId: inventoryAcc.id, amount: product.price * qty });
+            }
+
+            // 儲存所有變更
+            saveSheet(SHEET_NAMES.PRODUCTS, products);
+            saveSheet(SHEET_NAMES.SALES, sales);
+            saveSheet(SHEET_NAMES.TRANSACTIONS, transactions);
+            setTimeout(() => renderAll(), 500);
+        });
+
+        // 手動收入
+        document.getElementById('incBtn').addEventListener('click', () => {
+            const date = document.getElementById('incDate').value;
+            const stylist = document.getElementById('incStylist').value;
+            const amount = parseFloat(document.getElementById('incAmount').value);
+            const payment = document.getElementById('incPayment').value;
+            const note = document.getElementById('incNote').value;
+            if (!date || !stylist || isNaN(amount) || amount <= 0) return alert('請填寫完整');
+            const incId = 'inc_' + Date.now();
+            manualIncomes.push({ id: incId, date, stylist, amount, paymentMethod: payment, note });
+            
+            // 產生收入分錄
+            const revenueAcc = accounts.find(a => a.type === 'income' && a.name.includes('服務')) || accounts.find(a => a.type === 'income');
+            if (revenueAcc) {
+                transactions.push({ id: 'tr_' + Date.now(), date, description: `服務收入 - ${stylist}`, debitId: payment === 'cash' ? 'cash' : 'bank', creditId: revenueAcc.id, amount });
+            }
+            
+            saveSheet(SHEET_NAMES.MANUAL_INCOME, manualIncomes);
+            saveSheet(SHEET_NAMES.TRANSACTIONS, transactions);
+            setTimeout(() => renderAll(), 500);
+        });
+
+        // 刪除按鈕 (全域委託)
+        document.body.addEventListener('click', e => {
+            if (!e.target.classList.contains('delete-btn')) return;
+            const type = e.target.dataset.type;
+            const id = e.target.dataset.id;
+            if (!confirm('確定刪除？')) return;
+            
+            if (type === 'account') {
+                // 檢查是否被交易使用
+                const used = transactions.some(t => t.debitId === id || t.creditId === id);
+                if (used) return alert('此科目已有交易，無法刪除');
+                accounts = accounts.filter(a => a.id !== id);
+                saveSheet(SHEET_NAMES.ACCOUNTS, accounts, renderAll);
+            } else if (type === 'transaction') {
+                transactions = transactions.filter(t => t.id !== id);
+                saveSheet(SHEET_NAMES.TRANSACTIONS, transactions, renderAll);
+            } else if (type === 'product') {
+                // 檢查是否已被銷售
+                const used = sales.some(s => s.productId === id);
+                if (used) return alert('此產品已有銷售記錄，無法刪除');
+                products = products.filter(p => p.id !== id);
+                saveSheet(SHEET_NAMES.PRODUCTS, products, renderAll);
+            }
+        });
+
+        // CSV 匯入
+        document.getElementById('importBtn').addEventListener('click', () => {
+            const file = document.getElementById('csvFile').files[0];
+            const targetSheet = document.getElementById('importSheet').value;
+            if (!file) return alert('請選擇檔案');
+            const reader = new FileReader();
+            reader.onload = e => {
+                const text = e.target.result;
+                const lines = text.split('\n').filter(l => l.trim() !== '');
+                const headers = lines[0].split(',').map(h => h.trim());
+                const rows = lines.slice(1).map(line => {
+                    const values = line.split(',').map(v => v.trim());
+                    let obj = {};
+                    headers.forEach((h, i) => obj[h] = values[i]);
+                    return obj;
+                });
+                
+                // 根據目標工作表決定存入哪個陣列
+                if (targetSheet === SHEET_NAMES.PRODUCTS) {
+                    products = rows;
+                    saveSheet(SHEET_NAMES.PRODUCTS, products, renderAll);
+                } else if (targetSheet === SHEET_NAMES.ACCOUNTS) {
+                    accounts = rows;
+                    saveSheet(SHEET_NAMES.ACCOUNTS, accounts, renderAll);
+                } else if (targetSheet === SHEET_NAMES.TRANSACTIONS) {
+                    transactions = rows;
+                    saveSheet(SHEET_NAMES.TRANSACTIONS, transactions, renderAll);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // 預測按鈕
+        document.getElementById('forecastBtn').addEventListener('click', renderForecast);
+    }
+
+    // ========== 初始化 ==========
+    window.onload = function() {
+        // 設定預設日期
+        const today = new Date().toISOString().slice(0,10);
+        if (document.getElementById('transDate')) document.getElementById('transDate').value = today;
+        if (document.getElementById('sellDate')) document.getElementById('sellDate').value = today;
+        if (document.getElementById('incDate')) document.getElementById('incDate').value = today;
+
+        loadAllData();
+        attachEvents();
+    };
+</script>
+</body>
+</html>
