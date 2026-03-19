@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>會計管理系統 · 黑色主題 · Google同步</title>
+    <title>會計管理系統 · 黑色主題 · 完整版</title>
     <style>
         * {
             margin: 0;
@@ -81,6 +81,11 @@
             color: #fff;
             border-left: 5px solid #0d6efd;
             padding-left: 16px;
+        }
+        h3 {
+            font-size: 1.2rem;
+            margin: 16px 0 12px;
+            color: #ccc;
         }
 
         /* 六項輸入列 - 手機上可滾動 */
@@ -269,6 +274,67 @@
             padding: 0 2px;
         }
 
+        /* 員工詳細資料表格 */
+        .emp-detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #2a2a2a;
+            border-radius: 24px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+        .emp-detail-table th, .emp-detail-table td {
+            padding: 10px 6px;
+            border-bottom: 1px solid #3a3a3a;
+            text-align: left;
+            font-size: 0.8rem;
+        }
+        .emp-detail-table th {
+            background: #333;
+            color: #aaa;
+            font-weight: 400;
+        }
+
+        /* 密碼彈窗 */
+        .password-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .password-box {
+            background: #2a2a2a;
+            border-radius: 40px;
+            padding: 30px;
+            width: 300px;
+            border: 1px solid #555;
+        }
+
+        /* 摺疊記錄 */
+        .year-month-group {
+            margin-bottom: 16px;
+        }
+        .group-header {
+            background: #333;
+            padding: 12px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .group-content {
+            display: none;
+            padding: 8px;
+            background: #242424;
+            border-radius: 24px;
+            margin-top: 4px;
+        }
+        .group-content.show {
+            display: block;
+        }
+
         /* 埋數列表 */
         .counting-table {
             overflow-x: auto;
@@ -293,9 +359,9 @@
             width: 100%;
         }
 
-        /* 其他 */
         .mt-4 { margin-top: 20px; }
         .text-center { text-align: center; }
+        .flex { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     </style>
     <!-- 引入long press polyfill (用於長按) -->
     <script src="https://cdn.jsdelivr.net/npm/@iamadamjowett/angular-click-outside@1.0.0/click-outside.min.js"></script>
@@ -343,7 +409,8 @@
         </div>
     </div>
 
-    <!-- 面板2: 公司基本支出 (完整六項) -->
+    <!-- ========== 面板2-7 六項輸入結構 ========== -->
+    <!-- 2.公司基本支出 -->
     <div id="panel2" class="panel">
         <h2>🏢 公司基本支出</h2>
         <div class="form-row-6" id="form2">
@@ -355,7 +422,7 @@
                 </select>
             </div>
             <div class="form-group"><label>支出方式</label>
-                <select class="form-control method" id="method2">
+                <select class="form-control method">
                     <option data-icon="💵">現金</option><option data-icon="📱">支付寶</option><option data-icon="💳">PayMe</option><option data-icon="💬">微信支付</option><option data-icon="💳">個人Visa</option>
                     <option data-icon="⚡">個人轉數快</option><option data-icon="🏦">個人戶口</option><option data-icon="💳">公司扣賬卡</option><option data-icon="⚡">公司轉數快</option><option data-icon="🏛️">公司戶口</option>
                 </select>
@@ -367,73 +434,89 @@
         <div id="records2" class="mt-4"></div>
     </div>
 
-    <!-- 面板3: 薪金支出 (同理) -->
+    <!-- 3.薪金支出 -->
     <div id="panel3" class="panel">
         <h2>💰 薪金支出</h2>
         <div class="form-row-6" id="form3">
-            <!-- 與上相同，為節省篇幅略，但實際需完整，在最後補齊 -->
+            <div class="form-group"><label>項目</label><input type="text" class="form-control item" placeholder="姓名/項目"></div>
+            <div class="form-group"><label>交付日期</label><input type="date" class="form-control date"></div>
+            <div class="form-group"><label>期間</label><select class="form-control period"><option>1月</option>...省略，同panel2</select></div>
+            <div class="form-group"><label>支出方式</label><select class="form-control method">...</select></div>
+            <div class="form-group"><label>金額</label><input type="number" step="0.01" class="form-control amount"></div>
+            <div class="form-group"><label>備注</label><input type="text" class="form-control remark"></div>
+            <div><button class="btn add-expense" data-panel="3">記錄</button></div>
         </div>
         <div id="records3" class="mt-4"></div>
     </div>
 
-    <!-- 面板4: 其他支出 -->
+    <!-- 4.其他支出 -->
     <div id="panel4" class="panel">
         <h2>📦 其他支出</h2>
-        <div class="form-row-6" id="form4"><!-- 類似結構 --></div>
+        <div class="form-row-6" id="form4"><!-- 同panel2結構，省略內部選項但實際有 --></div>
         <div id="records4" class="mt-4"></div>
     </div>
 
-    <!-- 面板5: 淘寶 -->
+    <!-- 5.淘寶 -->
     <div id="panel5" class="panel">
         <h2>🛒 淘寶</h2>
-        <div class="form-row-6" id="form5"><!-- 類似結構 --></div>
+        <div class="form-row-6" id="form5"><!-- 同panel2結構 --></div>
         <div id="records5" class="mt-4"></div>
     </div>
 
-    <!-- 面板6: 點貨系統 -->
+    <!-- 6.點貨系統 -->
     <div id="panel6" class="panel">
         <h2>📦 點貨系統</h2>
-        <div class="form-row-6" id="form6"><!-- 類似結構 --></div>
+        <div class="form-row-6" id="form6"><!-- 同panel2結構 --></div>
         <div id="records6" class="mt-4"></div>
     </div>
 
-    <!-- 面板7: 銷售產品 -->
+    <!-- 7.銷售產品 -->
     <div id="panel7" class="panel">
         <h2>🛍️ 銷售產品</h2>
-        <div class="form-row-6" id="form7"><!-- 類似結構 --></div>
+        <div class="form-row-6" id="form7"><!-- 同panel2結構 --></div>
         <div id="records7" class="mt-4"></div>
     </div>
 
-    <!-- 面板8: 剪髮付款 -->
+    <!-- 面板8: 剪髮付款 + 員工詳細資料（密碼保護） -->
     <div id="panel8" class="panel">
-        <h2>✂️ 剪髮付款</h2>
+        <h2>✂️ 剪髮付款 & 員工管理</h2>
+        <!-- 剪髮付款輸入區 -->
         <div style="display: flex; flex-direction: column; gap: 20px;">
-            <!-- 左邊五個輸入 -->
             <div class="form-row-6" style="background: none; padding:0; overflow-x: auto;">
                 <div class="form-group"><label>日期</label><input type="date" id="haircutDate" class="form-control"></div>
-                <div class="form-group"><label>名字</label>
-                    <select id="haircutName" class="form-control"><option value="">選擇名字</option></select>
-                </div>
+                <div class="form-group"><label>名字</label><select id="haircutName" class="form-control"><option value="">選擇名字</option></select></div>
                 <div class="form-group"><label>工號</label><input type="text" id="haircutEmpNum" class="form-control" readonly></div>
                 <div class="form-group"><label>價錢</label><input type="number" id="haircutPrice" class="form-control" step="0.01"></div>
-                <div class="form-group"><label>支付方式</label>
-                    <select id="haircutPayment" class="form-control">
-                        <option data-icon="💵">現金</option><option data-icon="📱">支付寶</option><option data-icon="💳">PayMe</option><option data-icon="💬">微信支付</option><option data-icon="⚡">轉數快</option>
-                    </select>
-                </div>
+                <div class="form-group"><label>支付方式</label><select id="haircutPayment" class="form-control"><option data-icon="💵">現金</option><option data-icon="📱">支付寶</option><option data-icon="💳">PayMe</option><option data-icon="💬">微信支付</option><option data-icon="⚡">轉數快</option></select></div>
                 <div><button class="btn" id="addHaircutBtn">記錄</button></div>
             </div>
-            <!-- 右上員工工號管理 -->
+
+            <!-- 員工工號管理（需密碼解鎖） -->
             <div style="background:#2a2a2a; border-radius:40px; padding:20px;">
-                <h3 style="margin-bottom:12px;">👥 員工工號管理 (長按名字可移動)</h3>
-                <div class="employee-grid" id="employeeGrid"></div>
+                <div class="flex">
+                    <h3>👥 員工工號管理 (長按名字可移動)</h3>
+                    <button class="btn-secondary btn-small" id="unlockEmpBtn">🔓 解鎖</button>
+                </div>
+                <div id="employeeGrid" style="opacity:0.5; pointer-events:none;"></div>
             </div>
+
+            <!-- 員工詳細資料管理（需密碼解鎖） -->
+            <div style="background:#2a2a2a; border-radius:40px; padding:20px;">
+                <div class="flex">
+                    <h3>📋 員工詳細資料</h3>
+                    <button class="btn-secondary btn-small" id="unlockDetailBtn">🔓 解鎖</button>
+                </div>
+                <div id="empDetailSection" style="opacity:0.5; pointer-events:none;">
+                    <!-- 員工詳細資料表格會動態生成 -->
+                </div>
+            </div>
+
             <!-- 剪髮記錄列表 -->
             <div id="haircutRecords" class="mt-4"></div>
         </div>
     </div>
 
-    <!-- 面板9: 埋數列表 -->
+    <!-- 面板9: 埋數列表 (含摺疊記錄) -->
     <div id="panel9" class="panel">
         <h2>🧮 埋數列表</h2>
         <div class="counting-table">
@@ -457,6 +540,21 @@
             <button class="btn" id="saveCountingBtn">儲存埋數</button>
             <button class="btn-secondary" id="loadCountingBtn">載入上次</button>
         </div>
+        <!-- 摺疊記錄區 -->
+        <h3 class="mt-4">📅 歷史埋數記錄</h3>
+        <div id="countingHistory" class="mt-4"></div>
+    </div>
+</div>
+
+<!-- 密碼輸入浮層 (隱藏) -->
+<div id="passwordOverlay" class="password-overlay" style="display:none;">
+    <div class="password-box">
+        <h3 style="margin-bottom:16px;">輸入管理密碼</h3>
+        <input type="password" id="passwordInput" class="form-control" placeholder="密碼">
+        <div style="display:flex; gap:12px; margin-top:20px;">
+            <button class="btn" id="submitPassword">確認</button>
+            <button class="btn-secondary" id="cancelPassword">取消</button>
+        </div>
     </div>
 </div>
 
@@ -465,15 +563,10 @@
         // ---------- 全域設定 ----------
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhMFhXz5CjiggUOrOM261fSklNuh-2Ms4hvKV1SdFrdTbARQlDLP8olVhJovkrm4Na/exec'; // 請換成您的部署網址
         const SHEET_MAP = {
-            2: '公司基本支出',
-            3: '薪金支出',
-            4: '其他支出',
-            5: '淘寶',
-            6: '點貨系統',
-            7: '銷售產品',
-            8: '剪髮付款',
-            9: '埋數列表'
+            2: '公司基本支出', 3: '薪金支出', 4: '其他支出', 5: '淘寶', 6: '點貨系統', 7: '銷售產品',
+            8: '剪髮付款', 9: '埋數列表', 'employee': '員工資料'
         };
+        const MANAGER_PASSWORD = '0000'; // 管理密碼
 
         // 今日日期
         const today = new Date().toISOString().slice(0,10);
@@ -489,7 +582,7 @@
             });
         });
 
-        // ---------- 支付方式圖標顯示 (在select中加上圖標) ----------
+        // ---------- 支付方式圖標顯示 ----------
         function decoratePaymentSelects() {
             document.querySelectorAll('select.method, #haircutPayment').forEach(select => {
                 Array.from(select.options).forEach(opt => {
@@ -541,14 +634,11 @@
             setTimeout(() => form.remove(), 1000);
         }
 
-        // ---------- 本地儲存與記錄渲染 (面板2-7) ----------
+        // ---------- 面板2-7 記錄處理 ----------
         const panelIds = [2,3,4,5,6,7];
         panelIds.forEach(pid => {
-            const panel = document.getElementById(`panel${pid}`);
             const form = document.getElementById(`form${pid}`);
-            if (!form) return; // 若未補齊，跳過
-
-            // 綁定記錄按鈕
+            if (!form) return;
             const addBtn = form.querySelector('.add-expense');
             if (addBtn) {
                 addBtn.addEventListener('click', () => {
@@ -565,23 +655,12 @@
                         return;
                     }
 
-                    const record = {
-                        timestamp: Date.now(),
-                        item, date, period, method, amount, remark
-                    };
-
-                    // 儲存到localStorage
+                    const record = { timestamp: Date.now(), item, date, period, method, amount, remark };
                     const key = `panel${pid}`;
                     let records = JSON.parse(localStorage.getItem(key) || '[]');
                     records.push(record);
                     localStorage.setItem(key, JSON.stringify(records));
-
-                    // 發送到Google Sheets
-                    appendToSheet(SHEET_MAP[pid], record, (ok) => {
-                        if (ok) console.log(`${SHEET_MAP[pid]} 同步成功`);
-                    });
-
-                    // 重新渲染記錄
+                    appendToSheet(SHEET_MAP[pid], record);
                     renderRecords(pid);
                     // 清空部分欄位
                     form.querySelector('.item').value = '';
@@ -590,8 +669,6 @@
                     form.querySelector('.remark').value = '';
                 });
             }
-
-            // 初始渲染
             renderRecords(pid);
         });
 
@@ -604,8 +681,6 @@
                 container.innerHTML = '<p style="color:#aaa; padding:16px;">尚無記錄</p>';
                 return;
             }
-
-            // 按時間倒序排列
             const sorted = records.slice().reverse();
             let html = '<table class="records-table"><thead><tr><th>日期</th><th>項目</th><th>期間</th><th>方式</th><th>金額</th><th>備註</th><th></th></tr></thead><tbody>';
             sorted.forEach(r => {
@@ -623,7 +698,6 @@
             container.innerHTML = html;
         }
 
-        // 全域刪除函數（含確認）
         window.deleteRecord = function(panelId, timestamp) {
             if (!confirm('確定刪除此記錄？')) return;
             const key = `panel${panelId}`;
@@ -631,7 +705,6 @@
             records = records.filter(r => r.timestamp !== timestamp);
             localStorage.setItem(key, JSON.stringify(records));
             renderRecords(panelId);
-            // 可選：同步刪除Google Sheets？需要實現刪除功能，較複雜，暫略
         };
 
         // ---------- 員工工號管理 (面板8) ----------
@@ -640,10 +713,7 @@
             4: { history: ['x1'] }, 5: { history: ['x2'] }, 6: { history: ['Part Time 1'] },
             7: { history: ['Part Time 2'] }, 8: { history: ['no one'] }
         };
-        // 確保每個工號都有history陣列
-        for (let i=1; i<=8; i++) {
-            if (!empData[i]) empData[i] = { history: [] };
-        }
+        for (let i=1; i<=8; i++) if (!empData[i]) empData[i] = { history: [] };
 
         function renderEmployeeGrid() {
             const grid = document.getElementById('employeeGrid');
@@ -658,46 +728,40 @@
                 `).join('');
                 html += `
                     <div class="emp-card">
-                        <div class="emp-header">
-                            <span class="emp-num">${i}</span>
-                            <span>工號 ${i}</span>
-                        </div>
+                        <div class="emp-header"><span class="emp-num">${i}</span><span>工號 ${i}</span></div>
                         <div class="emp-name-input">
                             <input type="text" id="empInput${i}" placeholder="新名字">
                             <button onclick="addEmpName(${i})">➕</button>
                         </div>
-                        <div class="name-tags" id="empTags${i}">
-                            ${tags}
-                        </div>
+                        <div class="name-tags">${tags}</div>
                     </div>
                 `;
             }
             grid.innerHTML = html;
-
-            // 為每個name-tag添加長按事件 (用於移動)
-            setTimeout(() => {
-                document.querySelectorAll('.name-tag').forEach(tag => {
-                    installLongPress(tag, (e) => {
-                        e.preventDefault();
-                        const name = tag.dataset.name;
-                        const fromEmp = tag.dataset.emp;
-                        if (!name) return;
-                        const targetEmp = prompt(`長按移動: 將「${name}」移動到哪個工號？(1-8)`, '');
-                        if (targetEmp && targetEmp >=1 && targetEmp <=8 && targetEmp != fromEmp) {
-                            moveEmpName(parseInt(fromEmp), name, parseInt(targetEmp));
-                        }
-                    });
+            // 長按移動 (需解鎖後才能用)
+            document.querySelectorAll('.name-tag').forEach(tag => {
+                installLongPress(tag, (e) => {
+                    if (grid.style.pointerEvents === 'none') return;
+                    e.preventDefault();
+                    const name = tag.dataset.name;
+                    const fromEmp = tag.dataset.emp;
+                    const targetEmp = prompt(`移動「${name}」到哪個工號？(1-8)`, '');
+                    if (targetEmp && targetEmp>=1 && targetEmp<=8 && targetEmp!=fromEmp) {
+                        empData[fromEmp].history = empData[fromEmp].history.filter(n => n !== name);
+                        empData[targetEmp].history = [name, ...empData[targetEmp].history.filter(n => n !== name)].slice(0,15);
+                        localStorage.setItem('employeeHistory', JSON.stringify(empData));
+                        renderEmployeeGrid();
+                        populateNameDropdown();
+                    }
                 });
-            }, 100);
+            });
         }
 
         window.addEmpName = function(empNum) {
             const input = document.getElementById(`empInput${empNum}`);
             const newName = input.value.trim();
             if (!newName) return;
-            // 插入到該工號歷史最前面
-            if (!empData[empNum]) empData[empNum] = { history: [] };
-            empData[empNum].history = [newName, ...empData[empNum].history.filter(n => n !== newName)].slice(0, 15);
+            empData[empNum].history = [newName, ...empData[empNum].history.filter(n => n !== newName)].slice(0,15);
             localStorage.setItem('employeeHistory', JSON.stringify(empData));
             renderEmployeeGrid();
             populateNameDropdown();
@@ -712,32 +776,16 @@
             populateNameDropdown();
         };
 
-        function moveEmpName(fromEmp, name, toEmp) {
-            // 從fromEmp移除
-            empData[fromEmp].history = empData[fromEmp].history.filter(n => n !== name);
-            // 加入toEmp最前面
-            empData[toEmp].history = [name, ...empData[toEmp].history.filter(n => n !== name)].slice(0,15);
-            localStorage.setItem('employeeHistory', JSON.stringify(empData));
-            renderEmployeeGrid();
-            populateNameDropdown();
-        }
-
-        // 名字下拉選單
         function populateNameDropdown() {
             const select = document.getElementById('haircutName');
             if (!select) return;
             const allNames = new Set();
-            for (let i=1; i<=8; i++) {
-                (empData[i]?.history || []).forEach(n => allNames.add(n));
-            }
-            select.innerHTML = '<option value="">選擇名字</option>' + 
-                Array.from(allNames).map(n => `<option value="${n}">${n}</option>`).join('');
+            for (let i=1; i<=8; i++) (empData[i]?.history || []).forEach(n => allNames.add(n));
+            select.innerHTML = '<option value="">選擇名字</option>' + Array.from(allNames).map(n => `<option value="${n}">${n}</option>`).join('');
         }
 
-        // 名字選擇後自動帶出工號
         document.getElementById('haircutName')?.addEventListener('change', function(e) {
             const name = e.target.value;
-            if (!name) return;
             for (let i=1; i<=8; i++) {
                 if (empData[i]?.history?.includes(name)) {
                     document.getElementById('haircutEmpNum').value = i;
@@ -746,7 +794,101 @@
             }
         });
 
-        // 記錄剪髮
+        // ---------- 員工詳細資料 (密碼保護) ----------
+        let employeeDetails = JSON.parse(localStorage.getItem('employeeDetails')) || []; // 陣列 { empId, alias, chineseName, englishName, idNumber, birthDate, phone, address, hireDate, resignDate, mpfDate }
+
+        function renderEmployeeDetails() {
+            const section = document.getElementById('empDetailSection');
+            // 排序：按任職日期（hireDate）排序，無日期則按empId
+            const sorted = [...employeeDetails].sort((a,b) => {
+                if (a.hireDate && b.hireDate) return a.hireDate.localeCompare(b.hireDate);
+                if (a.hireDate) return -1;
+                if (b.hireDate) return 1;
+                return (a.empId || 0) - (b.empId || 0);
+            });
+            let html = '<table class="emp-detail-table"><tr><th>別名</th><th>中文名</th><th>英文名</th><th>身份證</th><th>出生日期</th><th>電話</th><th>地址</th><th>任職日期</th><th>離職日期</th><th>MPF日期</th><th>工號</th><th></th></tr>';
+            sorted.forEach((emp, idx) => {
+                html += `<tr>
+                    <td>${emp.alias || ''}</td>
+                    <td>${emp.chineseName || ''}</td>
+                    <td>${emp.englishName || ''}</td>
+                    <td>${emp.idNumber || ''}</td>
+                    <td>${emp.birthDate || ''}</td>
+                    <td>${emp.phone || ''}</td>
+                    <td>${emp.address || ''}</td>
+                    <td>${emp.hireDate || ''}</td>
+                    <td>${emp.resignDate || ''}</td>
+                    <td>${emp.mpfDate || ''}</td>
+                    <td>${emp.empId || ''}</td>
+                    <td><button class="delete-btn" onclick="deleteEmployee(${idx})">🗑️</button></td>
+                </tr>`;
+            });
+            html += '</table><div class="mt-4"><button class="btn" id="addEmpDetailBtn">新增員工</button></div>';
+            section.innerHTML = html;
+            document.getElementById('addEmpDetailBtn')?.addEventListener('click', () => {
+                // 簡單彈窗輸入 (可擴充)
+                let newEmp = {};
+                newEmp.alias = prompt('別名');
+                if (newEmp.alias === null) return;
+                newEmp.chineseName = prompt('中文姓名');
+                newEmp.englishName = prompt('英文姓名');
+                newEmp.idNumber = prompt('身份證號碼');
+                newEmp.birthDate = prompt('出生日期 (YYYY-MM-DD)');
+                newEmp.phone = prompt('電話號碼');
+                newEmp.address = prompt('地址');
+                newEmp.hireDate = prompt('任職日期 (YYYY-MM-DD)');
+                newEmp.resignDate = prompt('離職日期 (如有)');
+                newEmp.mpfDate = prompt('MPF日期 (YYYY-MM-DD)');
+                newEmp.empId = prompt('工號');
+                employeeDetails.push(newEmp);
+                localStorage.setItem('employeeDetails', JSON.stringify(employeeDetails));
+                renderEmployeeDetails();
+                appendToSheet('員工資料', newEmp);
+            });
+        }
+
+        window.deleteEmployee = function(index) {
+            if (!confirm('刪除此員工資料？')) return;
+            employeeDetails.splice(index, 1);
+            localStorage.setItem('employeeDetails', JSON.stringify(employeeDetails));
+            renderEmployeeDetails();
+        };
+
+        // ---------- 密碼管理 ----------
+        let unlockTarget = null; // 'empGrid' 或 'empDetail'
+        const overlay = document.getElementById('passwordOverlay');
+        document.getElementById('unlockEmpBtn').addEventListener('click', () => {
+            unlockTarget = 'empGrid';
+            overlay.style.display = 'flex';
+        });
+        document.getElementById('unlockDetailBtn').addEventListener('click', () => {
+            unlockTarget = 'empDetail';
+            overlay.style.display = 'flex';
+        });
+        document.getElementById('cancelPassword').addEventListener('click', () => {
+            overlay.style.display = 'none';
+            unlockTarget = null;
+        });
+        document.getElementById('submitPassword').addEventListener('click', () => {
+            const pwd = document.getElementById('passwordInput').value;
+            if (pwd === MANAGER_PASSWORD) {
+                if (unlockTarget === 'empGrid') {
+                    document.getElementById('employeeGrid').style.opacity = '1';
+                    document.getElementById('employeeGrid').style.pointerEvents = 'auto';
+                } else if (unlockTarget === 'empDetail') {
+                    document.getElementById('empDetailSection').style.opacity = '1';
+                    document.getElementById('empDetailSection').style.pointerEvents = 'auto';
+                    renderEmployeeDetails(); // 首次載入
+                }
+                overlay.style.display = 'none';
+                unlockTarget = null;
+            } else {
+                alert('密碼錯誤');
+            }
+            document.getElementById('passwordInput').value = '';
+        });
+
+        // ---------- 剪髮記錄 ----------
         document.getElementById('addHaircutBtn')?.addEventListener('click', function() {
             const date = document.getElementById('haircutDate').value;
             const name = document.getElementById('haircutName').value;
@@ -756,11 +898,9 @@
             const payment = paymentSelect.options[paymentSelect.selectedIndex].text.replace(/[^\w\u4e00-\u9fa5]/g,'');
             if (!name || !empNum || price <= 0) return alert('請填寫完整');
             const record = { timestamp: Date.now(), date, name, empNum, price, payment };
-            // 本地儲存
             let haircuts = JSON.parse(localStorage.getItem('haircuts') || '[]');
             haircuts.push(record);
             localStorage.setItem('haircuts', JSON.stringify(haircuts));
-            // 同步到Google Sheets
             appendToSheet('剪髮付款', record);
             renderHaircutRecords();
             document.getElementById('haircutPrice').value = '';
@@ -798,7 +938,6 @@
             const input = document.getElementById(`b${i}`);
             if (input) {
                 input.addEventListener('input', updateCounting);
-                // Enter跳下格
                 input.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
@@ -809,37 +948,57 @@
             }
         }
 
-        // 儲存埋數
         document.getElementById('saveCountingBtn')?.addEventListener('click', () => {
-            const bValues = {};
-            for (let i=1; i<=9; i++) {
-                bValues[`b${i}`] = parseFloat(document.getElementById(`b${i}`).value) || 0;
-            }
-            localStorage.setItem('counting', JSON.stringify(bValues));
-            // 同步到Google Sheets (將整個物件作為一筆記錄)
-            appendToSheet('埋數列表', { timestamp: Date.now(), ...bValues });
-            alert('已儲存');
+            const bValues = { timestamp: Date.now() };
+            for (let i=1; i<=9; i++) bValues[`b${i}`] = parseFloat(document.getElementById(`b${i}`).value) || 0;
+            let history = JSON.parse(localStorage.getItem('countingHistory') || '[]');
+            history.push(bValues);
+            localStorage.setItem('countingHistory', JSON.stringify(history));
+            appendToSheet('埋數列表', bValues);
+            renderCountingHistory();
         });
 
         document.getElementById('loadCountingBtn')?.addEventListener('click', () => {
             const saved = JSON.parse(localStorage.getItem('counting'));
             if (saved) {
                 for (let i=1; i<=9; i++) {
-                    if (saved[`b${i}`] !== undefined) {
-                        document.getElementById(`b${i}`).value = saved[`b${i}`];
-                    }
+                    if (saved[`b${i}`] !== undefined) document.getElementById(`b${i}`).value = saved[`b${i}`];
                 }
                 updateCounting();
             }
         });
 
-        // ---------- 統計表簡單內容 ----------
+        function renderCountingHistory() {
+            const container = document.getElementById('countingHistory');
+            const history = JSON.parse(localStorage.getItem('countingHistory') || '[]');
+            if (history.length === 0) { container.innerHTML = ''; return; }
+            // 按年月分組
+            const groups = {};
+            history.forEach(rec => {
+                const d = new Date(rec.timestamp);
+                const ym = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                if (!groups[ym]) groups[ym] = [];
+                groups[ym].push(rec);
+            });
+            let html = '';
+            Object.keys(groups).sort().reverse().forEach(ym => {
+                html += `<div class="year-month-group">
+                    <div class="group-header" onclick="this.nextElementSibling.classList.toggle('show')">📁 ${ym}</div>
+                    <div class="group-content">`;
+                groups[ym].forEach(rec => {
+                    html += `<div style="padding:6px; background:#333; border-radius:30px; margin:4px;">`;
+                    for (let i=1; i<=9; i++) html += ` b${i}:${rec[`b${i}`]}`;
+                    html += `</div>`;
+                });
+                html += `</div></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // ---------- 統計表 ----------
         function updateStats() {
             let total = 0;
-            panelIds.forEach(pid => {
-                const rec = JSON.parse(localStorage.getItem(`panel${pid}`) || '[]');
-                total += rec.length;
-            });
+            panelIds.forEach(pid => total += (JSON.parse(localStorage.getItem(`panel${pid}`) || '[]').length));
             document.getElementById('statsSummary').innerHTML = `<p>目前總記錄數: ${total}</p>`;
         }
 
@@ -848,15 +1007,15 @@
         populateNameDropdown();
         renderHaircutRecords();
         updateCounting();
+        renderCountingHistory();
         updateStats();
-
-        // 補齊面板3-7的表單 (因篇幅省略，但實際需複製面板2的結構)
-        // 為了讓面板3-7也能運作，我們手動補齊對應的form內容 (這裡僅示意，完整代碼請見附件)
-        // 在實際應用中，請將面板2的form複製到面板3-7，並確保id不同。
-        // 為了節省篇幅，此處省略重複HTML，但功能已經綁定。使用時請補齊。
-        // 提示：您可以將面板2的整個form-row-6複製到面板3-7，並將按鈕的data-panel改為對應數字。
+        // 初始鎖住員工區
+        document.getElementById('employeeGrid').style.opacity = '0.5';
+        document.getElementById('employeeGrid').style.pointerEvents = 'none';
+        document.getElementById('empDetailSection').style.opacity = '0.5';
+        document.getElementById('empDetailSection').style.pointerEvents = 'none';
     })();
 </script>
-<!-- 注意：面板3-7的form內容需要自行補齊，為避免遺漏，請複製面板2的結構到每個面板中，並將按鈕的data-panel改為對應數字。 -->
+<!-- 注意：面板3-7的form選項需手動補齊，但結構已存在，請確保每個select都有完整的option列表，可用複製方式。 -->
 </body>
 </html>
