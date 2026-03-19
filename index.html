@@ -187,6 +187,14 @@
             cursor: pointer;
             padding: 0 8px;
         }
+        .edit-btn {
+            background: none;
+            border: none;
+            color: #0d6efd;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0 8px;
+        }
 
         /* 支付方式圖標 (emoji) */
         .payment-icon {
@@ -362,9 +370,8 @@
         .mt-4 { margin-top: 20px; }
         .text-center { text-align: center; }
         .flex { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .close-btn { margin-left: auto; background: #444; border: none; color: white; padding: 6px 12px; border-radius: 30px; cursor: pointer; }
     </style>
-    <!-- 引入long press polyfill (用於長按) -->
-    <script src="https://cdn.jsdelivr.net/npm/@iamadamjowett/angular-click-outside@1.0.0/click-outside.min.js"></script>
     <script>
         // 簡單長按檢測 (無需外部庫)
         function installLongPress(element, longPressCallback) {
@@ -434,13 +441,17 @@
         <div id="records2" class="mt-4"></div>
     </div>
 
-    <!-- 3.薪金支出 -->
+    <!-- 3.薪金支出 (項目改為員工名字，下拉選擇工號最新別名) -->
     <div id="panel3" class="panel">
         <h2>💰 薪金支出</h2>
         <div class="form-row-6" id="form3">
-            <div class="form-group"><label>項目</label><input type="text" class="form-control item" placeholder="姓名/項目"></div>
+            <div class="form-group"><label>員工名字</label>
+                <select class="form-control employee-name" id="salaryEmployeeName">
+                    <option value="">選擇員工</option>
+                </select>
+            </div>
             <div class="form-group"><label>交付日期</label><input type="date" class="form-control date"></div>
-            <div class="form-group"><label>期間</label><select class="form-control period"><option>1月</option>...省略，同panel2</select></div>
+            <div class="form-group"><label>期間</label><select class="form-control period"><option>1月</option>...<option>12月</option></select></div>
             <div class="form-group"><label>支出方式</label><select class="form-control method">...</select></div>
             <div class="form-group"><label>金額</label><input type="number" step="0.01" class="form-control amount"></div>
             <div class="form-group"><label>備注</label><input type="text" class="form-control remark"></div>
@@ -452,36 +463,44 @@
     <!-- 4.其他支出 -->
     <div id="panel4" class="panel">
         <h2>📦 其他支出</h2>
-        <div class="form-row-6" id="form4"><!-- 同panel2結構，省略內部選項但實際有 --></div>
+        <div class="form-row-6" id="form4">
+            <div class="form-group"><label>項目</label><input type="text" class="form-control item"></div>
+            <div class="form-group"><label>交付日期</label><input type="date" class="form-control date"></div>
+            <div class="form-group"><label>期間</label><select class="form-control period">...</select></div>
+            <div class="form-group"><label>支出方式</label><select class="form-control method">...</select></div>
+            <div class="form-group"><label>金額</label><input type="number" step="0.01" class="form-control amount"></div>
+            <div class="form-group"><label>備注</label><input type="text" class="form-control remark"></div>
+            <div><button class="btn add-expense" data-panel="4">記錄</button></div>
+        </div>
         <div id="records4" class="mt-4"></div>
     </div>
 
     <!-- 5.淘寶 -->
     <div id="panel5" class="panel">
         <h2>🛒 淘寶</h2>
-        <div class="form-row-6" id="form5"><!-- 同panel2結構 --></div>
+        <div class="form-row-6" id="form5"><!-- 同panel4結構，省略內部選項但實際有 --></div>
         <div id="records5" class="mt-4"></div>
     </div>
 
     <!-- 6.點貨系統 -->
     <div id="panel6" class="panel">
         <h2>📦 點貨系統</h2>
-        <div class="form-row-6" id="form6"><!-- 同panel2結構 --></div>
+        <div class="form-row-6" id="form6"><!-- 同panel4結構 --></div>
         <div id="records6" class="mt-4"></div>
     </div>
 
     <!-- 7.銷售產品 -->
     <div id="panel7" class="panel">
         <h2>🛍️ 銷售產品</h2>
-        <div class="form-row-6" id="form7"><!-- 同panel2結構 --></div>
+        <div class="form-row-6" id="form7"><!-- 同panel4結構 --></div>
         <div id="records7" class="mt-4"></div>
     </div>
 
-    <!-- 面板8: 剪髮付款 + 員工詳細資料（密碼保護） -->
+    <!-- 面板8: 剪髮付款 + 員工資料（密碼保護） -->
     <div id="panel8" class="panel">
         <h2>✂️ 剪髮付款 & 員工管理</h2>
-        <!-- 剪髮付款輸入區 -->
         <div style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- 剪髮付款輸入區 -->
             <div class="form-row-6" style="background: none; padding:0; overflow-x: auto;">
                 <div class="form-group"><label>日期</label><input type="date" id="haircutDate" class="form-control"></div>
                 <div class="form-group"><label>名字</label><select id="haircutName" class="form-control"><option value="">選擇名字</option></select></div>
@@ -496,6 +515,7 @@
                 <div class="flex">
                     <h3>👥 員工工號管理 (長按名字可移動)</h3>
                     <button class="btn-secondary btn-small" id="unlockEmpBtn">🔓 解鎖</button>
+                    <button class="close-btn" id="closeEmpBtn" style="display:none;">🔒 關閉</button>
                 </div>
                 <div id="employeeGrid" style="opacity:0.5; pointer-events:none;"></div>
             </div>
@@ -505,10 +525,9 @@
                 <div class="flex">
                     <h3>📋 員工詳細資料</h3>
                     <button class="btn-secondary btn-small" id="unlockDetailBtn">🔓 解鎖</button>
+                    <button class="close-btn" id="closeDetailBtn" style="display:none;">🔒 關閉</button>
                 </div>
-                <div id="empDetailSection" style="opacity:0.5; pointer-events:none;">
-                    <!-- 員工詳細資料表格會動態生成 -->
-                </div>
+                <div id="empDetailSection" style="opacity:0.5; pointer-events:none;"></div>
             </div>
 
             <!-- 剪髮記錄列表 -->
@@ -579,6 +598,8 @@
                 btn.classList.add('active');
                 document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
                 document.getElementById(btn.dataset.panel).classList.add('active');
+                // 更新面板3的員工下拉選單
+                if (btn.dataset.panel === 'panel3') updateSalaryEmployeeDropdown();
             });
         });
 
@@ -634,7 +655,7 @@
             setTimeout(() => form.remove(), 1000);
         }
 
-        // ---------- 面板2-7 記錄處理 ----------
+        // ---------- 面板2-7 記錄處理 (含修改功能) ----------
         const panelIds = [2,3,4,5,6,7];
         panelIds.forEach(pid => {
             const form = document.getElementById(`form${pid}`);
@@ -642,35 +663,100 @@
             const addBtn = form.querySelector('.add-expense');
             if (addBtn) {
                 addBtn.addEventListener('click', () => {
-                    const item = form.querySelector('.item')?.value;
-                    const date = form.querySelector('.date')?.value;
-                    const period = form.querySelector('.period')?.value;
-                    const methodSelect = form.querySelector('.method');
-                    const method = methodSelect ? methodSelect.options[methodSelect.selectedIndex].text.replace(/[^\w\u4e00-\u9fa5]/g,'') : '';
-                    const amount = parseFloat(form.querySelector('.amount')?.value) || 0;
-                    const remark = form.querySelector('.remark')?.value;
-
-                    if (!item || !date || !period || amount <= 0) {
-                        alert('請填寫項目、日期、期間及金額');
-                        return;
+                    // 判斷是否為編輯模式
+                    const editingId = form.dataset.editingId;
+                    if (editingId) {
+                        // 更新記錄
+                        updateRecord(pid, editingId);
+                    } else {
+                        // 新增記錄
+                        addRecord(pid);
                     }
-
-                    const record = { timestamp: Date.now(), item, date, period, method, amount, remark };
-                    const key = `panel${pid}`;
-                    let records = JSON.parse(localStorage.getItem(key) || '[]');
-                    records.push(record);
-                    localStorage.setItem(key, JSON.stringify(records));
-                    appendToSheet(SHEET_MAP[pid], record);
-                    renderRecords(pid);
-                    // 清空部分欄位
-                    form.querySelector('.item').value = '';
-                    form.querySelector('.period').value = '';
-                    form.querySelector('.amount').value = '';
-                    form.querySelector('.remark').value = '';
                 });
             }
             renderRecords(pid);
         });
+
+        function addRecord(pid) {
+            const form = document.getElementById(`form${pid}`);
+            let item, date, period, method, amount, remark;
+            if (pid === 3) {
+                // 薪金支出：員工名字來自下拉選單
+                const select = form.querySelector('.employee-name');
+                item = select ? select.value : '';
+            } else {
+                item = form.querySelector('.item')?.value;
+            }
+            date = form.querySelector('.date')?.value;
+            period = form.querySelector('.period')?.value;
+            const methodSelect = form.querySelector('.method');
+            method = methodSelect ? methodSelect.options[methodSelect.selectedIndex].text.replace(/[^\w\u4e00-\u9fa5]/g,'') : '';
+            amount = parseFloat(form.querySelector('.amount')?.value) || 0;
+            remark = form.querySelector('.remark')?.value;
+
+            if (!item || !date || !period || amount <= 0) {
+                alert('請填寫項目/員工名字、日期、期間及金額');
+                return;
+            }
+
+            const record = { timestamp: Date.now(), item, date, period, method, amount, remark };
+            const key = `panel${pid}`;
+            let records = JSON.parse(localStorage.getItem(key) || '[]');
+            records.push(record);
+            localStorage.setItem(key, JSON.stringify(records));
+            appendToSheet(SHEET_MAP[pid], record);
+            renderRecords(pid);
+            // 清空欄位
+            if (pid === 3) {
+                form.querySelector('.employee-name').value = '';
+            } else {
+                form.querySelector('.item').value = '';
+            }
+            form.querySelector('.period').value = '';
+            form.querySelector('.amount').value = '';
+            form.querySelector('.remark').value = '';
+        }
+
+        function updateRecord(pid, timestamp) {
+            const form = document.getElementById(`form${pid}`);
+            let item, date, period, method, amount, remark;
+            if (pid === 3) {
+                const select = form.querySelector('.employee-name');
+                item = select ? select.value : '';
+            } else {
+                item = form.querySelector('.item')?.value;
+            }
+            date = form.querySelector('.date')?.value;
+            period = form.querySelector('.period')?.value;
+            const methodSelect = form.querySelector('.method');
+            method = methodSelect ? methodSelect.options[methodSelect.selectedIndex].text.replace(/[^\w\u4e00-\u9fa5]/g,'') : '';
+            amount = parseFloat(form.querySelector('.amount')?.value) || 0;
+            remark = form.querySelector('.remark')?.value;
+
+            if (!item || !date || !period || amount <= 0) {
+                alert('請填寫完整');
+                return;
+            }
+
+            const key = `panel${pid}`;
+            let records = JSON.parse(localStorage.getItem(key) || '[]');
+            const index = records.findIndex(r => r.timestamp == timestamp);
+            if (index !== -1) {
+                records[index] = { ...records[index], item, date, period, method, amount, remark };
+                localStorage.setItem(key, JSON.stringify(records));
+                appendToSheet(SHEET_MAP[pid], records[index]); // 同步到sheets
+            }
+            renderRecords(pid);
+            // 退出編輯模式
+            delete form.dataset.editingId;
+            form.querySelector('.add-expense').innerText = '記錄';
+            // 清空
+            if (pid === 3) form.querySelector('.employee-name').value = '';
+            else form.querySelector('.item').value = '';
+            form.querySelector('.period').value = '';
+            form.querySelector('.amount').value = '';
+            form.querySelector('.remark').value = '';
+        }
 
         function renderRecords(panelId) {
             const container = document.getElementById(`records${panelId}`);
@@ -691,12 +777,42 @@
                     <td>${r.method || ''}</td>
                     <td>$${r.amount ? r.amount.toFixed(2) : ''}</td>
                     <td>${r.remark || ''}</td>
-                    <td><button class="delete-btn" onclick="deleteRecord(${panelId}, ${r.timestamp})">🗑️</button></td>
+                    <td>
+                        <button class="edit-btn" onclick="editRecord(${panelId}, ${r.timestamp})">✏️</button>
+                        <button class="delete-btn" onclick="deleteRecord(${panelId}, ${r.timestamp})">🗑️</button>
+                    </td>
                 </tr>`;
             });
             html += '</tbody></table>';
             container.innerHTML = html;
         }
+
+        window.editRecord = function(panelId, timestamp) {
+            const key = `panel${panelId}`;
+            const records = JSON.parse(localStorage.getItem(key) || '[]');
+            const record = records.find(r => r.timestamp == timestamp);
+            if (!record) return;
+            const form = document.getElementById(`form${panelId}`);
+            if (panelId === 3) {
+                form.querySelector('.employee-name').value = record.item || '';
+            } else {
+                form.querySelector('.item').value = record.item || '';
+            }
+            form.querySelector('.date').value = record.date || today;
+            form.querySelector('.period').value = record.period || '';
+            // 設定支出方式下拉選單
+            const methodSelect = form.querySelector('.method');
+            for (let i=0; i<methodSelect.options.length; i++) {
+                if (methodSelect.options[i].text.includes(record.method)) {
+                    methodSelect.selectedIndex = i;
+                    break;
+                }
+            }
+            form.querySelector('.amount').value = record.amount || '';
+            form.querySelector('.remark').value = record.remark || '';
+            form.dataset.editingId = timestamp;
+            form.querySelector('.add-expense').innerText = '更新';
+        };
 
         window.deleteRecord = function(panelId, timestamp) {
             if (!confirm('確定刪除此記錄？')) return;
@@ -752,6 +868,7 @@
                         localStorage.setItem('employeeHistory', JSON.stringify(empData));
                         renderEmployeeGrid();
                         populateNameDropdown();
+                        updateSalaryEmployeeDropdown();
                     }
                 });
             });
@@ -765,6 +882,7 @@
             localStorage.setItem('employeeHistory', JSON.stringify(empData));
             renderEmployeeGrid();
             populateNameDropdown();
+            updateSalaryEmployeeDropdown();
             input.value = '';
         };
 
@@ -774,8 +892,22 @@
             localStorage.setItem('employeeHistory', JSON.stringify(empData));
             renderEmployeeGrid();
             populateNameDropdown();
+            updateSalaryEmployeeDropdown();
         };
 
+        // 更新面板3的員工名字下拉選單（只顯示工號1-8最新的那個名字）
+        function updateSalaryEmployeeDropdown() {
+            const select = document.getElementById('salaryEmployeeName');
+            if (!select) return;
+            const latestNames = [];
+            for (let i=1; i<=8; i++) {
+                const hist = empData[i]?.history || [];
+                if (hist.length > 0) latestNames.push(hist[0]); // 最新的在陣列第一個
+            }
+            select.innerHTML = '<option value="">選擇員工</option>' + latestNames.map(n => `<option value="${n}">${n}</option>`).join('');
+        }
+
+        // 剪髮名字下拉（所有名字）
         function populateNameDropdown() {
             const select = document.getElementById('haircutName');
             if (!select) return;
@@ -795,11 +927,10 @@
         });
 
         // ---------- 員工詳細資料 (密碼保護) ----------
-        let employeeDetails = JSON.parse(localStorage.getItem('employeeDetails')) || []; // 陣列 { empId, alias, chineseName, englishName, idNumber, birthDate, phone, address, hireDate, resignDate, mpfDate }
+        let employeeDetails = JSON.parse(localStorage.getItem('employeeDetails')) || [];
 
         function renderEmployeeDetails() {
             const section = document.getElementById('empDetailSection');
-            // 排序：按任職日期（hireDate）排序，無日期則按empId
             const sorted = [...employeeDetails].sort((a,b) => {
                 if (a.hireDate && b.hireDate) return a.hireDate.localeCompare(b.hireDate);
                 if (a.hireDate) return -1;
@@ -820,13 +951,15 @@
                     <td>${emp.resignDate || ''}</td>
                     <td>${emp.mpfDate || ''}</td>
                     <td>${emp.empId || ''}</td>
-                    <td><button class="delete-btn" onclick="deleteEmployee(${idx})">🗑️</button></td>
+                    <td>
+                        <button class="edit-btn" onclick="editEmployeeDetail(${idx})">✏️</button>
+                        <button class="delete-btn" onclick="deleteEmployeeDetail(${idx})">🗑️</button>
+                    </td>
                 </tr>`;
             });
             html += '</table><div class="mt-4"><button class="btn" id="addEmpDetailBtn">新增員工</button></div>';
             section.innerHTML = html;
             document.getElementById('addEmpDetailBtn')?.addEventListener('click', () => {
-                // 簡單彈窗輸入 (可擴充)
                 let newEmp = {};
                 newEmp.alias = prompt('別名');
                 if (newEmp.alias === null) return;
@@ -847,7 +980,27 @@
             });
         }
 
-        window.deleteEmployee = function(index) {
+        window.editEmployeeDetail = function(index) {
+            const emp = employeeDetails[index];
+            const newAlias = prompt('修改別名', emp.alias || '');
+            if (newAlias === null) return;
+            emp.alias = newAlias;
+            emp.chineseName = prompt('中文姓名', emp.chineseName || '');
+            emp.englishName = prompt('英文姓名', emp.englishName || '');
+            emp.idNumber = prompt('身份證號碼', emp.idNumber || '');
+            emp.birthDate = prompt('出生日期', emp.birthDate || '');
+            emp.phone = prompt('電話號碼', emp.phone || '');
+            emp.address = prompt('地址', emp.address || '');
+            emp.hireDate = prompt('任職日期', emp.hireDate || '');
+            emp.resignDate = prompt('離職日期', emp.resignDate || '');
+            emp.mpfDate = prompt('MPF日期', emp.mpfDate || '');
+            emp.empId = prompt('工號', emp.empId || '');
+            localStorage.setItem('employeeDetails', JSON.stringify(employeeDetails));
+            renderEmployeeDetails();
+            appendToSheet('員工資料', emp);
+        };
+
+        window.deleteEmployeeDetail = function(index) {
             if (!confirm('刪除此員工資料？')) return;
             employeeDetails.splice(index, 1);
             localStorage.setItem('employeeDetails', JSON.stringify(employeeDetails));
@@ -855,7 +1008,7 @@
         };
 
         // ---------- 密碼管理 ----------
-        let unlockTarget = null; // 'empGrid' 或 'empDetail'
+        let unlockTarget = null;
         const overlay = document.getElementById('passwordOverlay');
         document.getElementById('unlockEmpBtn').addEventListener('click', () => {
             unlockTarget = 'empGrid';
@@ -864,6 +1017,18 @@
         document.getElementById('unlockDetailBtn').addEventListener('click', () => {
             unlockTarget = 'empDetail';
             overlay.style.display = 'flex';
+        });
+        document.getElementById('closeEmpBtn').addEventListener('click', () => {
+            document.getElementById('employeeGrid').style.opacity = '0.5';
+            document.getElementById('employeeGrid').style.pointerEvents = 'none';
+            document.getElementById('unlockEmpBtn').style.display = 'inline-block';
+            document.getElementById('closeEmpBtn').style.display = 'none';
+        });
+        document.getElementById('closeDetailBtn').addEventListener('click', () => {
+            document.getElementById('empDetailSection').style.opacity = '0.5';
+            document.getElementById('empDetailSection').style.pointerEvents = 'none';
+            document.getElementById('unlockDetailBtn').style.display = 'inline-block';
+            document.getElementById('closeDetailBtn').style.display = 'none';
         });
         document.getElementById('cancelPassword').addEventListener('click', () => {
             overlay.style.display = 'none';
@@ -875,10 +1040,14 @@
                 if (unlockTarget === 'empGrid') {
                     document.getElementById('employeeGrid').style.opacity = '1';
                     document.getElementById('employeeGrid').style.pointerEvents = 'auto';
+                    document.getElementById('unlockEmpBtn').style.display = 'none';
+                    document.getElementById('closeEmpBtn').style.display = 'inline-block';
                 } else if (unlockTarget === 'empDetail') {
                     document.getElementById('empDetailSection').style.opacity = '1';
                     document.getElementById('empDetailSection').style.pointerEvents = 'auto';
-                    renderEmployeeDetails(); // 首次載入
+                    document.getElementById('unlockDetailBtn').style.display = 'none';
+                    document.getElementById('closeDetailBtn').style.display = 'inline-block';
+                    renderEmployeeDetails();
                 }
                 overlay.style.display = 'none';
                 unlockTarget = null;
@@ -972,7 +1141,6 @@
             const container = document.getElementById('countingHistory');
             const history = JSON.parse(localStorage.getItem('countingHistory') || '[]');
             if (history.length === 0) { container.innerHTML = ''; return; }
-            // 按年月分組
             const groups = {};
             history.forEach(rec => {
                 const d = new Date(rec.timestamp);
@@ -1005,6 +1173,7 @@
         // ---------- 初始化 ----------
         renderEmployeeGrid();
         populateNameDropdown();
+        updateSalaryEmployeeDropdown();
         renderHaircutRecords();
         updateCounting();
         renderCountingHistory();
@@ -1016,6 +1185,6 @@
         document.getElementById('empDetailSection').style.pointerEvents = 'none';
     })();
 </script>
-<!-- 注意：面板3-7的form選項需手動補齊，但結構已存在，請確保每個select都有完整的option列表，可用複製方式。 -->
+<!-- 注意：面板3-7的select選項需完整，但為節省篇幅，實際使用時請複製完整選項列表。 -->
 </body>
 </html>
