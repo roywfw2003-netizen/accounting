@@ -3,34 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>会计系统仪表板 | 灵感源自Xero</title>
-    <!-- 引入Google Material Icons (用于图标，风格现代) -->
+    <title>智慧会计系统 | 多模块 + 数据编辑</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <!-- 引入Inter字体，提升可读性 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <!-- Chart.js 轻量图表库，展示财务趋势 (兼容性良好) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
             background: #f5f7fa;
             color: #1f2a3e;
             line-height: 1.4;
         }
-
-        /* 布局容器：侧边栏固定 + 右侧内容滚动 */
-        .app-wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* ========= 侧边栏 (Xero风格深色系导航) ========= */
+        .app-wrapper { display: flex; min-height: 100vh; }
+        /* 侧边栏 (保持原有风格) */
         .sidebar {
             width: 260px;
             background-color: #0b2b3b;
@@ -38,603 +24,387 @@
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            transition: all 0.2s;
         }
-
-        .logo-area {
-            padding: 24px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 20px;
-        }
-
-        .logo-area h2 {
-            font-weight: 600;
-            font-size: 1.6rem;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #fff 0%, #9bc0cf 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .logo-area p {
-            font-size: 0.7rem;
-            opacity: 0.7;
-            margin-top: 5px;
-        }
-
-        .nav-menu {
-            flex: 1;
-            padding: 0 12px;
-        }
-
+        .logo-area { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+        .logo-area h2 { font-weight: 600; font-size: 1.6rem; background: linear-gradient(135deg, #fff 0%, #9bc0cf 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .logo-area p { font-size: 0.7rem; opacity: 0.7; margin-top: 5px; }
+        .nav-menu { flex: 1; padding: 0 12px; }
         .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            margin-bottom: 6px;
-            color: #cbdbe2;
-            transition: all 0.2s;
-            cursor: default;
-            font-weight: 500;
+            display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 12px;
+            margin-bottom: 6px; color: #cbdbe2; transition: 0.2s; cursor: pointer; font-weight: 500;
         }
+        .nav-item .material-icons { font-size: 22px; }
+        .nav-item.active { background: #1e4a62; color: white; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .nav-item:hover:not(.active) { background: #1f3e4c; color: #f0f4f9; }
+        .sidebar-footer { padding: 20px; font-size: 0.7rem; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto; color: #8aaebf; }
 
-        .nav-item .material-icons {
-            font-size: 22px;
-        }
+        /* 主内容区 */
+        .main-content { flex: 1; overflow-y: auto; background: #f5f7fa; display: flex; flex-direction: column; }
+        .top-bar { background: white; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
+        .page-title h1 { font-size: 1.6rem; font-weight: 600; color: #0f2b3a; }
+        .page-title p { font-size: 0.8rem; color: #5c6f87; margin-top: 4px; }
+        .user-area { display: flex; align-items: center; gap: 20px; }
+        .date-badge { background: #eff3f6; padding: 6px 14px; border-radius: 30px; font-size: 0.85rem; font-weight: 500; }
+        .avatar { width: 40px; height: 40px; background: #2c7da0; border-radius: 40px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; }
 
-        .nav-item.active {
-            background: #1e4a62;
-            color: white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
+        /* 页面容器 */
+        .page-container { padding: 28px 32px; display: none; }
+        .page-container.active-page { display: block; }
 
-        .nav-item:hover:not(.active) {
-            background: #1f3e4c;
-            color: #f0f4f9;
+        /* 卡片样式 */
+        .card { background: white; border-radius: 24px; border: 1px solid #eef2f8; margin-bottom: 28px; overflow: hidden; }
+        .card-header { padding: 18px 24px; border-bottom: 1px solid #ecf3f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .card-header h3 { font-weight: 600; font-size: 1.1rem; }
+        .btn-primary, .btn-secondary {
+            border: none; padding: 6px 14px; border-radius: 30px; font-weight: 500; cursor: pointer;
+            font-family: inherit; font-size: 0.8rem; transition: 0.1s;
         }
+        .btn-primary { background: #2c7da0; color: white; }
+        .btn-primary:hover { background: #1f5e7a; }
+        .btn-secondary { background: #eef2f8; color: #2c3e50; border: 1px solid #d0dfec; }
+        .btn-secondary:hover { background: #e2e8f0; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 14px 16px; border-bottom: 1px solid #f0f4fa; }
+        th { font-weight: 600; color: #5f7d9c; font-size: 0.8rem; }
+        .action-icons i { cursor: pointer; margin-right: 12px; color: #6c8db0; font-size: 18px; vertical-align: middle; }
+        .badge { padding: 4px 10px; border-radius: 30px; font-size: 0.7rem; font-weight: 500; }
+        .bg-success-light { background: #e1f7ed; color: #1e7b48; }
+        .bg-warning-light { background: #fff1e0; color: #c46f1a; }
+        .bg-danger-light { background: #ffe6e5; color: #bc2c1e; }
 
-        /* 底部简单信息 */
-        .sidebar-footer {
-            padding: 20px;
-            font-size: 0.7rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            margin-top: auto;
-            color: #8aaebf;
-        }
+        /* 模态框 */
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index:1000; }
+        .modal-content { background: white; border-radius: 32px; width: 500px; max-width: 90%; padding: 28px; box-shadow: 0 20px 35px rgba(0,0,0,0.2); }
+        .modal-content h3 { margin-bottom: 20px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 0.8rem; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #ccdbe9; border-radius: 16px; font-family: inherit; }
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
 
-        /* ========= 右侧主内容区 ========= */
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-            background: #f5f7fa;
-            display: flex;
-            flex-direction: column;
-        }
+        /* 图表容器 */
+        .chart-container { padding: 20px; }
+        canvas#cashflowChart { max-height: 260px; width: 100%; }
 
-        /* 顶部栏 */
-        .top-bar {
-            background: white;
-            padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e2e8f0;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-            flex-wrap: wrap;
-        }
-
-        .page-title h1 {
-            font-size: 1.6rem;
-            font-weight: 600;
-            color: #0f2b3a;
-        }
-        .page-title p {
-            font-size: 0.8rem;
-            color: #5c6f87;
-            margin-top: 4px;
-        }
-
-        .user-area {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        .date-badge {
-            background: #eff3f6;
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-        .avatar {
-            width: 40px;
-            height: 40px;
-            background: #2c7da0;
-            border-radius: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-        }
-
-        /* dashboard卡片区域 */
-        .dashboard-container {
-            padding: 28px 32px;
-        }
-
-        /* KPI 卡片网格 */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 22px;
-            margin-bottom: 32px;
-        }
-
-        .kpi-card {
-            background: white;
-            border-radius: 24px;
-            padding: 20px 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.03);
-            transition: transform 0.1s ease;
-            border: 1px solid #edf2f7;
-        }
-
-        .kpi-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #5f7d9c;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .kpi-amount {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: #1e2a3e;
-            margin-bottom: 6px;
-        }
-        .kpi-trend {
-            font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .trend-up { color: #2c9b5e; }
-        .trend-down { color: #d9534f; }
-
-        /* 双列布局：近期交易 + 发票概览 */
-        .two-columns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 28px;
-            margin-bottom: 32px;
-        }
-
-        .widget {
-            background: white;
-            border-radius: 24px;
-            border: 1px solid #eef2f8;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        }
-
-        .widget-header {
-            padding: 18px 22px;
-            border-bottom: 1px solid #ecf3f9;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .widget-header h3 {
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-        .widget-link {
-            font-size: 0.8rem;
-            color: #2c7da0;
-            cursor: default;
-        }
-
-        .transaction-list, .invoice-list {
-            padding: 0;
-        }
-        .transaction-item, .invoice-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 22px;
-            border-bottom: 1px solid #f0f4fa;
-        }
-        .trans-info .trans-name {
-            font-weight: 500;
-        }
-        .trans-date {
-            font-size: 0.7rem;
-            color: #7a8aa3;
-            margin-top: 4px;
-        }
-        .trans-amount {
-            font-weight: 700;
-        }
-        .amount-negative {
-            color: #d9534f;
-        }
-        .amount-positive {
-            color: #2c9b5e;
-        }
-
-        .badge-status {
-            font-size: 0.7rem;
-            padding: 4px 10px;
-            border-radius: 30px;
-            background: #f0f2f5;
-        }
-        .status-paid { background: #e1f7ed; color: #1e7b48; }
-        .status-pending { background: #fff1e0; color: #c46f1a; }
-        .status-overdue { background: #ffe6e5; color: #bc2c1e; }
-
-        /* 图表区域 (现金流趋势) */
-        .chart-widget {
-            background: white;
-            border-radius: 24px;
-            border: 1px solid #eef2f8;
-            padding: 18px 20px;
-            margin-bottom: 32px;
-        }
-        .chart-header {
-            margin-bottom: 16px;
-            font-weight: 600;
-        }
-        canvas#cashflowChart {
-            max-height: 280px;
-            width: 100%;
-        }
-
-        /* 底部占位 */
-        .footer-note {
-            text-align: center;
-            font-size: 0.7rem;
-            padding: 20px;
-            color: #7f8c9b;
-            border-top: 1px solid #e2e8f0;
-            margin-top: 16px;
-        }
-
-        /* 响应式适配 */
-        @media (max-width: 880px) {
-            .sidebar { width: 220px; }
-            .two-columns { grid-template-columns: 1fr; }
-            .dashboard-container { padding: 20px; }
-            .top-bar { padding: 12px 20px; }
-        }
-        @media (max-width: 680px) {
-            .app-wrapper { flex-direction: column; }
-            .sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; padding: 10px; }
-            .nav-menu { display: flex; flex-wrap: wrap; gap: 5px; }
-            .logo-area { width: 100%; }
-            .sidebar-footer { display: none; }
-        }
-
-        /* 模拟交互: 按钮不可点击仅为展示，但保留视觉 */
-        .btn-outline-sm {
-            border: 1px solid #cbdde9;
-            border-radius: 20px;
-            padding: 4px 12px;
-            font-size: 0.7rem;
-            background: transparent;
-            cursor: default;
-        }
+        @media (max-width: 880px) { .sidebar { width: 220px; } .page-container { padding: 20px; } }
+        @media (max-width: 680px) { .app-wrapper { flex-direction: column; } .sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; } .nav-menu { display: flex; flex-wrap: wrap; } .logo-area { width: 100%; } .sidebar-footer { display: none; } }
     </style>
 </head>
 <body>
 <div class="app-wrapper">
-    <!-- 侧边栏导航 (Xero风格主要模块) -->
     <aside class="sidebar">
-        <div class="logo-area">
-            <h2>📐 智慧会计</h2>
-            <p>Inspire by Xero | 企业级财务</p>
-        </div>
+        <div class="logo-area"><h2>📐 智慧会计</h2><p>多模块 · 实时编辑</p></div>
         <div class="nav-menu">
-            <div class="nav-item active">
-                <span class="material-icons">dashboard</span>
-                <span>仪表板</span>
-            </div>
-            <div class="nav-item">
-                <span class="material-icons">receipt</span>
-                <span>发票</span>
-            </div>
-            <div class="nav-item">
-                <span class="material-icons">payments</span>
-                <span>账单</span>
-            </div>
-            <div class="nav-item">
-                <span class="material-icons">account_balance</span>
-                <span>银行账户</span>
-            </div>
-            <div class="nav-item">
-                <span class="material-icons">assessment</span>
-                <span>报表</span>
-            </div>
-            <div class="nav-item">
-                <span class="material-icons">contacts</span>
-                <span>联系人</span>
-            </div>
-            <div class="nav-item">
-                <span class="material-icons">settings</span>
-                <span>设置</span>
-            </div>
+            <div class="nav-item active" data-page="dashboard"><span class="material-icons">dashboard</span><span>仪表板</span></div>
+            <div class="nav-item" data-page="invoices"><span class="material-icons">receipt</span><span>发票</span></div>
+            <div class="nav-item" data-page="bills"><span class="material-icons">payments</span><span>账单</span></div>
+            <div class="nav-item" data-page="bank"><span class="material-icons">account_balance</span><span>银行账户</span></div>
+            <div class="nav-item" data-page="reports"><span class="material-icons">assessment</span><span>报表</span></div>
+            <div class="nav-item" data-page="contacts"><span class="material-icons">contacts</span><span>联系人</span></div>
         </div>
-        <div class="sidebar-footer">
-            <div>🔒 安全加密 · 实时同步</div>
-            <div>会计期间: 2026 Q1</div>
-        </div>
+        <div class="sidebar-footer"><div>🔒 本地模拟 · 数据可编辑</div><div>会计期间: 2026 Q1</div></div>
     </aside>
 
-    <!-- 右侧主内容 -->
     <main class="main-content">
         <div class="top-bar">
-            <div class="page-title">
-                <h1>仪表板</h1>
-                <p>财务健康概览 & 关键业务指标</p>
+            <div class="page-title"><h1 id="currentPageTitle">仪表板</h1><p id="currentPageDesc">财务健康概览 & 关键业务指标</p></div>
+            <div class="user-area"><div class="date-badge"><span class="material-icons" style="font-size:16px;">calendar_today</span> 2026年3月22日</div><div class="avatar">CF</div></div>
+        </div>
+
+        <!-- 页面容器 -->
+        <div id="dashboardPage" class="page-container active-page">
+            <div class="kpi-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:22px; margin-bottom:32px;">
+                <div class="card" style="padding:20px;"><div class="kpi-title">🏦 银行余额</div><div class="kpi-amount" id="kpiBankBalance">$0</div><div class="kpi-trend">实时同步</div></div>
+                <div class="card" style="padding:20px;"><div class="kpi-title">📄 应收账款(未结)</div><div class="kpi-amount" id="kpiReceivables">$0</div><div class="kpi-trend">未付发票总额</div></div>
+                <div class="card" style="padding:20px;"><div class="kpi-title">📑 应付账款(未付)</div><div class="kpi-amount" id="kpiPayables">$0</div><div class="kpi-trend">未付账单总额</div></div>
+                <div class="card" style="padding:20px;"><div class="kpi-title">📈 本月净利润(估算)</div><div class="kpi-amount" id="kpiProfit">$0</div><div class="kpi-trend">收入 - 支出</div></div>
             </div>
-            <div class="user-area">
-                <div class="date-badge">
-                    <span class="material-icons" style="font-size: 16px; vertical-align: middle;">calendar_today</span> 
-                    2026年3月22日
-                </div>
-                <div class="avatar">CF</div>
+            <div class="card"><div class="card-header"><h3>📊 现金流趋势 (最近6个月)</h3></div><div class="chart-container"><canvas id="cashflowChart"></canvas></div></div>
+            <div class="card"><div class="card-header"><h3>📋 近期交易预览</h3><span class="btn-secondary" style="cursor:default;">完整记录见银行账户</span></div>
+                <table id="recentTransactionsTable"><thead><tr><th>日期</th><th>描述</th><th>金额</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
 
-        <div class="dashboard-container">
-            <!-- KPI 卡片区域: 模仿Xero关键指标 -->
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <div class="kpi-title"><span class="material-icons">account_balance_wallet</span>银行余额</div>
-                    <div class="kpi-amount">$128,450.80</div>
-                    <div class="kpi-trend"><span class="trend-up">▲ +4.2%</span> <span class="trend-up">较上月</span></div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-title"><span class="material-icons">receipt</span>应收账款 (A/R)</div>
-                    <div class="kpi-amount">$32,185.00</div>
-                    <div class="kpi-trend"><span class="trend-up">● 未结发票: 12笔</span></div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-title"><span class="material-icons">assignment</span>应付账款 (A/P)</div>
-                    <div class="kpi-amount">$18,740.25</div>
-                    <div class="kpi-trend"><span class="trend-down">▼ 待支付账单: 8笔</span></div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-title"><span class="material-icons">trending_up</span>本月净利润</div>
-                    <div class="kpi-amount">$24,532.90</div>
-                    <div class="kpi-trend"><span class="trend-up">▲ +12% 超预算</span></div>
-                </div>
+        <div id="invoicesPage" class="page-container">
+            <div class="card"><div class="card-header"><h3>📄 发票管理</h3><button class="btn-primary" id="newInvoiceBtn">+ 新建发票</button></div>
+                <table id="invoicesTable"><thead><tr><th>发票号</th><th>客户</th><th>金额</th><th>状态</th><th>操作</th></tr></thead><tbody></tbody></table>
             </div>
+        </div>
 
-            <!-- 双栏: 近期交易 + 发票概览 -->
-            <div class="two-columns">
-                <!-- 近期银行交易 -->
-                <div class="widget">
-                    <div class="widget-header">
-                        <h3>🏦 近期银行交易</h3>
-                        <div class="widget-link">查看全部 <span class="material-icons" style="font-size: 14px;">chevron_right</span></div>
-                    </div>
-                    <div class="transaction-list">
-                        <div class="transaction-item">
-                            <div class="trans-info">
-                                <div class="trans-name">云服务订阅 - AWS</div>
-                                <div class="trans-date">2026-03-20</div>
-                            </div>
-                            <div class="trans-amount amount-negative">-$489.50</div>
-                        </div>
-                        <div class="transaction-item">
-                            <div class="trans-info">
-                                <div class="trans-name">客户回款 - 创新科技</div>
-                                <div class="trans-date">2026-03-19</div>
-                            </div>
-                            <div class="trans-amount amount-positive">+$5,200.00</div>
-                        </div>
-                        <div class="transaction-item">
-                            <div class="trans-info">
-                                <div class="trans-name">办公用品采购</div>
-                                <div class="trans-date">2026-03-18</div>
-                            </div>
-                            <div class="trans-amount amount-negative">-$342.80</div>
-                        </div>
-                        <div class="transaction-item">
-                            <div class="trans-info">
-                                <div class="trans-name">咨询费收入 - 商业咨询</div>
-                                <div class="trans-date">2026-03-17</div>
-                            </div>
-                            <div class="trans-amount amount-positive">+$2,850.00</div>
-                        </div>
-                        <div class="transaction-item">
-                            <div class="trans-info">
-                                <div class="trans-name">工资支付</div>
-                                <div class="trans-date">2026-03-15</div>
-                            </div>
-                            <div class="trans-amount amount-negative">-$7,200.00</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 发票概览 (未结/已结) -->
-                <div class="widget">
-                    <div class="widget-header">
-                        <h3>📄 待处理发票</h3>
-                        <div class="widget-link">新建发票 <span class="material-icons" style="font-size: 14px;">add_circle</span></div>
-                    </div>
-                    <div class="invoice-list">
-                        <div class="invoice-item">
-                            <div><strong>INV-240301</strong><br>锐意设计工作室</div>
-                            <div style="text-align: right;">
-                                <div>$3,240.00</div>
-                                <span class="badge-status status-pending">待付款</span>
-                            </div>
-                        </div>
-                        <div class="invoice-item">
-                            <div><strong>INV-240228</strong><br>云创科技</div>
-                            <div style="text-align: right;">
-                                <div>$1,875.50</div>
-                                <span class="badge-status status-overdue">逾期2天</span>
-                            </div>
-                        </div>
-                        <div class="invoice-item">
-                            <div><strong>INV-240305</strong><br>联合咨询集团</div>
-                            <div style="text-align: right;">
-                                <div>$7,200.00</div>
-                                <span class="badge-status status-pending">待付款</span>
-                            </div>
-                        </div>
-                        <div class="invoice-item">
-                            <div><strong>INV-240310</strong><br>数智未来</div>
-                            <div style="text-align: right;">
-                                <div>$4,500.00</div>
-                                <span class="badge-status status-paid">已付款</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div id="billsPage" class="page-container">
+            <div class="card"><div class="card-header"><h3>💰 账单管理 (应付)</h3><button class="btn-primary" id="newBillBtn">+ 新建账单</button></div>
+                <table id="billsTable"><thead><tr><th>账单号</th><th>供应商</th><th>金额</th><th>到期日</th><th>状态</th><th>操作</th></tr></thead><tbody></tbody></table>
             </div>
+        </div>
 
-            <!-- 现金流趋势图表 (兼容性图表，展示财务走势) -->
-            <div class="chart-widget">
-                <div class="chart-header">
-                    <span class="material-icons" style="vertical-align: middle;">show_chart</span> 
-                    现金流趋势 (最近6个月)
-                </div>
-                <canvas id="cashflowChart" width="800" height="280" style="max-width:100%; height:auto; aspect-ratio:800/280"></canvas>
-                <div style="font-size: 0.7rem; text-align: center; margin-top: 12px; color:#6883a0;">数据基于银行流水 & 收入预测 | 单位: 千美元</div>
+        <div id="bankPage" class="page-container">
+            <div class="card"><div class="card-header"><h3>🏦 银行账户 (主账户)</h3><button class="btn-primary" id="newTransactionBtn">+ 新增交易</button></div>
+                <table id="transactionsTable"><thead><tr><th>日期</th><th>描述</th><th>金额</th><th>操作</th></tr></thead><tbody></tbody></table>
             </div>
+        </div>
 
-            <!-- 额外模块: 账单提醒 & 银行对账提示 (模拟Xero功能丰富性) -->
-            <div class="two-columns">
-                <div class="widget">
-                    <div class="widget-header">
-                        <h3>📅 即将到期账单</h3>
-                        <div class="widget-link">管理账单</div>
-                    </div>
-                    <div class="transaction-list">
-                        <div class="transaction-item">
-                            <div>供应商 - 办公设备租赁</div>
-                            <div class="trans-amount amount-negative">$650.00</div>
-                            <div class="trans-date" style="margin-left: 8px;">到期: 3/25</div>
-                        </div>
-                        <div class="transaction-item">
-                            <div>营销服务 - 广告投放</div>
-                            <div class="trans-amount amount-negative">$1,200.00</div>
-                            <div class="trans-date" style="margin-left: 8px;">到期: 3/28</div>
-                        </div>
-                        <div class="transaction-item">
-                            <div>云存储续费</div>
-                            <div class="trans-amount amount-negative">$89.99</div>
-                            <div class="trans-date" style="margin-left: 8px;">到期: 3/30</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="widget">
-                    <div class="widget-header">
-                        <h3>🔄 待对账交易 (银行)</h3>
-                        <div class="widget-link">匹配交易</div>
-                    </div>
-                    <div class="transaction-list">
-                        <div class="transaction-item">
-                            <div>💳 信用卡结算 - 未分类</div>
-                            <div class="trans-amount amount-negative">-$1,450.00</div>
-                            <div><span class="badge-status">待匹配</span></div>
-                        </div>
-                        <div class="transaction-item">
-                            <div>📱 Stripe收款 - 未关联发票</div>
-                            <div class="trans-amount amount-positive">+$789.00</div>
-                            <div><span class="badge-status">待匹配</span></div>
-                        </div>
-                        <div class="transaction-item">
-                            <div>🏦 利息收入</div>
-                            <div class="trans-amount amount-positive">+$32.15</div>
-                            <div><span class="badge-status">已确认</span></div>
-                        </div>
-                    </div>
-                </div>
+        <div id="reportsPage" class="page-container">
+            <div class="card"><div class="card-header"><h3>📑 简易利润表 (本年累计)</h3></div>
+                <table style="width:100%"><tr><td><strong>总收入</strong></td><td id="reportIncome">$0</td></tr><tr><td><strong>总支出</strong></td><td id="reportExpense">$0</td></tr><tr><td><strong>净利润</strong></td><td id="reportNetProfit">$0</td></tr></table>
+                <div class="card-header" style="margin-top:20px;"><h3>📌 应付/应收汇总</h3></div>
+                <table><tr><td>应收账款总额(未付发票)</td><td id="reportAR">$0</td></tr><tr><td>应付账款总额(未付账单)</td><td id="reportAP">$0</td></tr></table>
             </div>
-            <div class="footer-note">
-                🧾 系统依据Xero功能设计 | 支持多币种、报表分析、自动银行源同步 | 数据实时更新于会计期间2026
+        </div>
+
+        <div id="contactsPage" class="page-container">
+            <div class="card"><div class="card-header"><h3>👥 客户/供应商列表</h3><button class="btn-primary" id="newContactBtn">+ 新建联系人</button></div>
+                <table id="contactsTable"><thead><tr><th>名称</th><th>类型</th><th>邮箱</th><th>操作</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
     </main>
 </div>
 
-<script>
-    // 现金流图表绘制 (Chart.js 兼容所有现代浏览器)
-    document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('cashflowChart').getContext('2d');
-        // 模拟最近6个月现金流入流出数据 (单位千美元)
-        const months = ['2025年10月', '2025年11月', '2025年12月', '2026年1月', '2026年2月', '2026年3月'];
-        const inflowData = [48.2, 52.3, 67.8, 55.4, 72.1, 84.5];   // 收入/入账
-        const outflowData = [32.5, 35.7, 41.2, 38.9, 44.3, 52.1];   // 支出
+<!-- 通用模态框 -->
+<div id="editModal" class="modal"><div class="modal-content" id="modalContent"></div></div>
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: months,
-                datasets: [
-                    {
-                        label: '总流入 (千美元)',
-                        data: inflowData,
-                        borderColor: '#2c7da0',
-                        backgroundColor: 'rgba(44, 125, 160, 0.05)',
-                        borderWidth: 2.5,
-                        fill: true,
-                        tension: 0.3,
-                        pointBackgroundColor: '#2c7da0',
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                    },
-                    {
-                        label: '总流出 (千美元)',
-                        data: outflowData,
-                        borderColor: '#e07c5c',
-                        backgroundColor: 'rgba(224, 124, 92, 0.02)',
-                        borderWidth: 2.2,
-                        fill: false,
-                        tension: 0.3,
-                        pointBackgroundColor: '#e07c5c',
-                        pointRadius: 4,
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    tooltip: { mode: 'index', intersect: false },
-                    legend: { position: 'top', labels: { font: { family: 'Inter', size: 11 } } }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#eef2f8' },
-                        title: { display: true, text: '金额 (千美元)', font: { size: 11 } }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { font: { size: 10 } }
-                    }
-                },
-                interaction: { intersect: false, mode: 'index' }
+<script>
+    // ---------- 数据模型 ----------
+    let invoices = [
+        { id: 1, number: "INV-240301", client: "锐意设计工作室", amount: 3240, status: "pending" },
+        { id: 2, number: "INV-240228", client: "云创科技", amount: 1875.5, status: "overdue" },
+        { id: 3, number: "INV-240305", client: "联合咨询集团", amount: 7200, status: "pending" },
+        { id: 4, number: "INV-240310", client: "数智未来", amount: 4500, status: "paid" }
+    ];
+    let bills = [
+        { id: 1, number: "BILL-101", vendor: "办公设备租赁", amount: 650, dueDate: "2026-03-25", status: "pending" },
+        { id: 2, number: "BILL-102", vendor: "广告投放服务", amount: 1200, dueDate: "2026-03-28", status: "pending" },
+        { id: 3, number: "BILL-103", vendor: "云存储续费", amount: 89.99, dueDate: "2026-03-30", status: "pending" }
+    ];
+    let transactions = [
+        { id: 1, date: "2026-03-20", description: "云服务订阅 - AWS", amount: -489.5 },
+        { id: 2, date: "2026-03-19", description: "客户回款 - 创新科技", amount: 5200 },
+        { id: 3, date: "2026-03-18", description: "办公用品采购", amount: -342.8 },
+        { id: 4, date: "2026-03-17", description: "咨询费收入 - 商业咨询", amount: 2850 },
+        { id: 5, date: "2026-03-15", description: "工资支付", amount: -7200 }
+    ];
+    let contacts = [
+        { id: 1, name: "锐意设计工作室", type: "customer", email: "design@example.com" },
+        { id: 2, name: "云创科技", type: "customer", email: "info@yuncc.com" },
+        { id: 3, name: "联合咨询集团", type: "customer", email: "contact@united.com" },
+        { id: 4, name: "办公设备租赁", type: "vendor", email: "lease@office.com" }
+    ];
+
+    let nextInvoiceId = 5, nextBillId = 4, nextTransId = 6, nextContactId = 5;
+    let currentPage = "dashboard";
+
+    // 辅助函数: 计算总额
+    function calcReceivables() { return invoices.filter(i => i.status !== "paid").reduce((sum, i) => sum + i.amount, 0); }
+    function calcPayables() { return bills.filter(b => b.status === "pending").reduce((sum, b) => sum + b.amount, 0); }
+    function calcBankBalance() { return transactions.reduce((sum, t) => sum + t.amount, 0); }
+    function calcIncome() { return transactions.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0); }
+    function calcExpense() { return transactions.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0); }
+
+    // 渲染所有页面 & KPI
+    function refreshAll() {
+        // KPI
+        document.getElementById("kpiBankBalance").innerText = "$" + calcBankBalance().toFixed(2);
+        document.getElementById("kpiReceivables").innerText = "$" + calcReceivables().toFixed(2);
+        document.getElementById("kpiPayables").innerText = "$" + calcPayables().toFixed(2);
+        let profit = calcIncome() - calcExpense();
+        document.getElementById("kpiProfit").innerText = "$" + profit.toFixed(2);
+
+        // 发票表格
+        const invTbody = document.querySelector("#invoicesTable tbody");
+        invTbody.innerHTML = invoices.map(inv => `
+            <tr>
+                <td>${inv.number}</td><td>${inv.client}</td><td>$${inv.amount.toFixed(2)}</td>
+                <td><span class="badge ${inv.status==='paid'?'bg-success-light':(inv.status==='overdue'?'bg-danger-light':'bg-warning-light')}">${inv.status==='paid'?'已付款':(inv.status==='overdue'?'逾期':'待付款')}</span></td>
+                <td class="action-icons"><i class="material-icons" onclick="editInvoice(${inv.id})">edit</i><i class="material-icons" onclick="deleteInvoice(${inv.id})">delete</i></td>
+            </tr>
+        `).join("");
+        // 账单表格
+        const billsTbody = document.querySelector("#billsTable tbody");
+        billsTbody.innerHTML = bills.map(b => `
+            <tr>
+                <td>${b.number}</td><td>${b.vendor}</td><td>$${b.amount.toFixed(2)}</td><td>${b.dueDate}</td>
+                <td><span class="badge ${b.status==='paid'?'bg-success-light':'bg-warning-light'}">${b.status==='paid'?'已付':'待付'}</span></td>
+                <td class="action-icons"><i class="material-icons" onclick="editBill(${b.id})">edit</i><i class="material-icons" onclick="deleteBill(${b.id})">delete</i></td>
+            </tr>
+        `).join("");
+        // 交易表格
+        const transTbody = document.querySelector("#transactionsTable tbody");
+        transTbody.innerHTML = transactions.map(t => `
+            <tr>
+                <td>${t.date}</td><td>${t.description}</td><td style="color:${t.amount>=0?'#2c9b5e':'#d9534f'}">${t.amount>=0?'+':''}$${t.amount.toFixed(2)}</td>
+                <td class="action-icons"><i class="material-icons" onclick="editTransaction(${t.id})">edit</i><i class="material-icons" onclick="deleteTransaction(${t.id})">delete</i></td>
+            </tr>
+        `).join("");
+        // 联系人表格
+        const contactsTbody = document.querySelector("#contactsTable tbody");
+        contactsTbody.innerHTML = contacts.map(c => `
+            <tr>
+                <td>${c.name}</td><td>${c.type==='customer'?'客户':'供应商'}</td><td>${c.email}</td>
+                <td class="action-icons"><i class="material-icons" onclick="editContact(${c.id})">edit</i><i class="material-icons" onclick="deleteContact(${c.id})">delete</i></td>
+            </tr>
+        `).join("");
+        // 仪表板近期交易 (最多5条)
+        const recentTbody = document.querySelector("#recentTransactionsTable tbody");
+        if(recentTbody) {
+            recentTbody.innerHTML = transactions.slice(0,5).map(t => `<tr><td>${t.date}</td><td>${t.description}</td><td style="color:${t.amount>=0?'green':'red'}">${t.amount>=0?'+':''}$${t.amount.toFixed(2)}</td></tr>`).join("");
+        }
+        // 报表页数据
+        document.getElementById("reportIncome").innerText = "$" + calcIncome().toFixed(2);
+        document.getElementById("reportExpense").innerText = "$" + calcExpense().toFixed(2);
+        document.getElementById("reportNetProfit").innerText = "$" + profit.toFixed(2);
+        document.getElementById("reportAR").innerText = "$" + calcReceivables().toFixed(2);
+        document.getElementById("reportAP").innerText = "$" + calcPayables().toFixed(2);
+        // 图表更新
+        updateChart();
+    }
+
+    // 图表刷新 (基于交易历史模拟近6月趋势)
+    let chart;
+    function updateChart() {
+        const months = ['2025年10月','2025年11月','2025年12月','2026年1月','2026年2月','2026年3月'];
+        // 根据交易数据实际计算最近6个月流入/流出
+        let inflow = new Array(6).fill(0);
+        let outflow = new Array(6).fill(0);
+        transactions.forEach(t => {
+            let date = new Date(t.date);
+            let monthIdx = (date.getFullYear()===2026 ? date.getMonth()+3 : date.getMonth()-9); // 粗略映射到数组索引 2025-10 =>0
+            if(monthIdx>=0 && monthIdx<6) {
+                if(t.amount>0) inflow[monthIdx] += t.amount;
+                else outflow[monthIdx] += Math.abs(t.amount);
             }
         });
-    });
-</script>
+        const ctx = document.getElementById('cashflowChart').getContext('2d');
+        if(chart) chart.destroy();
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: { labels: months, datasets: [
+                { label: '总流入 (美元)', data: inflow, borderColor: '#2c7da0', backgroundColor: 'rgba(44,125,160,0.05)', borderWidth: 2, fill: true, tension: 0.3 },
+                { label: '总流出 (美元)', data: outflow, borderColor: '#e07c5c', borderWidth: 2, fill: false, tension: 0.3 }
+            ]},
+            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } } }
+        });
+    }
 
-<!-- 附加安全与兼容性说明：本界面为前端静态原型，无后端逻辑，避免了注入风险；所有图标和字体均使用CDN，确保跨平台兼容；
-     图表库使用稳定版本，且检测DOM加载完成后初始化，避免冲突。会计逻辑基于典型财务数据结构展示。 -->
+    // ----- 模态框通用逻辑 -----
+    function showModal(contentHtml, onSave) {
+        const modal = document.getElementById("editModal");
+        const modalContent = document.getElementById("modalContent");
+        modalContent.innerHTML = contentHtml;
+        modal.style.display = "flex";
+        const saveBtn = modalContent.querySelector("#modalSaveBtn");
+        if(saveBtn) saveBtn.onclick = () => { onSave(); modal.style.display = "none"; };
+        const cancelBtn = modalContent.querySelector("#modalCancelBtn");
+        if(cancelBtn) cancelBtn.onclick = () => modal.style.display = "none";
+        window.onclick = (e) => { if(e.target === modal) modal.style.display = "none"; };
+    }
+
+    // 发票编辑/新增
+    window.editInvoice = (id) => {
+        let inv = invoices.find(i => i.id === id);
+        showModal(`
+            <h3>编辑发票</h3><div class="form-group"><label>发票号</label><input id="invNumber" value="${inv.number}"></div>
+            <div class="form-group"><label>客户</label><input id="invClient" value="${inv.client}"></div>
+            <div class="form-group"><label>金额</label><input id="invAmount" type="number" step="0.01" value="${inv.amount}"></div>
+            <div class="form-group"><label>状态</label><select id="invStatus"><option ${inv.status==='pending'?'selected':''}>pending</option><option ${inv.status==='paid'?'selected':''}>paid</option><option ${inv.status==='overdue'?'selected':''}>overdue</option></select></div>
+            <div class="modal-buttons"><button class="btn-secondary" id="modalCancelBtn">取消</button><button class="btn-primary" id="modalSaveBtn">保存</button></div>
+        `, () => {
+            inv.number = document.getElementById("invNumber").value;
+            inv.client = document.getElementById("invClient").value;
+            inv.amount = parseFloat(document.getElementById("invAmount").value);
+            inv.status = document.getElementById("invStatus").value;
+            refreshAll();
+        });
+    };
+    window.deleteInvoice = (id) => { if(confirm("删除发票？")){ invoices = invoices.filter(i => i.id !== id); refreshAll(); } };
+    document.getElementById("newInvoiceBtn").onclick = () => {
+        let newId = nextInvoiceId++;
+        invoices.push({ id: newId, number: `INV-${newId}`, client: "新客户", amount: 0, status: "pending" });
+        refreshAll();
+        editInvoice(newId);
+    };
+    // 账单
+    window.editBill = (id) => {
+        let bill = bills.find(b => b.id === id);
+        showModal(`<h3>编辑账单</h3><div class="form-group"><label>账单号</label><input id="billNumber" value="${bill.number}"></div>
+            <div class="form-group"><label>供应商</label><input id="billVendor" value="${bill.vendor}"></div>
+            <div class="form-group"><label>金额</label><input id="billAmount" type="number" value="${bill.amount}"></div>
+            <div class="form-group"><label>到期日</label><input id="billDue" type="date" value="${bill.dueDate}"></div>
+            <div class="form-group"><label>状态</label><select id="billStatus"><option ${bill.status==='pending'?'selected':''}>pending</option><option ${bill.status==='paid'?'selected':''}>paid</option></select></div>
+            <div class="modal-buttons"><button class="btn-secondary" id="modalCancelBtn">取消</button><button class="btn-primary" id="modalSaveBtn">保存</button></div>`, () => {
+            bill.number = document.getElementById("billNumber").value;
+            bill.vendor = document.getElementById("billVendor").value;
+            bill.amount = parseFloat(document.getElementById("billAmount").value);
+            bill.dueDate = document.getElementById("billDue").value;
+            bill.status = document.getElementById("billStatus").value;
+            refreshAll();
+        });
+    };
+    window.deleteBill = (id) => { if(confirm("删除账单？")){ bills = bills.filter(b => b.id !== id); refreshAll(); } };
+    document.getElementById("newBillBtn").onclick = () => {
+        let newId = nextBillId++;
+        bills.push({ id: newId, number: `BILL-${newId}`, vendor: "新供应商", amount: 0, dueDate: "2026-04-01", status: "pending" });
+        refreshAll();
+        editBill(newId);
+    };
+    // 交易
+    window.editTransaction = (id) => {
+        let trans = transactions.find(t => t.id === id);
+        showModal(`<h3>编辑交易</h3><div class="form-group"><label>日期</label><input id="transDate" type="date" value="${trans.date}"></div>
+            <div class="form-group"><label>描述</label><input id="transDesc" value="${trans.description}"></div>
+            <div class="form-group"><label>金额 (正数为收入，负数为支出)</label><input id="transAmount" type="number" step="0.01" value="${trans.amount}"></div>
+            <div class="modal-buttons"><button class="btn-secondary" id="modalCancelBtn">取消</button><button class="btn-primary" id="modalSaveBtn">保存</button></div>`, () => {
+            trans.date = document.getElementById("transDate").value;
+            trans.description = document.getElementById("transDesc").value;
+            trans.amount = parseFloat(document.getElementById("transAmount").value);
+            refreshAll();
+        });
+    };
+    window.deleteTransaction = (id) => { if(confirm("删除交易？")){ transactions = transactions.filter(t => t.id !== id); refreshAll(); } };
+    document.getElementById("newTransactionBtn").onclick = () => {
+        let newId = nextTransId++;
+        transactions.push({ id: newId, date: "2026-03-22", description: "新交易", amount: 0 });
+        refreshAll();
+        editTransaction(newId);
+    };
+    // 联系人
+    window.editContact = (id) => {
+        let con = contacts.find(c => c.id === id);
+        showModal(`<h3>编辑联系人</h3><div class="form-group"><label>名称</label><input id="conName" value="${con.name}"></div>
+            <div class="form-group"><label>类型</label><select id="conType"><option ${con.type==='customer'?'selected':''}>customer</option><option ${con.type==='vendor'?'selected':''}>vendor</option></select></div>
+            <div class="form-group"><label>邮箱</label><input id="conEmail" value="${con.email}"></div>
+            <div class="modal-buttons"><button class="btn-secondary" id="modalCancelBtn">取消</button><button class="btn-primary" id="modalSaveBtn">保存</button></div>`, () => {
+            con.name = document.getElementById("conName").value;
+            con.type = document.getElementById("conType").value;
+            con.email = document.getElementById("conEmail").value;
+            refreshAll();
+        });
+    };
+    window.deleteContact = (id) => { if(confirm("删除联系人？")){ contacts = contacts.filter(c => c.id !== id); refreshAll(); } };
+    document.getElementById("newContactBtn").onclick = () => {
+        let newId = nextContactId++;
+        contacts.push({ id: newId, name: "新联系人", type: "customer", email: "new@example.com" });
+        refreshAll();
+        editContact(newId);
+    };
+
+    // 页面切换逻辑
+    const pages = ["dashboard", "invoices", "bills", "bank", "reports", "contacts"];
+    function switchPage(pageId) {
+        currentPage = pageId;
+        document.querySelectorAll(".page-container").forEach(div => div.classList.remove("active-page"));
+        document.getElementById(`${pageId}Page`).classList.add("active-page");
+        document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+        document.querySelector(`.nav-item[data-page="${pageId}"]`).classList.add("active");
+        const titles = { dashboard:"仪表板", invoices:"发票管理", bills:"账单管理", bank:"银行账户", reports:"报表中心", contacts:"联系人" };
+        document.getElementById("currentPageTitle").innerText = titles[pageId];
+        document.getElementById("currentPageDesc").innerText = pageId==="dashboard"?"财务概览与实时指标":"管理并编辑数据";
+        refreshAll();
+    }
+    document.querySelectorAll(".nav-item").forEach(item => {
+        item.addEventListener("click", () => { switchPage(item.getAttribute("data-page")); });
+    });
+
+    // 初始渲染 + 图表预留
+    refreshAll();
+    switchPage("dashboard");
+</script>
 </body>
 </html>
