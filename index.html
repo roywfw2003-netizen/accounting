@@ -3,408 +3,656 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>智慧会计系统 | 多模块 + 数据编辑</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <title>庫存管理系統 · 事件溯源防篡改版</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: #f5f7fa;
-            color: #1f2a3e;
-            line-height: 1.4;
+            background: #f0f2f5;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            padding: 24px 20px;
+            color: #1e293b;
         }
-        .app-wrapper { display: flex; min-height: 100vh; }
-        /* 侧边栏 (保持原有风格) */
-        .sidebar {
-            width: 260px;
-            background-color: #0b2b3b;
-            color: #e6f0f5;
-            flex-shrink: 0;
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 頂部資訊欄 */
+        .header {
+            background: white;
+            border-radius: 24px;
+            padding: 16px 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+            margin-bottom: 24px;
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
         }
-        .logo-area { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
-        .logo-area h2 { font-weight: 600; font-size: 1.6rem; background: linear-gradient(135deg, #fff 0%, #9bc0cf 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .logo-area p { font-size: 0.7rem; opacity: 0.7; margin-top: 5px; }
-        .nav-menu { flex: 1; padding: 0 12px; }
-        .nav-item {
-            display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 12px;
-            margin-bottom: 6px; color: #cbdbe2; transition: 0.2s; cursor: pointer; font-weight: 500;
+
+        .user-badge {
+            background: #eef2ff;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 500;
+            color: #1e40af;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-        .nav-item .material-icons { font-size: 22px; }
-        .nav-item.active { background: #1e4a62; color: white; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-        .nav-item:hover:not(.active) { background: #1f3e4c; color: #f0f4f9; }
-        .sidebar-footer { padding: 20px; font-size: 0.7rem; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto; color: #8aaebf; }
 
-        /* 主内容区 */
-        .main-content { flex: 1; overflow-y: auto; background: #f5f7fa; display: flex; flex-direction: column; }
-        .top-bar { background: white; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
-        .page-title h1 { font-size: 1.6rem; font-weight: 600; color: #0f2b3a; }
-        .page-title p { font-size: 0.8rem; color: #5c6f87; margin-top: 4px; }
-        .user-area { display: flex; align-items: center; gap: 20px; }
-        .date-badge { background: #eff3f6; padding: 6px 14px; border-radius: 30px; font-size: 0.85rem; font-weight: 500; }
-        .avatar { width: 40px; height: 40px; background: #2c7da0; border-radius: 40px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; }
-
-        /* 页面容器 */
-        .page-container { padding: 28px 32px; display: none; }
-        .page-container.active-page { display: block; }
-
-        /* 卡片样式 */
-        .card { background: white; border-radius: 24px; border: 1px solid #eef2f8; margin-bottom: 28px; overflow: hidden; }
-        .card-header { padding: 18px 24px; border-bottom: 1px solid #ecf3f9; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-        .card-header h3 { font-weight: 600; font-size: 1.1rem; }
-        .btn-primary, .btn-secondary {
-            border: none; padding: 6px 14px; border-radius: 30px; font-weight: 500; cursor: pointer;
-            font-family: inherit; font-size: 0.8rem; transition: 0.1s;
+        .user-badge span:first-child {
+            font-weight: 600;
         }
-        .btn-primary { background: #2c7da0; color: white; }
-        .btn-primary:hover { background: #1f5e7a; }
-        .btn-secondary { background: #eef2f8; color: #2c3e50; border: 1px solid #d0dfec; }
-        .btn-secondary:hover { background: #e2e8f0; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: left; padding: 14px 16px; border-bottom: 1px solid #f0f4fa; }
-        th { font-weight: 600; color: #5f7d9c; font-size: 0.8rem; }
-        .action-icons i { cursor: pointer; margin-right: 12px; color: #6c8db0; font-size: 18px; vertical-align: middle; }
-        .badge { padding: 4px 10px; border-radius: 30px; font-size: 0.7rem; font-weight: 500; }
-        .bg-success-light { background: #e1f7ed; color: #1e7b48; }
-        .bg-warning-light { background: #fff1e0; color: #c46f1a; }
-        .bg-danger-light { background: #ffe6e5; color: #bc2c1e; }
 
-        /* 模态框 */
-        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index:1000; }
-        .modal-content { background: white; border-radius: 32px; width: 500px; max-width: 90%; padding: 28px; box-shadow: 0 20px 35px rgba(0,0,0,0.2); }
-        .modal-content h3 { margin-bottom: 20px; }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 0.8rem; }
-        .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #ccdbe9; border-radius: 16px; font-family: inherit; }
-        .modal-buttons { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+        .badge-icon {
+            font-size: 1.2rem;
+        }
 
-        /* 图表容器 */
-        .chart-container { padding: 20px; }
-        canvas#cashflowChart { max-height: 260px; width: 100%; }
+        .security-note {
+            background: #fef9e3;
+            color: #92400e;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-        @media (max-width: 880px) { .sidebar { width: 220px; } .page-container { padding: 20px; } }
-        @media (max-width: 680px) { .app-wrapper { flex-direction: column; } .sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; } .nav-menu { display: flex; flex-wrap: wrap; } .logo-area { width: 100%; } .sidebar-footer { display: none; } }
+        /* 卡片通用樣式 */
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+            transition: all 0.2s;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 4px solid #3b82f6;
+            padding-left: 14px;
+        }
+
+        /* 庫存看板 (網格) */
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .product-card {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            transition: 0.1s;
+        }
+
+        .product-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .product-sku {
+            font-size: 0.7rem;
+            color: #64748b;
+            font-family: monospace;
+        }
+
+        .product-stock {
+            margin: 12px 0 8px;
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .product-unit {
+            font-size: 0.85rem;
+            color: #475569;
+            margin-left: 4px;
+            font-weight: normal;
+        }
+
+        .stock-warning {
+            color: #dc2626;
+            font-size: 0.7rem;
+            margin-top: 4px;
+        }
+
+        /* 表單區域 */
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+            margin-top: 12px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+
+        select, input, button {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+        }
+
+        button {
+            background: #3b82f6;
+            color: white;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(37,99,235,0.2);
+        }
+
+        button.secondary {
+            background: #f1f5f9;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+        }
+
+        button.danger {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        /* 事件表格區域 (防篡改重點) */
+        .events-wrapper {
+            overflow-x: auto;
+        }
+
+        .events-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .events-table th {
+            text-align: left;
+            padding: 12px 8px;
+            background: #f1f5f9;
+            color: #334155;
+            font-weight: 600;
+        }
+
+        .events-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+
+        .event-type-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .type-in { background: #dcfce7; color: #15803d; }
+        .type-out_sale { background: #ffe4e6; color: #b91c1c; }
+        .type-out_consume { background: #fff3e3; color: #b45309; }
+        .type-adjust { background: #e0e7ff; color: #3730a3; }
+
+        .btn-small {
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 30px;
+            color: #2563eb;
+            cursor: pointer;
+        }
+
+        .btn-small:hover {
+            background: #eef2ff;
+        }
+
+        .reason-text {
+            max-width: 200px;
+            font-size: 0.7rem;
+            color: #475569;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 32px;
+            font-size: 0.7rem;
+            color: #6c757d;
+        }
+
+        @media (max-width: 700px) {
+            body { padding: 16px; }
+            .form-row { flex-direction: column; }
+            .events-table th, .events-table td { padding: 8px 4px; }
+        }
     </style>
 </head>
 <body>
-<div class="app-wrapper">
-    <aside class="sidebar">
-        <div class="logo-area"><h2>📐 智慧会计</h2><p>多模块 · 实时编辑</p></div>
-        <div class="nav-menu">
-            <div class="nav-item active" data-page="dashboard"><span class="material-icons">dashboard</span><span>仪表板</span></div>
-            <div class="nav-item" data-page="invoices"><span class="material-icons">receipt</span><span>发票</span></div>
-            <div class="nav-item" data-page="bills"><span class="material-icons">payments</span><span>账单</span></div>
-            <div class="nav-item" data-page="bank"><span class="material-icons">account_balance</span><span>银行账户</span></div>
-            <div class="nav-item" data-page="reports"><span class="material-icons">assessment</span><span>报表</span></div>
-            <div class="nav-item" data-page="contacts"><span class="material-icons">contacts</span><span>联系人</span></div>
+<div class="container">
+    <!-- 頂部資訊欄 展示職員身份+防篡改說明 -->
+    <div class="header">
+        <div class="user-badge">
+            <span class="badge-icon">👩‍💼</span>
+            <span>操作職員：</span>
+            <select id="operatorSelect" style="width: auto; padding: 4px 12px; font-weight: 500; background: #eef2ff; border: none; border-radius: 30px;">
+                <option value="張敏（銷售部）">張敏（銷售部）</option>
+                <option value="李志鵬（倉庫）">李志鵬（倉庫）</option>
+                <option value="王芳（辦公室）">王芳（辦公室）</option>
+                <option value="陳曦（生產組）">陳曦（生產組）</option>
+            </select>
         </div>
-        <div class="sidebar-footer"><div>🔒 本地模拟 · 数据可编辑</div><div>会计期间: 2026 Q1</div></div>
-    </aside>
-
-    <main class="main-content">
-        <div class="top-bar">
-            <div class="page-title"><h1 id="currentPageTitle">仪表板</h1><p id="currentPageDesc">财务健康概览 & 关键业务指标</p></div>
-            <div class="user-area"><div class="date-badge"><span class="material-icons" style="font-size:16px;">calendar_today</span> 2026年3月22日</div><div class="avatar">CF</div></div>
+        <div class="security-note">
+            🔒 防篡改機制：所有操作均為「不可變事件」｜歷史記錄禁止修改/刪除｜庫存由事件即時計算｜修正錯誤需「沖正」新增事件
         </div>
+    </div>
 
-        <!-- 页面容器 -->
-        <div id="dashboardPage" class="page-container active-page">
-            <div class="kpi-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:22px; margin-bottom:32px;">
-                <div class="card" style="padding:20px;"><div class="kpi-title">🏦 银行余额</div><div class="kpi-amount" id="kpiBankBalance">$0</div><div class="kpi-trend">实时同步</div></div>
-                <div class="card" style="padding:20px;"><div class="kpi-title">📄 应收账款(未结)</div><div class="kpi-amount" id="kpiReceivables">$0</div><div class="kpi-trend">未付发票总额</div></div>
-                <div class="card" style="padding:20px;"><div class="kpi-title">📑 应付账款(未付)</div><div class="kpi-amount" id="kpiPayables">$0</div><div class="kpi-trend">未付账单总额</div></div>
-                <div class="card" style="padding:20px;"><div class="kpi-title">📈 本月净利润(估算)</div><div class="kpi-amount" id="kpiProfit">$0</div><div class="kpi-trend">收入 - 支出</div></div>
+    <!-- 庫存看板 -->
+    <div class="card">
+        <div class="card-title">📦 實時庫存狀態 <span style="font-size: 0.7rem; background:#eef2ff; padding:2px 8px; border-radius:40px;">事件溯源驅動</span></div>
+        <div id="inventoryContainer" class="inventory-grid">
+            <!-- 動態渲染商品卡片 -->
+        </div>
+    </div>
+
+    <!-- 操作面板 (職員可自行新增記錄) -->
+    <div class="card">
+        <div class="card-title">➕ 新增庫存變動 (點貨 / 賣貨 / 消耗)</div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>📦 商品</label>
+                <select id="productSelect"></select>
             </div>
-            <div class="card"><div class="card-header"><h3>📊 现金流趋势 (最近6个月)</h3></div><div class="chart-container"><canvas id="cashflowChart"></canvas></div></div>
-            <div class="card"><div class="card-header"><h3>📋 近期交易预览</h3><span class="btn-secondary" style="cursor:default;">完整记录见银行账户</span></div>
-                <table id="recentTransactionsTable"><thead><tr><th>日期</th><th>描述</th><th>金额</th></tr></thead><tbody></tbody></table>
+            <div class="form-group">
+                <label>⚙️ 操作類型</label>
+                <select id="actionType">
+                    <option value="in">📥 點貨入庫 (增加庫存)</option>
+                    <option value="out_sale">💰 賣貨出庫 (銷售)</option>
+                    <option value="out_consume">🧾 內部消耗 (領用)</option>
+                </select>
             </div>
-        </div>
-
-        <div id="invoicesPage" class="page-container">
-            <div class="card"><div class="card-header"><h3>📄 发票管理</h3><button class="btn-primary" id="newInvoiceBtn">+ 新建发票</button></div>
-                <table id="invoicesTable"><thead><tr><th>发票号</th><th>客户</th><th>金额</th><th>状态</th><th>操作</th></tr></thead><tbody></tbody></table>
+            <div class="form-group">
+                <label>🔢 數量</label>
+                <input type="number" id="quantity" min="1" step="1" value="1" placeholder="輸入正整數">
             </div>
-        </div>
-
-        <div id="billsPage" class="page-container">
-            <div class="card"><div class="card-header"><h3>💰 账单管理 (应付)</h3><button class="btn-primary" id="newBillBtn">+ 新建账单</button></div>
-                <table id="billsTable"><thead><tr><th>账单号</th><th>供应商</th><th>金额</th><th>到期日</th><th>状态</th><th>操作</th></tr></thead><tbody></tbody></table>
+            <div class="form-group">
+                <label>📝 備註 / 原因 (選填)</label>
+                <input type="text" id="remark" placeholder="例如: 盤點入庫/客戶訂單/部門領用">
             </div>
-        </div>
-
-        <div id="bankPage" class="page-container">
-            <div class="card"><div class="card-header"><h3>🏦 银行账户 (主账户)</h3><button class="btn-primary" id="newTransactionBtn">+ 新增交易</button></div>
-                <table id="transactionsTable"><thead><tr><th>日期</th><th>描述</th><th>金额</th><th>操作</th></tr></thead><tbody></tbody></table>
-            </div>
-        </div>
-
-        <div id="reportsPage" class="page-container">
-            <div class="card"><div class="card-header"><h3>📑 简易利润表 (本年累计)</h3></div>
-                <table style="width:100%"><tr><td><strong>总收入</strong></td><td id="reportIncome">$0</td></tr><tr><td><strong>总支出</strong></td><td id="reportExpense">$0</td></tr><tr><td><strong>净利润</strong></td><td id="reportNetProfit">$0</td></tr></table>
-                <div class="card-header" style="margin-top:20px;"><h3>📌 应付/应收汇总</h3></div>
-                <table><tr><td>应收账款总额(未付发票)</td><td id="reportAR">$0</td></tr><tr><td>应付账款总额(未付账单)</td><td id="reportAP">$0</td></tr></table>
+            <div class="form-group" style="flex: 0.4;">
+                <button id="submitEventBtn">✔ 提交事件 (不可篡改)</button>
             </div>
         </div>
-
-        <div id="contactsPage" class="page-container">
-            <div class="card"><div class="card-header"><h3>👥 客户/供应商列表</h3><button class="btn-primary" id="newContactBtn">+ 新建联系人</button></div>
-                <table id="contactsTable"><thead><tr><th>名称</th><th>类型</th><th>邮箱</th><th>操作</th></tr></thead><tbody></tbody></table>
-            </div>
+        <div style="margin-top: 12px; font-size:0.7rem; background:#f9f9fb; padding: 8px; border-radius: 16px; color:#4b5563;">
+            💡 提示：所有操作將生成永久事件記錄，無法刪除或修改。如需糾正錯誤，請使用下方「沖正」按鈕新增抵銷事件。
         </div>
-    </main>
+    </div>
+
+    <!-- 不可變事件記錄表 (展示所有事件，不可編輯/刪除) -->
+    <div class="card">
+        <div class="card-title">📜 不可變事件溯源日誌 (僅可新增，禁篡改)</div>
+        <div class="events-wrapper">
+            <table class="events-table">
+                <thead>
+                    <tr><th>時間</th><th>操作人</th><th>商品</th><th>類型</th><th>數量</th><th>備註/原因</th><th>沖正</th></tr>
+                </thead>
+                <tbody id="eventsTbody">
+                    <tr><td colspan="7" style="text-align:center;">加載中…</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top: 16px; font-size:0.7rem; background:#fef2e8; padding: 8px 12px; border-radius: 16px; color:#9b4a00;">
+            🛡️ 安全約束：任何事件不可刪除/修改；錯誤操作只能透過「沖正」產生相反事件；所有庫存皆由事件即時演算，確保審計完整性。
+        </div>
+    </div>
+    <footer>基於事件溯源架構｜所有操作留痕｜沖正不破壞原始記錄｜符合財務防篡改規範</footer>
 </div>
 
-<!-- 通用模态框 -->
-<div id="editModal" class="modal"><div class="modal-content" id="modalContent"></div></div>
-
 <script>
-    // ---------- 数据模型 ----------
-    let invoices = [
-        { id: 1, number: "INV-240301", client: "锐意设计工作室", amount: 3240, status: "pending" },
-        { id: 2, number: "INV-240228", client: "云创科技", amount: 1875.5, status: "overdue" },
-        { id: 3, number: "INV-240305", client: "联合咨询集团", amount: 7200, status: "pending" },
-        { id: 4, number: "INV-240310", client: "数智未来", amount: 4500, status: "paid" }
-    ];
-    let bills = [
-        { id: 1, number: "BILL-101", vendor: "办公设备租赁", amount: 650, dueDate: "2026-03-25", status: "pending" },
-        { id: 2, number: "BILL-102", vendor: "广告投放服务", amount: 1200, dueDate: "2026-03-28", status: "pending" },
-        { id: 3, number: "BILL-103", vendor: "云存储续费", amount: 89.99, dueDate: "2026-03-30", status: "pending" }
-    ];
-    let transactions = [
-        { id: 1, date: "2026-03-20", description: "云服务订阅 - AWS", amount: -489.5 },
-        { id: 2, date: "2026-03-19", description: "客户回款 - 创新科技", amount: 5200 },
-        { id: 3, date: "2026-03-18", description: "办公用品采购", amount: -342.8 },
-        { id: 4, date: "2026-03-17", description: "咨询费收入 - 商业咨询", amount: 2850 },
-        { id: 5, date: "2026-03-15", description: "工资支付", amount: -7200 }
-    ];
-    let contacts = [
-        { id: 1, name: "锐意设计工作室", type: "customer", email: "design@example.com" },
-        { id: 2, name: "云创科技", type: "customer", email: "info@yuncc.com" },
-        { id: 3, name: "联合咨询集团", type: "customer", email: "contact@united.com" },
-        { id: 4, name: "办公设备租赁", type: "vendor", email: "lease@office.com" }
+    // ---------- 商品主數據 (固定不變，防止篡改商品定義) ----------
+    const PRODUCTS = [
+        { id: "P1001", name: "筆記型電腦", sku: "NB-X1", unit: "台", initStock: 0 },   // 初始庫存由事件累計
+        { id: "P1002", name: "無線滑鼠", sku: "MS-G3", unit: "個", initStock: 0 },
+        { id: "P1003", name: "A4影印紙", sku: "PP-A4", unit: "包", initStock: 0 },
+        { id: "P1004", name: "辦公椅", sku: "CH-02", unit: "張", initStock: 0 },
+        { id: "P1005", name: "隨身碟 64G", sku: "UD-64", unit: "個", initStock: 0 }
     ];
 
-    let nextInvoiceId = 5, nextBillId = 4, nextTransId = 6, nextContactId = 5;
-    let currentPage = "dashboard";
+    // ---------- 全局事件數組 (不可變存儲) ----------
+    let events = [];   // 每個事件結構: { id, timestamp, operator, productId, type, quantity, reason, reverseForEventId? }
 
-    // 辅助函数: 计算总额
-    function calcReceivables() { return invoices.filter(i => i.status !== "paid").reduce((sum, i) => sum + i.amount, 0); }
-    function calcPayables() { return bills.filter(b => b.status === "pending").reduce((sum, b) => sum + b.amount, 0); }
-    function calcBankBalance() { return transactions.reduce((sum, t) => sum + t.amount, 0); }
-    function calcIncome() { return transactions.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0); }
-    function calcExpense() { return transactions.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0); }
+    // LocalStorage key
+    const STORAGE_KEY = "inventory_event_sourcing_v1";
 
-    // 渲染所有页面 & KPI
-    function refreshAll() {
-        // KPI
-        document.getElementById("kpiBankBalance").innerText = "$" + calcBankBalance().toFixed(2);
-        document.getElementById("kpiReceivables").innerText = "$" + calcReceivables().toFixed(2);
-        document.getElementById("kpiPayables").innerText = "$" + calcPayables().toFixed(2);
-        let profit = calcIncome() - calcExpense();
-        document.getElementById("kpiProfit").innerText = "$" + profit.toFixed(2);
-
-        // 发票表格
-        const invTbody = document.querySelector("#invoicesTable tbody");
-        invTbody.innerHTML = invoices.map(inv => `
-            <tr>
-                <td>${inv.number}</td><td>${inv.client}</td><td>$${inv.amount.toFixed(2)}</td>
-                <td><span class="badge ${inv.status==='paid'?'bg-success-light':(inv.status==='overdue'?'bg-danger-light':'bg-warning-light')}">${inv.status==='paid'?'已付款':(inv.status==='overdue'?'逾期':'待付款')}</span></td>
-                <td class="action-icons"><i class="material-icons" onclick="editInvoice(${inv.id})">edit</i><i class="material-icons" onclick="deleteInvoice(${inv.id})">delete</i></td>
-            </tr>
-        `).join("");
-        // 账单表格
-        const billsTbody = document.querySelector("#billsTable tbody");
-        billsTbody.innerHTML = bills.map(b => `
-            <tr>
-                <td>${b.number}</td><td>${b.vendor}</td><td>$${b.amount.toFixed(2)}</td><td>${b.dueDate}</td>
-                <td><span class="badge ${b.status==='paid'?'bg-success-light':'bg-warning-light'}">${b.status==='paid'?'已付':'待付'}</span></td>
-                <td class="action-icons"><i class="material-icons" onclick="editBill(${b.id})">edit</i><i class="material-icons" onclick="deleteBill(${b.id})">delete</i></td>
-            </tr>
-        `).join("");
-        // 交易表格
-        const transTbody = document.querySelector("#transactionsTable tbody");
-        transTbody.innerHTML = transactions.map(t => `
-            <tr>
-                <td>${t.date}</td><td>${t.description}</td><td style="color:${t.amount>=0?'#2c9b5e':'#d9534f'}">${t.amount>=0?'+':''}$${t.amount.toFixed(2)}</td>
-                <td class="action-icons"><i class="material-icons" onclick="editTransaction(${t.id})">edit</i><i class="material-icons" onclick="deleteTransaction(${t.id})">delete</i></td>
-            </tr>
-        `).join("");
-        // 联系人表格
-        const contactsTbody = document.querySelector("#contactsTable tbody");
-        contactsTbody.innerHTML = contacts.map(c => `
-            <tr>
-                <td>${c.name}</td><td>${c.type==='customer'?'客户':'供应商'}</td><td>${c.email}</td>
-                <td class="action-icons"><i class="material-icons" onclick="editContact(${c.id})">edit</i><i class="material-icons" onclick="deleteContact(${c.id})">delete</i></td>
-            </tr>
-        `).join("");
-        // 仪表板近期交易 (最多5条)
-        const recentTbody = document.querySelector("#recentTransactionsTable tbody");
-        if(recentTbody) {
-            recentTbody.innerHTML = transactions.slice(0,5).map(t => `<tr><td>${t.date}</td><td>${t.description}</td><td style="color:${t.amount>=0?'green':'red'}">${t.amount>=0?'+':''}$${t.amount.toFixed(2)}</td></tr>`).join("");
+    // 輔助函數: 載入事件
+    function loadEvents() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            try {
+                events = JSON.parse(stored);
+                // 確保每個事件有 id 與 timestamp
+                if (!events.length) events = [];
+            } catch(e) { events = []; }
         }
-        // 报表页数据
-        document.getElementById("reportIncome").innerText = "$" + calcIncome().toFixed(2);
-        document.getElementById("reportExpense").innerText = "$" + calcExpense().toFixed(2);
-        document.getElementById("reportNetProfit").innerText = "$" + profit.toFixed(2);
-        document.getElementById("reportAR").innerText = "$" + calcReceivables().toFixed(2);
-        document.getElementById("reportAP").innerText = "$" + calcPayables().toFixed(2);
-        // 图表更新
-        updateChart();
+        // 如果沒有任何事件，插入一組初始示範事件 (展示功能且讓庫存不為空)
+        if (!events || events.length === 0) {
+            const now = new Date();
+            events = [
+                { id: 1001, timestamp: new Date(now.getTime() - 86400000).toISOString(), operator: "系統初始化", productId: "P1001", type: "in", quantity: 12, reason: "期初盤點入庫", reverseForEventId: null },
+                { id: 1002, timestamp: new Date(now.getTime() - 72000000).toISOString(), operator: "張敏（銷售部）", productId: "P1002", type: "in", quantity: 30, reason: "採購入庫", reverseForEventId: null },
+                { id: 1003, timestamp: new Date(now.getTime() - 3600000).toISOString(), operator: "李志鵬（倉庫）", productId: "P1003", type: "in", quantity: 200, reason: "批量點貨", reverseForEventId: null },
+                { id: 1004, timestamp: new Date(now.getTime() - 1800000).toISOString(), operator: "王芳（辦公室）", productId: "P1003", type: "out_consume", quantity: 15, reason: "部門領用", reverseForEventId: null },
+                { id: 1005, timestamp: new Date(now.getTime() - 600000).toISOString(), operator: "張敏（銷售部）", productId: "P1001", type: "out_sale", quantity: 2, reason: "客戶訂單 #C123", reverseForEventId: null }
+            ];
+            saveEvents();
+        }
     }
 
-    // 图表刷新 (基于交易历史模拟近6月趋势)
-    let chart;
-    function updateChart() {
-        const months = ['2025年10月','2025年11月','2025年12月','2026年1月','2026年2月','2026年3月'];
-        // 根据交易数据实际计算最近6个月流入/流出
-        let inflow = new Array(6).fill(0);
-        let outflow = new Array(6).fill(0);
-        transactions.forEach(t => {
-            let date = new Date(t.date);
-            let monthIdx = (date.getFullYear()===2026 ? date.getMonth()+3 : date.getMonth()-9); // 粗略映射到数组索引 2025-10 =>0
-            if(monthIdx>=0 && monthIdx<6) {
-                if(t.amount>0) inflow[monthIdx] += t.amount;
-                else outflow[monthIdx] += Math.abs(t.amount);
+    function saveEvents() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+    }
+
+    // 獲取下一個事件ID (簡易遞增)
+    function getNextEventId() {
+        if (events.length === 0) return 1001;
+        return Math.max(...events.map(e => e.id)) + 1;
+    }
+
+    // 計算當前所有商品庫存 (基於事件累計)
+    function computeCurrentStock() {
+        const stockMap = new Map(); // productId -> 數量
+        PRODUCTS.forEach(p => stockMap.set(p.id, 0));
+        // 按時間順序遍歷事件 (正序保證正確累計)
+        const sortedEvents = [...events].sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+        for (const ev of sortedEvents) {
+            const current = stockMap.get(ev.productId) || 0;
+            if (ev.type === "in") {
+                stockMap.set(ev.productId, current + ev.quantity);
+            } else if (ev.type === "out_sale" || ev.type === "out_consume") {
+                // 出庫，理論上校驗已在新增時做，此處直接減
+                stockMap.set(ev.productId, current - ev.quantity);
             }
-        });
-        const ctx = document.getElementById('cashflowChart').getContext('2d');
-        if(chart) chart.destroy();
-        chart = new Chart(ctx, {
-            type: 'line',
-            data: { labels: months, datasets: [
-                { label: '总流入 (美元)', data: inflow, borderColor: '#2c7da0', backgroundColor: 'rgba(44,125,160,0.05)', borderWidth: 2, fill: true, tension: 0.3 },
-                { label: '总流出 (美元)', data: outflow, borderColor: '#e07c5c', borderWidth: 2, fill: false, tension: 0.3 }
-            ]},
-            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } } }
+        }
+        return stockMap;
+    }
+
+    // 渲染庫存看板
+    function renderInventory() {
+        const stockMap = computeCurrentStock();
+        const container = document.getElementById("inventoryContainer");
+        if (!container) return;
+        container.innerHTML = PRODUCTS.map(product => {
+            const stockQty = stockMap.get(product.id) || 0;
+            const warning = stockQty < 0 ? "<div class='stock-warning'>⚠️ 庫存異常(負數) 請立即沖正</div>" : (stockQty <= 3 ? "<div class='stock-warning'>⚠️ 低庫存</div>" : "");
+            return `
+                <div class="product-card">
+                    <div class="product-name">
+                        <span>${escapeHtml(product.name)}</span>
+                        <span class="product-sku">${product.sku}</span>
+                    </div>
+                    <div class="product-stock">
+                        ${stockQty} <span class="product-unit">${product.unit}</span>
+                    </div>
+                    ${warning}
+                </div>
+            `;
+        }).join("");
+    }
+
+    // 渲染事件表格 (不可編輯/刪除，只能進行「沖正」操作)
+    function renderEventsTable() {
+        const tbody = document.getElementById("eventsTbody");
+        if (!tbody) return;
+        if (events.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">暫無事件記錄，請新增點貨或銷售</td></tr>';
+            return;
+        }
+        // 按時間倒序顯示 (最新在上)
+        const sorted = [...events].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+        tbody.innerHTML = sorted.map(ev => {
+            const product = PRODUCTS.find(p => p.id === ev.productId) || { name: "未知商品", sku: "" };
+            let typeLabel = "";
+            let typeClass = "";
+            if (ev.type === "in") { typeLabel = "📥 點貨入庫"; typeClass = "type-in"; }
+            else if (ev.type === "out_sale") { typeLabel = "💰 賣貨出庫"; typeClass = "type-out_sale"; }
+            else if (ev.type === "out_consume") { typeLabel = "🧾 內部消耗"; typeClass = "type-out_consume"; }
+            else { typeLabel = ev.type; typeClass = "type-adjust"; }
+
+            const displayQuantity = (ev.type === "in" ? `+${ev.quantity}` : `-${ev.quantity}`);
+            const reasonText = ev.reason ? (ev.reason.length > 28 ? ev.reason.substring(0,25)+"..." : ev.reason) : "—";
+            const timeStr = new Date(ev.timestamp).toLocaleString();
+            const isReverse = ev.reverseForEventId ? " (沖正關聯)" : "";
+            return `
+                <tr>
+                    <td style="white-space: nowrap;">${escapeHtml(timeStr)}</td>
+                    <td>${escapeHtml(ev.operator)}${isReverse}</td>
+                    <td>${escapeHtml(product.name)}<span style="font-size:0.6rem; color:#6c757d;"> ${product.sku}</span></td>
+                    <td><span class="event-type-badge ${typeClass}">${typeLabel}</span></td>
+                    <td style="font-weight:500;">${displayQuantity}</td>
+                    <td class="reason-text" title="${escapeHtml(ev.reason || '')}">${escapeHtml(reasonText)}</td>
+                    <td><button class="btn-small" data-event-id="${ev.id}" data-event-type="${ev.type}" data-product-id="${ev.productId}" data-quantity="${ev.quantity}" data-operator="${ev.operator}">🔄 沖正</button></td>
+                </tr>
+            `;
+        }).join("");
+
+        // 綁定沖正按鈕事件
+        document.querySelectorAll('.btn-small[data-event-id]').forEach(btn => {
+            btn.removeEventListener('click', handleReverseClick);
+            btn.addEventListener('click', handleReverseClick);
         });
     }
 
-    // ----- 模态框通用逻辑 -----
-    function showModal(contentHtml, onSave) {
-        const modal = document.getElementById("editModal");
-        const modalContent = document.getElementById("modalContent");
-        modalContent.innerHTML = contentHtml;
-        modal.style.display = "flex";
-        const saveBtn = modalContent.querySelector("#modalSaveBtn");
-        if(saveBtn) saveBtn.onclick = () => { onSave(); modal.style.display = "none"; };
-        const cancelBtn = modalContent.querySelector("#modalCancelBtn");
-        if(cancelBtn) cancelBtn.onclick = () => modal.style.display = "none";
-        window.onclick = (e) => { if(e.target === modal) modal.style.display = "none"; };
+    // 處理沖正 (新增一個相反事件，保持不可變)
+    function handleReverseClick(e) {
+        const btn = e.currentTarget;
+        const originalEventId = parseInt(btn.getAttribute('data-event-id'));
+        const originalType = btn.getAttribute('data-event-type');
+        const originalProductId = btn.getAttribute('data-product-id');
+        const originalQuantity = parseInt(btn.getAttribute('data-quantity'));
+        const originalOperator = btn.getAttribute('data-operator');
+
+        // 找到原始事件
+        const originalEvent = events.find(ev => ev.id === originalEventId);
+        if (!originalEvent) {
+            alert("找不到原始事件，無法沖正");
+            return;
+        }
+
+        const reason = prompt(`⚠️ 沖正確認\n原始事件：${originalType === 'in' ? '入庫' : '出庫'} ${originalQuantity} 件\n請輸入沖正原因 (例如：錄入錯誤，抵銷此筆)`, "操作失誤，沖正修正");
+        if (reason === null) return;
+        if (reason.trim() === "") {
+            alert("沖正必須填寫原因，以符合審計要求");
+            return;
+        }
+
+        // 決定沖正類型: 原始是in則沖正為out (出庫類型需選擇一種? 系統統一定義為「沖正出庫」但為了精確，我們統一用 out_adjust 但為了財務清晰，用原相反類型)
+        // 為了保持分類，如果是in, 沖正用 "out_sale" 或 "out_consume"? 但對庫存而言，沖正只需減少對應數量，但業務含義建議設為 "out_adjust" 。但為了與現有邏輯相容，定義一個新類型 "out_reverse"
+        // 但為了簡化且讓庫存計算正確，我們可新增一個特殊類型 "out_reverse"，計算時同出庫。但為了讓介面識別，我們將其歸類為「沖正出庫」。
+        let reverseType = "";
+        let displayTypeForMsg = "";
+        if (originalType === "in") {
+            reverseType = "out_reverse";   // 出庫類型，減少庫存
+            displayTypeForMsg = "沖正出庫(抵銷入庫)";
+        } else if (originalType === "out_sale" || originalType === "out_consume" || originalType === "out_reverse") {
+            reverseType = "in";             // 入庫補回庫存
+            displayTypeForMsg = "沖正入庫(補回庫存)";
+        } else {
+            alert("不支援該事件沖正");
+            return;
+        }
+
+        // 庫存檢查: 如果沖正類型是出庫 (reverseType === "out_reverse")，需要確保目前庫存足夠抵銷本次沖正出庫
+        const currentStockMap = computeCurrentStock();
+        const currentStock = currentStockMap.get(originalProductId) || 0;
+        if (reverseType === "out_reverse" && currentStock < originalQuantity) {
+            alert(`庫存不足，無法執行沖正出庫。當前庫存 ${currentStock}，沖正將減少 ${originalQuantity} 會導致負庫存。請先修正庫存問題。`);
+            return;
+        }
+
+        // 新增沖正事件 (不可變)
+        const operator = document.getElementById("operatorSelect").value;
+        const newEventId = getNextEventId();
+        const newEvent = {
+            id: newEventId,
+            timestamp: new Date().toISOString(),
+            operator: operator,
+            productId: originalProductId,
+            type: reverseType,
+            quantity: originalQuantity,
+            reason: `【沖正】原因: ${reason} | 原始事件ID:${originalEventId} (原始操作人:${originalOperator})`,
+            reverseForEventId: originalEventId
+        };
+        events.push(newEvent);
+        saveEvents();
+        // 刷新整個界面
+        refreshAll();
+        alert(`✅ 沖正事件已新增 (ID:${newEventId})，原始記錄保持不變。`);
     }
 
-    // 发票编辑/新增
-    window.editInvoice = (id) => {
-        let inv = invoices.find(i => i.id === id);
-        showModal(`
-            <h3>编辑发票</h3><div class="form-group"><label>发票号</label><input id="invNumber" value="${inv.number}"></div>
-            <div class="form-group"><label>客户</label><input id="invClient" value="${inv.client}"></div>
-            <div class="form-group"><label>金额</label><input id="invAmount" type="number" step="0.01" value="${inv.amount}"></div>
-            <div class="form-group"><label>状态</label><select id="invStatus"><option ${inv.status==='pending'?'selected':''}>pending</option><option ${inv.status==='paid'?'selected':''}>paid</option><option ${inv.status==='overdue'?'selected':''}>overdue</option></select></div>
-            <div class="modal-buttons"><button class="btn-secondary" id="modalCancelBtn">取消</button><button class="btn-primary" id="modalSaveBtn">保存</button></div>
-        `, () => {
-            inv.number = document.getElementById("invNumber").value;
-            inv.client = document.getElementById("invClient").value;
-            inv.amount = parseFloat(document.getElementById("invAmount").value);
-            inv.status = document.getElementById("invStatus").value;
-            refreshAll();
-        });
-    };
-    window.deleteInvoice = (id) => { if(confirm("删除发票？")){ invoices = invoices.filter(i => i.id !== id); refreshAll(); } };
-    document.getElementById("newInvoiceBtn").onclick = () => {
-        let newId = nextInvoiceId++;
-        invoices.push({ id: newId, number: `INV-${newId}`, client: "新客户", amount: 0, status: "pending" });
-        refreshAll();
-        editInvoice(newId);
-    };
-    // 账单
-    window.editBill = (id) => {
-        let bill = bills.find(b => b.id === id);
-        showModal(`<h3>编辑账单</h3><div class="form-group"><label>账单号</label><input id="billNumber" value="${bill.number}"></div>
-            <div class="form-group"><label>供应商</label><input id="billVendor" value="${bill.vendor}"></div>
-            <div class="form-group"><label>金额</label><input id="billAmount" type="number" value="${bill.amount}"></div>
-            <div class="form-group"><label>到期日</label><input id="billDue" type="date" value="${bill.dueDate}"></div>
-            <div class="form-group"><label>状态</label><select id="billStatus"><option ${bill.status==='pending'?'selected':''}>pending</option><option ${bill.status==='paid'?'selected':''}>paid</option></select></div>
-            <div class="modal-buttons"><button class="btn-secondary" id="modalCancelBtn">取消</button><button class="btn-primary" id="modalSaveBtn">保存</button></div>`, () => {
-            bill.number = document.getElementById("billNumber").value;
-            bill.vendor = document.getElementById("billVendor").value;
-            bill.amount = parseFloat(document.getElementById("billAmount").value);
-            bill.dueDate = document.getElementById("billDue").value;
-            bill.status = document.getElementById("billStatus").value;
-            refreshAll();
-        });
-    };
-    window.deleteBill = (id) => { if(confirm("删除账单？")){ bills = bills.filter(b => b.id !== id); refreshAll(); } };
-    document.getElementById("newBillBtn").onclick = () => {
-        let newId = nextBillId++;
-        bills.push({ id: newId, number: `BILL-${newId}`, vendor: "新供应商", amount: 0, dueDate: "2026-04-01", status: "pending" });
-        refreshAll();
-        editBill(newId);
-    };
-    // 交易
-    window.editTransaction = (id) => {
-        let trans = transactions.find(t => t.id === id);
-        showModal(`<h3>编辑交易</h3><div class="form-group"><label>日期</label><input id="transDate" type="date" value="${trans.date}"></div>
-            <div class="form-group"><label>描述</label><input id="transDesc" value="${trans.description}"></div>
-            <div class="form-group"><label>金额 (正数为收入，负数为支出)</label><input id="transAmount" type="number" step="0.01" value="${trans.amount}"></div>
-            <div class="modal-buttons"><button class="btn-secondary" id="modalCancelBtn">取消</button><button class="btn-primary" id="modalSaveBtn">保存</button></div>`, () => {
-            trans.date = document.getElementById("transDate").value;
-            trans.description = document.getElementById("transDesc").value;
-            trans.amount = parseFloat(document.getElementById("transAmount").value);
-            refreshAll();
-        });
-    };
-    window.deleteTransaction = (id) => { if(confirm("删除交易？")){ transactions = transactions.filter(t => t.id !== id); refreshAll(); } };
-    document.getElementById("newTransactionBtn").onclick = () => {
-        let newId = nextTransId++;
-        transactions.push({ id: newId, date: "2026-03-22", description: "新交易", amount: 0 });
-        refreshAll();
-        editTransaction(newId);
-    };
-    // 联系人
-    window.editContact = (id) => {
-        let con = contacts.find(c => c.id === id);
-        showModal(`<h3>编辑联系人</h3><div class="form-group"><label>名称</label><input id="conName" value="${con.name}"></div>
-            <div class="form-group"><label>类型</label><select id="conType"><option ${con.type==='customer'?'selected':''}>customer</option><option ${con.type==='vendor'?'selected':''}>vendor</option></select></div>
-            <div class="form-group"><label>邮箱</label><input id="conEmail" value="${con.email}"></div>
-            <div class="modal-buttons"><button class="btn-secondary" id="modalCancelBtn">取消</button><button class="btn-primary" id="modalSaveBtn">保存</button></div>`, () => {
-            con.name = document.getElementById("conName").value;
-            con.type = document.getElementById("conType").value;
-            con.email = document.getElementById("conEmail").value;
-            refreshAll();
-        });
-    };
-    window.deleteContact = (id) => { if(confirm("删除联系人？")){ contacts = contacts.filter(c => c.id !== id); refreshAll(); } };
-    document.getElementById("newContactBtn").onclick = () => {
-        let newId = nextContactId++;
-        contacts.push({ id: newId, name: "新联系人", type: "customer", email: "new@example.com" });
-        refreshAll();
-        editContact(newId);
-    };
+    // 新增一般事件 (點貨/賣貨/消耗)
+    function addInventoryEvent() {
+        const productId = document.getElementById("productSelect").value;
+        const actionType = document.getElementById("actionType").value;
+        let quantity = parseInt(document.getElementById("quantity").value);
+        let remark = document.getElementById("remark").value.trim();
+        const operator = document.getElementById("operatorSelect").value;
 
-    // 页面切换逻辑
-    const pages = ["dashboard", "invoices", "bills", "bank", "reports", "contacts"];
-    function switchPage(pageId) {
-        currentPage = pageId;
-        document.querySelectorAll(".page-container").forEach(div => div.classList.remove("active-page"));
-        document.getElementById(`${pageId}Page`).classList.add("active-page");
-        document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
-        document.querySelector(`.nav-item[data-page="${pageId}"]`).classList.add("active");
-        const titles = { dashboard:"仪表板", invoices:"发票管理", bills:"账单管理", bank:"银行账户", reports:"报表中心", contacts:"联系人" };
-        document.getElementById("currentPageTitle").innerText = titles[pageId];
-        document.getElementById("currentPageDesc").innerText = pageId==="dashboard"?"财务概览与实时指标":"管理并编辑数据";
+        if (isNaN(quantity) || quantity <= 0) {
+            alert("數量必須為正整數");
+            return;
+        }
+        if (!productId) {
+            alert("請選擇商品");
+            return;
+        }
+
+        // 出庫類型校驗 (賣貨/消耗) 必須有足夠庫存
+        const stockMap = computeCurrentStock();
+        const currentStock = stockMap.get(productId) || 0;
+        if ((actionType === "out_sale" || actionType === "out_consume") && currentStock < quantity) {
+            alert(`庫存不足！當前「${PRODUCTS.find(p=>p.id===productId)?.name}」庫存僅 ${currentStock}，無法出庫 ${quantity}。`);
+            return;
+        }
+
+        // 新增事件
+        const newId = getNextEventId();
+        const newEvent = {
+            id: newId,
+            timestamp: new Date().toISOString(),
+            operator: operator,
+            productId: productId,
+            type: actionType,
+            quantity: quantity,
+            reason: remark || (actionType === "in" ? "點貨入庫" : (actionType === "out_sale" ? "銷售出庫" : "內部消耗")),
+            reverseForEventId: null
+        };
+        events.push(newEvent);
+        saveEvents();
+
+        // 清空表單備註，保留數量1
+        document.getElementById("remark").value = "";
+        document.getElementById("quantity").value = "1";
         refreshAll();
+        // 成功提示
+        const productName = PRODUCTS.find(p=>p.id===productId)?.name;
+        alert(`✅ 操作成功！已新增事件 ID:${newId}\n商品：${productName} | ${actionType==="in"?"入庫":(actionType==="out_sale"?"銷售出庫":"消耗")} 數量:${quantity}`);
     }
-    document.querySelectorAll(".nav-item").forEach(item => {
-        item.addEventListener("click", () => { switchPage(item.getAttribute("data-page")); });
-    });
 
-    // 初始渲染 + 图表预留
-    refreshAll();
-    switchPage("dashboard");
+    // 刷新所有UI
+    function refreshAll() {
+        renderInventory();
+        renderEventsTable();
+        // 重新填充商品下拉選單 (產品不變，但確保綁定)
+        populateProductSelect();
+    }
+
+    // 商品下拉選單填充
+    function populateProductSelect() {
+        const select = document.getElementById("productSelect");
+        if (!select) return;
+        select.innerHTML = PRODUCTS.map(p => `<option value="${p.id}">${p.name} (${p.sku})</option>`).join("");
+    }
+
+    // 簡單防XSS
+    function escapeHtml(str) {
+        if (!str) return "";
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    // 初始化頁面
+    function init() {
+        loadEvents();
+        populateProductSelect();
+        refreshAll();
+        // 綁定提交按鈕
+        const submitBtn = document.getElementById("submitEventBtn");
+        if (submitBtn) {
+            submitBtn.addEventListener("click", addInventoryEvent);
+        }
+        // 確保任何情況下不提供編輯/刪除事件的功能，不提供任何修改按鈕
+    }
+
+    init();
 </script>
 </body>
 </html>
