@@ -1,868 +1,623 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>黑色會計管理系統</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支出管理系統</title>
+    <!-- 日期選擇器樣式 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- 自定義黑色主題樣式 -->
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            font-family: 'Microsoft JhengHei', '微軟正黑體', sans-serif;
         }
-
         body {
-            background-color: #121212;
-            color: #e0e0e0;
-            padding: 16px;
-            min-height: 100vh;
+            background-color: #0f0f0f;
+            color: #f5f5f5;
+            padding: 20px;
+            line-height: 1.5;
         }
-
         .container {
-            max-width: 100%;
+            max-width: 1400px;
             margin: 0 auto;
         }
-
-        /* 頂部導航 */
-        .nav-bar {
+        /* 導航欄 */
+        .nav {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-            background: #1e1e1e;
-            padding: 10px;
-            border-radius: 40px;
-            border: 1px solid #333;
-        }
-
-        .nav-btn {
-            background: #2d2d2d;
-            border: none;
-            color: #e0e0e0;
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            border: 1px solid #444;
-            transition: all 0.2s;
-            flex: 1;
-            text-align: center;
-        }
-
-        .nav-btn.active {
-            background: #0d6efd;
-            color: white;
-            border-color: #0d6efd;
-        }
-
-        /* 面板通用 */
-        .panel {
-            display: none;
-            background: #1e1e1e;
-            border-radius: 32px;
-            padding: 20px;
-            border: 1px solid #333;
-        }
-
-        .panel.active {
-            display: block;
-        }
-
-        h2 {
-            font-size: 1.4rem;
-            font-weight: 500;
-            margin-bottom: 18px;
-            color: #fff;
-            border-left: 4px solid #0d6efd;
-            padding-left: 14px;
-        }
-
-        h3 {
-            font-size: 1.1rem;
-            margin: 20px 0 12px;
-            color: #ccc;
-        }
-
-        /* 表單行（橫向滾動） */
-        .form-row {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            gap: 12px;
-            padding: 12px 6px;
-            background: #2a2a2a;
-            border-radius: 40px;
-            margin-bottom: 16px;
-            border: 1px solid #444;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-        }
-
-        .form-row::-webkit-scrollbar {
-            height: 4px;
-            background: #333;
-        }
-        .form-row::-webkit-scrollbar-thumb {
-            background: #666;
-            border-radius: 4px;
-        }
-
-        .form-group {
-            min-width: 150px;
-            flex: 0 0 auto;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: #aaa;
-            margin-bottom: 4px;
-            letter-spacing: 0.5px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 10px 12px;
-            background: #3a3a3a;
-            border: 1px solid #555;
-            color: #fff;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        .form-control:focus {
-            border-color: #0d6efd;
-        }
-
-        select.form-control {
-            appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 14px;
-        }
-
-        .btn {
-            background: #0d6efd;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: 0.2s;
-            display: inline-block;
-            text-align: center;
-        }
-
-        .btn-secondary {
-            background: #3a3a3a;
-            border: 1px solid #555;
-            color: #eee;
-        }
-
-        .btn-small {
-            padding: 6px 14px;
-            font-size: 0.8rem;
-        }
-
-        /* 按鈕列 */
-        .action-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 20px;
+            justify-content: space-between;
             align-items: center;
+            background-color: #1a1a1a;
+            padding: 18px 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
-
-        /* 表格記錄 */
-        .table-wrapper {
+        .nav h1 {
+            font-size: 22px;
+            color: #6366f1;
+            font-weight: 600;
+        }
+        .nav a {
+            color: #f5f5f5;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            margin-left: 10px;
+            background-color: #2d2d2d;
+            transition: all 0.3s ease;
+        }
+        .nav a:hover {
+            background-color: #6366f1;
+            color: #0f0f0f;
+        }
+        /* 表單區域 */
+        .form-section {
+            background-color: #1a1a1a;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .form-title {
+            font-size: 20px;
+            color: #6366f1;
+            margin-bottom: 25px;
+            font-weight: 600;
+            border-left: 4px solid #6366f1;
+            padding-left: 10px;
+        }
+        /* 六列表單網格 - 強制左至右排列，響應式不折行（保證欄位順序） */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
             overflow-x: auto;
-            margin-top: 16px;
-            border-radius: 24px;
-            background: #2a2a2a;
+            padding-bottom: 10px;
         }
-
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .form-group label {
+            font-size: 14px;
+            color: #b0b0b0;
+            font-weight: 500;
+        }
+        input, select, textarea {
+            padding: 12px 15px;
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 6px;
+            color: #f5f5f5;
+            font-size: 14px;
+            transition: border 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+        textarea {
+            resize: none;
+            min-height: 48px;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* 按鈕樣式 */
+        .btn {
+            padding: 12px 30px;
+            background-color: #6366f1;
+            color: #0f0f0f;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #4f46e5;
+            transform: translateY(-2px);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        /* 紀錄顯示區域 - 數據嚴格對齊，無數據顯示空格 */
+        .records-section {
+            background-color: #1a1a1a;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
         .records-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.8rem;
-            min-width: 500px;
+            margin-top: 15px;
+            min-width: 1000px;
         }
-
-        .records-table th,
-        .records-table td {
-            padding: 12px 8px;
+        .records-table th, .records-table td {
+            padding: 15px;
             text-align: left;
-            border-bottom: 1px solid #3a3a3a;
+            border-bottom: 1px solid #303030;
+            white-space: nowrap;
+            vertical-align: middle;
         }
-
         .records-table th {
-            background: #333;
-            color: #ccc;
-            font-weight: 500;
-        }
-
-        /* 統計卡片 */
-        .stats-card {
-            background: #2a2a2a;
-            border-radius: 24px;
-            padding: 16px;
-            margin-bottom: 24px;
-        }
-
-        .date-range {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            align-items: flex-end;
-            margin-bottom: 20px;
-        }
-
-        .date-range .form-group {
-            min-width: 130px;
-            flex: 1;
-        }
-
-        .stats-result {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .stats-total {
-            background: #0d6efd20;
-            border-radius: 24px;
-            padding: 16px;
-            flex: 1;
-            text-align: center;
-            min-width: 140px;
-        }
-
-        .stats-total .number {
-            font-size: 2rem;
+            background-color: #2d2d2d;
+            color: #6366f1;
             font-weight: 600;
-            color: #0d6efd;
+            font-size: 15px;
         }
-
-        .stats-method {
-            flex: 2;
-            background: #1e1e1e;
-            border-radius: 24px;
-            padding: 16px;
-            overflow-x: auto;
+        .records-table tr:hover {
+            background-color: #252525;
         }
-
-        .stats-method table {
+        .records-table td {
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        /* 管理員CSV/Excel處理區域 */
+        .csv-section {
+            background-color: #1a1a1a;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .file-input {
+            display: block;
+            margin: 15px 0 25px 0;
+            padding: 12px;
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 6px;
+            color: #e0e0e0;
             width: 100%;
-            border-collapse: collapse;
+            max-width: 500px;
         }
-
-        .stats-method td {
-            padding: 8px;
-            border-bottom: 1px solid #333;
+        #parse-result {
+            margin-top: 20px;
+            font-size: 15px;
+            line-height: 1.6;
         }
-
-        /* CSV 上傳區 */
-        .csv-upload {
-            background: #2a2a2a;
-            border-radius: 32px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        /* 管理員設定區 */
-        .admin-settings {
-            background: #2a2a2a;
-            border-radius: 32px;
-            padding: 20px;
-        }
-
-        /* 密碼彈窗 */
-        .password-overlay {
+        /* 管理員密碼彈窗 */
+        .password-modal {
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
             display: flex;
-            align-items: center;
             justify-content: center;
-            z-index: 1000;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
         }
-
-        .password-box {
-            background: #2a2a2a;
-            border-radius: 40px;
-            padding: 28px;
-            width: 280px;
-            border: 1px solid #555;
+        .password-form {
+            background-color: #1a1a1a;
+            padding: 40px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
         }
-
-        /* 輔助 */
-        .mt-2 { margin-top: 8px; }
-        .mt-4 { margin-top: 20px; }
-        .text-center { text-align: center; }
+        .password-form h2 {
+            color: #6366f1;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 20px;
+        }
+        #admin-password {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        #password-error {
+            color: #ef4444;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+            min-height: 18px;
+        }
+        /* 隱藏類 */
+        .hidden {
+            display: none !important;
+        }
+        /* 滾動條樣式 - 黑色主題匹配 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2d2d2d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6366f1;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <!-- 頂部導航 -->
-    <div class="nav-bar">
-        <button class="nav-btn active" data-panel="main">🏠 主頁</button>
-        <button class="nav-btn" data-panel="admin">🔐 管理員</button>
-    </div>
-
-    <!-- 主頁面板 -->
-    <div id="mainPanel" class="panel active">
-        <div class="action-bar">
-            <button id="mainOptionBtn" class="btn" style="background: #2d2d2d; border-color: #0d6efd;">1.選項</button>
-            <button id="csvBtn" class="btn btn-secondary">📂 CSV 匯入</button>
-            <button id="manualSyncBtn" class="btn btn-secondary">🔄 手動同步</button>
-        </div>
-
-        <!-- 表單區域 (初始隱藏) -->
-        <div id="formContainer" style="display: none;">
-            <div class="form-row" id="inputRow"></div>
-            <div style="text-align: right; margin-top: 12px;">
-                <button id="submitRecordBtn" class="btn">確定完成</button>
+    <div class="container">
+        <!-- 導航欄 -->
+        <div class="nav">
+            <h1>支出管理系統</h1>
+            <div>
+                <a href="#" id="home-link">主頁</a>
+                <a href="#" id="admin-link">管理員頁面</a>
             </div>
         </div>
 
-        <!-- CSV 上傳區域 (初始隱藏) -->
-        <div id="csvContainer" style="display: none;">
-            <div class="csv-upload">
-                <h3>📁 上傳 CSV 檔案 (UTF-8)</h3>
-                <input type="file" id="csvFileInput" accept=".csv" style="margin: 12px 0; width: 100%;">
-                <button id="uploadCsvBtn" class="btn">匯入並儲存</button>
-                <p style="font-size: 0.75rem; color: #aaa; margin-top: 10px;">
-                    CSV 格式：A 欄為日期時間 (如 1/3/2026 18:30:09)，B 欄為項目，C 欄為金額。
-                </p>
-            </div>
-        </div>
-
-        <!-- 統計表 -->
-        <div class="stats-card">
-            <h3>📊 統計表</h3>
-            <div class="date-range">
+        <!-- 主頁：支出記錄填寫表單 -->
+        <div id="home-section" class="form-section">
+            <h2 class="form-title">1. 支出記錄填寫</h2>
+            <div class="form-grid">
                 <div class="form-group">
-                    <label>開始日期</label>
-                    <input type="date" id="startDate" class="form-control">
+                    <label for="item">項目</label>
+                    <input type="text" id="item" placeholder="請輸入項目名稱" autocomplete="off">
                 </div>
                 <div class="form-group">
-                    <label>結束日期</label>
-                    <input type="date" id="endDate" class="form-control">
+                    <label for="delivery-date">交付日期</label>
+                    <input type="text" id="delivery-date" placeholder="選擇日期" autocomplete="off">
                 </div>
-                <button id="updateStatsBtn" class="btn btn-small">更新統計</button>
+                <div class="form-group">
+                    <label for="period">期間</label>
+                    <select id="period" autocomplete="off">
+                        <option value="">請選擇月份</option>
+                        <option value="1月">1月</option>
+                        <option value="2月">2月</option>
+                        <option value="3月">3月</option>
+                        <option value="4月">4月</option>
+                        <option value="5月">5月</option>
+                        <option value="6月">6月</option>
+                        <option value="7月">7月</option>
+                        <option value="8月">8月</option>
+                        <option value="9月">9月</option>
+                        <option value="10月">10月</option>
+                        <option value="11月">11月</option>
+                        <option value="12月">12月</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="payment-method">支出方式</label>
+                    <select id="payment-method" autocomplete="off">
+                        <option value="">請選擇支出方式</option>
+                        <option value="現金">現金</option>
+                        <option value="支付寶">支付寶</option>
+                        <option value="PayMe">PayMe</option>
+                        <option value="微信支付">微信支付</option>
+                        <option value="個人Visa">個人Visa</option>
+                        <option value="個人轉數快">個人轉數快</option>
+                        <option value="個人戶口">個人戶口</option>
+                        <option value="公司扣賬卡">公司扣賬卡</option>
+                        <option value="公司轉數快">公司轉數快</option>
+                        <option value="公司戶口">公司戶口</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="amount">金額</label>
+                    <input type="number" id="amount" placeholder="請輸入金額" step="0.01" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="remark">備注</label>
+                    <textarea id="remark" placeholder="請輸入備注（選填）" autocomplete="off"></textarea>
+                </div>
             </div>
-            <div id="statsResult" class="stats-result">
-                <!-- 動態顯示統計 -->
-            </div>
+            <button id="submit-btn" class="btn">確定完成</button>
         </div>
 
-        <!-- 記錄列表 -->
-        <h3>📋 支出記錄</h3>
-        <div class="table-wrapper">
+        <!-- 儲存紀錄顯示區域 -->
+        <div id="records-section" class="records-section">
+            <h2 class="form-title">儲存紀錄</h2>
             <table class="records-table">
-                <thead id="recordsHeader"></thead>
-                <tbody id="recordsBody"></tbody>
-             </table>
+                <thead>
+                    <tr>
+                        <th>項目</th>
+                        <th>交付日期</th>
+                        <th>期間</th>
+                        <th>支出方式</th>
+                        <th>金額</th>
+                        <th>備注</th>
+                    </tr>
+                </thead>
+                <tbody id="records-body">
+                    <!-- 動態加載紀錄，無數據時顯示空行 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 管理員頁面：Excel/CSV轉換與匯入 -->
+        <div id="admin-section" class="csv-section hidden">
+            <h2 class="form-title">Excel/CSV 解析與匯入</h2>
+            <p style="color: #b0b0b0; margin-bottom: 10px;">支援格式：.xlsx / .xls / .csv，自動匹配A欄日期時間格式（例：1/3/2026 18:30:09）</p>
+            <input type="file" id="file-upload" class="file-input" accept=".xlsx,.xls,.csv">
+            <button id="parse-file-btn" class="btn">解析檔案並匯入Google Sheets</button>
+            <p id="parse-result" style="color: #6366f1;"></p>
+        </div>
+
+        <!-- 管理員密碼驗證彈窗 -->
+        <div id="password-modal" class="password-modal hidden">
+            <div class="password-form">
+                <h2>管理員身份驗證</h2>
+                <p id="password-error"></p>
+                <input type="password" id="admin-password" placeholder="請輸入管理員密碼" autocomplete="off">
+                <button id="verify-password-btn" class="btn" style="width: 100%;">驗證並進入</button>
+            </div>
         </div>
     </div>
 
-    <!-- 管理員面板 -->
-    <div id="adminPanel" class="panel">
-        <h2>🔐 管理員設定</h2>
-        <div class="admin-settings">
-            <div class="form-group" style="margin-bottom: 16px;">
-                <label>主頁按鈕文字</label>
-                <input type="text" id="adminBtnLabel" class="form-control" value="1.選項">
-            </div>
-            <div class="form-group" style="margin-bottom: 16px;">
-                <label>六個欄位標籤 (用逗號分隔)</label>
-                <input type="text" id="adminFieldLabels" class="form-control" value="項目,交付日期,期間,支出方式,金額,備注">
-            </div>
-            <div class="form-group" style="margin-bottom: 16px;">
-                <label>支出方式選項 (用逗號分隔)</label>
-                <input type="text" id="adminPaymentOptions" class="form-control" value="現金,支付寶,PayMe,微信支付,個人Visa,個人轉數快,個人戶口,公司扣賬卡,公司轉數快,公司戶口">
-            </div>
-            <button id="saveAdminSettings" class="btn">儲存設定</button>
-            <button id="resetAdminSettings" class="btn btn-secondary" style="margin-left: 12px;">重置預設</button>
-        </div>
-    </div>
-</div>
+    <!-- 依賴庫加載 -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script>
+        // 全域配置 - 已嵌入你的Google Apps Script接口
+        const ADMIN_PASSWORD = "admin123"; // 可自行修改管理員密碼
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyuxyXs2qIp6fuTDCg3YSFMOlMRnJY8Cbjn7x6JRiT-LSQrmbVGan8l623JpzYk3AKGew/exec";
+        // 日期時間匹配規則（對應A欄：日/月/年 時:分:秒 或 月/日/年 時:分:秒）
+        const DATE_TIME_REGEX = /\d+\/\d+\/\d+\s+\d+:\d+:\d+/;
 
-<script>
-    // ========== 設定 ==========
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhMFhXz5CjiggUOrOM261fSklNuh-2Ms4hvKV1SdFrdTbARQlDLP8olVhJovkrm4Na/exec'; // 您提供的網址
-    const ADMIN_PASSWORD = 'admin123';
-
-    // 預設設定
-    const DEFAULT_SETTINGS = {
-        mainBtnLabel: '1.選項',
-        fieldLabels: ['項目', '交付日期', '期間', '支出方式', '金額', '備注'],
-        paymentOptions: ['現金', '支付寶', 'PayMe', '微信支付', '個人Visa', '個人轉數快', '個人戶口', '公司扣賬卡', '公司轉數快', '公司戶口']
-    };
-
-    // 全域資料
-    let allRecords = [];          // 所有記錄 { project, date, period, payment, amount, remark, timestamp }
-    let currentSettings = { ...DEFAULT_SETTINGS };
-    let isSyncing = false;
-
-    // ========== 輔助函數 ==========
-    function loadSettings() {
-        const saved = localStorage.getItem('accounting_settings');
-        if (saved) {
-            try {
-                const s = JSON.parse(saved);
-                currentSettings = { ...DEFAULT_SETTINGS, ...s };
-            } catch(e) {}
-        } else {
-            currentSettings = { ...DEFAULT_SETTINGS };
-        }
-        document.getElementById('adminBtnLabel').value = currentSettings.mainBtnLabel;
-        document.getElementById('adminFieldLabels').value = currentSettings.fieldLabels.join(',');
-        document.getElementById('adminPaymentOptions').value = currentSettings.paymentOptions.join(',');
-        document.getElementById('mainOptionBtn').innerText = currentSettings.mainBtnLabel;
-    }
-
-    function saveSettings() {
-        localStorage.setItem('accounting_settings', JSON.stringify(currentSettings));
-    }
-
-    // 建構表單HTML
-    function buildFormHtml() {
-        const labels = currentSettings.fieldLabels;
-        const paymentOptions = currentSettings.paymentOptions;
-        const today = new Date().toISOString().slice(0,10);
-        const months = ['', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
-        let html = '';
-        html += `<div class="form-group"><label>${labels[0]}</label><input type="text" id="field0" class="form-control" autocomplete="off"></div>`;
-        html += `<div class="form-group"><label>${labels[1]}</label><input type="date" id="field1" class="form-control" value="${today}"></div>`;
-        let periodSelect = `<div class="form-group"><label>${labels[2]}</label><select id="field2" class="form-control">`;
-        months.forEach(m => periodSelect += `<option value="${m}">${m}</option>`);
-        periodSelect += `</select></div>`;
-        html += periodSelect;
-        let paymentSelect = `<div class="form-group"><label>${labels[3]}</label><select id="field3" class="form-control">`;
-        paymentOptions.forEach(opt => paymentSelect += `<option value="${opt}">${opt}</option>`);
-        paymentSelect += `</select></div>`;
-        html += paymentSelect;
-        html += `<div class="form-group"><label>${labels[4]}</label><input type="number" step="0.01" id="field4" class="form-control"></div>`;
-        html += `<div class="form-group"><label>${labels[5]}</label><input type="text" id="field5" class="form-control"></div>`;
-        return html;
-    }
-
-    function rebuildForm() {
-        const container = document.getElementById('inputRow');
-        container.innerHTML = buildFormHtml();
-        const inputs = container.querySelectorAll('.form-control');
-        for (let i = 0; i < inputs.length; i++) {
-            inputs[i].addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (i === inputs.length - 1) {
-                        document.getElementById('submitRecordBtn').click();
-                    } else {
-                        inputs[i+1].focus();
-                    }
-                }
+        // 頁面加載完成初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. 初始化日期選擇器（預設當日，繁體中文，月曆選擇）
+            flatpickr('#delivery-date', {
+                locale: 'zh',
+                defaultDate: new Date(),
+                dateFormat: 'Y-m-d',
+                allowInput: false,
+                wrap: false
             });
+
+            // 2. 導航按鈕事件
+            // 回到主頁
+            document.getElementById('home-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('admin-section').classList.add('hidden');
+                document.getElementById('home-section').classList.remove('hidden');
+                document.getElementById('records-section').classList.remove('hidden');
+            });
+            // 打開管理員密碼彈窗
+            document.getElementById('admin-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('password-modal').classList.remove('hidden');
+                document.getElementById('admin-password').value = '';
+                document.getElementById('password-error').textContent = '';
+            });
+
+            // 3. 管理員密碼驗證
+            document.getElementById('verify-password-btn').addEventListener('click', verifyAdminPassword);
+            // 密碼框按Enter鍵驗證
+            document.getElementById('admin-password').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') verifyAdminPassword();
+            });
+
+            // 4. 表單提交按鈕事件
+            document.getElementById('submit-btn').addEventListener('click', submitExpenseRecord);
+
+            // 5. Excel/CSV解析匯入按鈕事件
+            document.getElementById('parse-file-btn').addEventListener('click', parseFileAndImport);
+
+            // 6. 初始化加載已儲存的紀錄
+            loadAllRecords();
+        });
+
+        // 管理員密碼驗證函數
+        function verifyAdminPassword() {
+            const inputPwd = document.getElementById('admin-password').value.trim();
+            if (!inputPwd) {
+                document.getElementById('password-error').textContent = "請輸入管理員密碼！";
+                return;
+            }
+            if (inputPwd === ADMIN_PASSWORD) {
+                document.getElementById('password-modal').classList.add('hidden');
+                document.getElementById('home-section').classList.add('hidden');
+                document.getElementById('records-section').classList.add('hidden');
+                document.getElementById('admin-section').classList.remove('hidden');
+            } else {
+                document.getElementById('password-error').textContent = "密碼錯誤，請重新輸入！";
+                document.getElementById('admin-password').focus();
+            }
         }
-    }
 
-    // 儲存本地記錄
-    function saveRecordsToLocal() {
-        localStorage.setItem('accounting_records', JSON.stringify(allRecords));
-    }
+        // 提交支出記錄到Google Sheets
+        async function submitExpenseRecord() {
+            // 獲取表單數據
+            const formData = {
+                item: document.getElementById('item').value.trim() || ' ',
+                deliveryDate: document.getElementById('delivery-date').value.trim() || ' ',
+                period: document.getElementById('period').value.trim() || ' ',
+                paymentMethod: document.getElementById('payment-method').value.trim() || ' ',
+                amount: document.getElementById('amount').value.trim() || ' ',
+                remark: document.getElementById('remark').value.trim() || ' '
+            };
 
-    // 新增記錄到 Google Sheets (非同步，不影響本機)
-    function appendToGoogle(record) {
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.name = 'iframe_' + Date.now();
-        document.body.appendChild(iframe);
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = SCRIPT_URL;
-        form.target = iframe.name;
-        form.style.display = 'none';
-        form.innerHTML = `
-            <input name="action" value="append">
-            <input name="sheet" value="支出記錄">
-            <input name="data" value='${JSON.stringify(record)}'>
-        `;
-        document.body.appendChild(form);
-        form.submit();
-        setTimeout(() => {
-            form.remove();
-            iframe.remove();
-        }, 2000);
-    }
+            // 核心欄位驗證（項目、日期、支出方式、金額為必填）
+            const requiredFields = [
+                { name: '項目', value: formData.item },
+                { name: '交付日期', value: formData.deliveryDate },
+                { name: '支出方式', value: formData.paymentMethod },
+                { name: '金額', value: formData.amount }
+            ];
+            const emptyField = requiredFields.find(field => field.value === ' ');
+            if (emptyField) {
+                alert(`請填寫必填欄位：${emptyField.name}！`);
+                document.getElementById(emptyField.name === '交付日期' ? 'delivery-date' : 
+                                      emptyField.name === '支出方式' ? 'payment-method' :
+                                      emptyField.name === '金額' ? 'amount' : 'item').focus();
+                return;
+            }
 
-    // 從 Google Sheets 讀取所有記錄 (JSONP)
-    function fetchFromGoogle() {
-        return new Promise((resolve, reject) => {
-            const callbackName = 'jsonp_cb_' + Date.now();
-            window[callbackName] = function(data) {
-                delete window[callbackName];
-                if (data.error) {
-                    reject(data.error);
+            try {
+                // 發送請求到Google Apps Script
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    },
+                    body: JSON.stringify({ action: 'saveRecord', data: formData })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert("記錄儲存成功！");
+                    // 清空表單，焦點跳轉到「項目」欄位（實現跳轉下一個項選）
+                    document.getElementById('item').value = '';
+                    document.getElementById('period').value = '';
+                    document.getElementById('payment-method').value = '';
+                    document.getElementById('amount').value = '';
+                    document.getElementById('remark').value = '';
+                    document.getElementById('item').focus();
+                    // 重新加載紀錄
+                    loadAllRecords();
                 } else {
-                    let records = [];
-                    if (Array.isArray(data)) records = data;
-                    else if (data.records) records = data.records;
-                    resolve(records);
+                    alert(`儲存失敗：${result.error || '未知錯誤'}`);
+                }
+            } catch (error) {
+                console.error('提交請求出錯：', error);
+                alert("網絡異常，請檢查網路後重試！");
+            }
+        }
+
+        // 加載Google Sheets中所有儲存的紀錄
+        async function loadAllRecords() {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    },
+                    body: JSON.stringify({ action: 'getRecords' })
+                });
+
+                const result = await response.json();
+                const recordsBody = document.getElementById('records-body');
+                // 清空原有紀錄
+                recordsBody.innerHTML = '';
+
+                if (result.success && result.records && result.records.length > 0) {
+                    // 渲染所有紀錄，嚴格對齊欄位，無數據顯示空格
+                    result.records.forEach(record => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${record.item || ' '}</td>
+                            <td>${record.deliveryDate || ' '}</td>
+                            <td>${record.period || ' '}</td>
+                            <td>${record.paymentMethod || ' '}</td>
+                            <td>${record.amount || ' '}</td>
+                            <td>${record.remark || ' '}</td>
+                        `;
+                        recordsBody.appendChild(tr);
+                    });
+                } else {
+                    // 無紀錄時顯示空行提示
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td colspan="6" style="text-align: center; color: #b0b0b0; padding: 30px;">暫無儲存的支出紀錄</td>
+                    `;
+                    recordsBody.appendChild(tr);
+                }
+            } catch (error) {
+                console.error('加載紀錄出錯：', error);
+                const recordsBody = document.getElementById('records-body');
+                recordsBody.innerHTML = `
+                    <tr><td colspan="6" style="text-align: center; color: #ef4444; padding: 30px;">加載紀錄失敗，請重試！</td></tr>
+                `;
+            }
+        }
+
+        // 解析Excel/CSV檔案並匯入Google Sheets
+        function parseFileAndImport() {
+            const fileInput = document.getElementById('file-upload');
+            const file = fileInput.files[0];
+            const parseResult = document.getElementById('parse-result');
+
+            // 檢查是否選擇檔案
+            if (!file) {
+                alert("請先選擇要解析的Excel/CSV檔案！");
+                fileInput.focus();
+                return;
+            }
+
+            // 重置解析結果提示
+            parseResult.textContent = "正在解析檔案，請稍候...";
+            parseResult.style.color = "#6366f1";
+
+            // 讀取檔案
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    // 解析Excel/CSV為JSON數據
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                    const firstSheet = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheet];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false });
+
+                    // 過濾A欄包含日期時間的行，提取A/B/C列
+                    const matchedData = [];
+                    jsonData.forEach((row, index) => {
+                        // 跳過表頭行（可根據實際調整，這裡跳過第1行）
+                        if (index === 0) return;
+                        const cellA = row[0] ? row[0].toString().trim() : '';
+                        if (DATE_TIME_REGEX.test(cellA)) {
+                            matchedData.push({
+                                a: cellA || ' ',
+                                b: row[1] ? row[1].toString().trim() : ' ',
+                                c: row[2] ? row[2].toString().trim() : ' '
+                            });
+                        }
+                    });
+
+                    // 判斷是否匹配到數據
+                    if (matchedData.length === 0) {
+                        parseResult.textContent = "解析完成：未在A欄找到符合「日期+時間」格式的數據！";
+                        parseResult.style.color = "#f59e0b";
+                        return;
+                    }
+
+                    // 發送匹配的數據到Google Sheets
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json; charset=utf-8'
+                        },
+                        body: JSON.stringify({ action: 'importCsvData', data: matchedData })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        parseResult.textContent = `解析匯入成功！共找到 ${matchedData.length} 條符合條件的數據，已儲存到Google Sheets！`;
+                        parseResult.style.color = "#10b981";
+                        // 清空檔案選擇框
+                        fileInput.value = '';
+                    } else {
+                        parseResult.textContent = `匯入失敗：${result.error || '未知錯誤'}`;
+                        parseResult.style.color = "#ef4444";
+                    }
+                } catch (error) {
+                    console.error('檔案解析出錯：', error);
+                    parseResult.textContent = `解析失敗：${error.message || '檔案格式錯誤，請確認是Excel/CSV檔案'}`;
+                    parseResult.style.color = "#ef4444";
                 }
             };
-            const script = document.createElement('script');
-            script.src = `${SCRIPT_URL}?action=getAll&callback=${callbackName}`;
-            document.body.appendChild(script);
-            setTimeout(() => {
-                if (window[callbackName]) {
-                    delete window[callbackName];
-                    reject('Timeout');
-                }
-            }, 10000);
-        });
-    }
 
-    // 合併雲端記錄與本地記錄（以 timestamp 為準，本地新增未同步的優先保留）
-    function mergeRecords(localRecords, cloudRecords) {
-        const map = new Map();
-        // 先加入本地記錄
-        localRecords.forEach(r => map.set(r.timestamp, r));
-        // 雲端記錄若 timestamp 不存在則新增，若存在但本地版本較舊則覆蓋？實際上本地可能已修改，但我們策略是雲端為主備份，但為了避免覆蓋本地新增未同步的，我們保留本地較新的。
-        cloudRecords.forEach(r => {
-            if (!map.has(r.timestamp)) {
-                map.set(r.timestamp, r);
-            } else {
-                // 如果本地已有相同 timestamp，保留本地（因為本地可能已修改）
-                // 不做覆蓋
-            }
-        });
-        return Array.from(map.values());
-    }
-
-    // 同步：從雲端拉取並合併本地
-    async function syncFromCloud() {
-        if (isSyncing) return;
-        isSyncing = true;
-        try {
-            const cloudRecords = await fetchFromGoogle();
-            const localRecords = [...allRecords];
-            const merged = mergeRecords(localRecords, cloudRecords);
-            allRecords = merged;
-            saveRecordsToLocal();
-            renderRecords();
-            updateStatistics();
-            console.log('同步成功，共 ' + allRecords.length + ' 筆記錄');
-        } catch (err) {
-            console.warn('同步失敗，使用本地資料', err);
-        } finally {
-            isSyncing = false;
+            // 以二進制方式讀取檔案
+            reader.readAsArrayBuffer(file);
         }
-    }
-
-    // 手動同步：將本地所有記錄推送到雲端 (覆蓋或追加？這裡採用追加方式，但避免重複，我們可以將本地尚未同步的記錄逐一推送，較簡單做法是將本地全部重新寫入？但為了簡單，我們提供一個按鈕將本地所有記錄發送到雲端（可能造成重複）。但更合理是：用戶點擊「手動同步」時，先從雲端拉取合併，然後再將合併後的完整數據推送到雲端（覆蓋整個工作表），但需要 Apps Script 支援 overwrite。但我們之前的 append 方式只支持追加。為保持簡單，我們先只做拉取合併，不推送全部。若要推送全部，需要修改 Apps Script。這裡我們實現「將本地記錄推送到雲端（逐筆追加）」作為備用功能。
-    function pushLocalToCloud() {
-        if (allRecords.length === 0) return;
-        if (confirm('將本地所有記錄上傳到 Google Sheets（可能產生重複，請確認）')) {
-            allRecords.forEach(rec => appendToGoogle(rec));
-            alert('已嘗試上傳，請稍後檢查雲端');
-        }
-    }
-
-    // 記錄列表渲染
-    function renderRecords() {
-        const thead = document.getElementById('recordsHeader');
-        const tbody = document.getElementById('recordsBody');
-        const labels = currentSettings.fieldLabels;
-        thead.innerHTML = `<tr>${labels.map(l => `<th>${l}</th>`).join('')}</tr>`;
-        if (allRecords.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">尚無記錄</td></tr>';
-            return;
-        }
-        const sorted = [...allRecords].sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-        tbody.innerHTML = sorted.map(rec => `
-            <tr>
-                <td>${rec.project || ''}</td>
-                <td>${rec.date || ''}</td>
-                <td>${rec.period || ''}</td>
-                <td>${rec.payment || ''}</td>
-                <td>${rec.amount ? rec.amount.toFixed(2) : ''}</td>
-                <td>${rec.remark || ''}</td>
-            </tr>
-        `).join('');
-    }
-
-    // 統計表更新
-    function updateStatistics() {
-        let start = document.getElementById('startDate').value;
-        let end = document.getElementById('endDate').value;
-        if (!start || !end) {
-            const now = new Date();
-            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0,10);
-            const lastDay = new Date(now.getFullYear(), now.getMonth()+1, 0).toISOString().slice(0,10);
-            start = firstDay;
-            end = lastDay;
-            document.getElementById('startDate').value = start;
-            document.getElementById('endDate').value = end;
-        }
-        const filtered = allRecords.filter(rec => {
-            if (!rec.date) return false;
-            return rec.date >= start && rec.date <= end;
-        });
-        const total = filtered.reduce((sum, r) => sum + (r.amount || 0), 0);
-        const methodMap = new Map();
-        filtered.forEach(r => {
-            const m = r.payment || '未分類';
-            methodMap.set(m, (methodMap.get(m) || 0) + (r.amount || 0));
-        });
-        const methodList = Array.from(methodMap.entries()).sort((a,b) => b[1] - a[1]);
-        let methodHtml = '<table><tr><th>支付方式</th><th>總金額</th></tr>';
-        methodList.forEach(([m, amt]) => {
-            methodHtml += `<tr><td>${m}</td><td>$${amt.toFixed(2)}</td></tr>`;
-        });
-        methodHtml += '</table>';
-        const statsDiv = document.getElementById('statsResult');
-        statsDiv.innerHTML = `
-            <div class="stats-total">
-                <div>總支出</div>
-                <div class="number">$${total.toFixed(2)}</div>
-            </div>
-            <div class="stats-method">
-                <div>支出方式統計</div>
-                ${methodHtml}
-            </div>
-        `;
-    }
-
-    // 儲存新記錄
-    function saveRecord() {
-        const labels = currentSettings.fieldLabels;
-        const project = document.getElementById('field0').value.trim();
-        const date = document.getElementById('field1').value;
-        const period = document.getElementById('field2').value;
-        const payment = document.getElementById('field3').value;
-        const amount = parseFloat(document.getElementById('field4').value) || 0;
-        const remark = document.getElementById('field5').value.trim();
-
-        if (!project || !date || amount <= 0) {
-            alert(`請填寫 ${labels[0]}、${labels[1]} 且金額大於0`);
-            return;
-        }
-
-        const newRecord = {
-            project,
-            date,
-            period,
-            payment,
-            amount,
-            remark,
-            timestamp: Date.now()
-        };
-        allRecords.push(newRecord);
-        saveRecordsToLocal();
-        appendToGoogle(newRecord);
-        renderRecords();
-        updateStatistics();
-        // 清空項目、金額、備註
-        document.getElementById('field0').value = '';
-        document.getElementById('field4').value = '';
-        document.getElementById('field5').value = '';
-    }
-
-    // CSV 匯入
-    function importCsv(file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const text = e.target.result;
-            const lines = text.split(/\r?\n/);
-            if (lines.length === 0) return;
-            const data = lines.map(line => line.split(',').map(cell => cell.trim()));
-            const dateTimeRegex = /(\d{1,2}\/\d{1,2}\/\d{4}\s+\d{1,2}:\d{2}:\d{2})/;
-            let importedCount = 0;
-            for (let i = 0; i < data.length; i++) {
-                const row = data[i];
-                if (row.length < 3) continue;
-                const cellA = row[0];
-                if (dateTimeRegex.test(cellA)) {
-                    const dateTime = cellA;
-                    const project = row[1] || '';
-                    const amount = parseFloat(row[2]) || 0;
-                    if (amount <= 0) continue;
-                    const newRecord = {
-                        project,
-                        date: dateTime,
-                        period: '',
-                        payment: '',
-                        amount,
-                        remark: '',
-                        timestamp: Date.now() + importedCount
-                    };
-                    allRecords.push(newRecord);
-                    appendToGoogle(newRecord);
-                    importedCount++;
-                }
-            }
-            if (importedCount > 0) {
-                saveRecordsToLocal();
-                renderRecords();
-                updateStatistics();
-                alert(`成功匯入 ${importedCount} 筆記錄`);
-            } else {
-                alert('找不到符合日期時間格式的資料');
-            }
-        };
-        reader.readAsText(file, 'UTF-8');
-    }
-
-    // 管理員功能
-    function showAdminPassword() {
-        const overlay = document.createElement('div');
-        overlay.className = 'password-overlay';
-        overlay.innerHTML = `
-            <div class="password-box">
-                <h3>輸入管理員密碼</h3>
-                <input type="password" id="adminPwdInput" class="form-control" style="margin: 12px 0;">
-                <div style="display: flex; gap: 12px;">
-                    <button id="adminPwdConfirm" class="btn">確認</button>
-                    <button id="adminPwdCancel" class="btn-secondary">取消</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-        const confirmBtn = overlay.querySelector('#adminPwdConfirm');
-        const cancelBtn = overlay.querySelector('#adminPwdCancel');
-        const pwdInput = overlay.querySelector('#adminPwdInput');
-        const close = () => overlay.remove();
-        confirmBtn.onclick = () => {
-            if (pwdInput.value === ADMIN_PASSWORD) {
-                close();
-                document.getElementById('adminPanel').classList.add('active');
-                document.getElementById('mainPanel').classList.remove('active');
-                document.querySelectorAll('.nav-btn').forEach(btn => {
-                    if (btn.dataset.panel === 'admin') btn.classList.add('active');
-                    else btn.classList.remove('active');
-                });
-            } else {
-                alert('密碼錯誤');
-                close();
-            }
-        };
-        cancelBtn.onclick = close;
-    }
-
-    function saveAdminSettings() {
-        const newBtnLabel = document.getElementById('adminBtnLabel').value.trim();
-        const labelsStr = document.getElementById('adminFieldLabels').value;
-        const paymentStr = document.getElementById('adminPaymentOptions').value;
-        const newLabels = labelsStr.split(',').map(s => s.trim());
-        const newPayments = paymentStr.split(',').map(s => s.trim());
-        if (newLabels.length !== 6) {
-            alert('欄位標籤必須為6個，用逗號分隔');
-            return;
-        }
-        currentSettings = {
-            mainBtnLabel: newBtnLabel,
-            fieldLabels: newLabels,
-            paymentOptions: newPayments
-        };
-        saveSettings();
-        document.getElementById('mainOptionBtn').innerText = currentSettings.mainBtnLabel;
-        rebuildForm();
-        renderRecords();
-        alert('設定已儲存');
-    }
-
-    function resetAdminSettings() {
-        currentSettings = { ...DEFAULT_SETTINGS };
-        saveSettings();
-        document.getElementById('adminBtnLabel').value = currentSettings.mainBtnLabel;
-        document.getElementById('adminFieldLabels').value = currentSettings.fieldLabels.join(',');
-        document.getElementById('adminPaymentOptions').value = currentSettings.paymentOptions.join(',');
-        document.getElementById('mainOptionBtn').innerText = currentSettings.mainBtnLabel;
-        rebuildForm();
-        renderRecords();
-        alert('已重置為預設');
-    }
-
-    // ========== 事件綁定 ==========
-    document.getElementById('mainOptionBtn').addEventListener('click', () => {
-        const formContainer = document.getElementById('formContainer');
-        const csvContainer = document.getElementById('csvContainer');
-        if (formContainer.style.display === 'none') {
-            rebuildForm();
-            formContainer.style.display = 'block';
-            csvContainer.style.display = 'none';
-        } else {
-            formContainer.style.display = 'none';
-        }
-    });
-    document.getElementById('csvBtn').addEventListener('click', () => {
-        const csvContainer = document.getElementById('csvContainer');
-        const formContainer = document.getElementById('formContainer');
-        if (csvContainer.style.display === 'none') {
-            csvContainer.style.display = 'block';
-            formContainer.style.display = 'none';
-        } else {
-            csvContainer.style.display = 'none';
-        }
-    });
-    document.getElementById('manualSyncBtn').addEventListener('click', async () => {
-        await syncFromCloud();
-        alert('同步完成');
-    });
-    document.getElementById('submitRecordBtn').addEventListener('click', saveRecord);
-    document.getElementById('uploadCsvBtn').addEventListener('click', () => {
-        const fileInput = document.getElementById('csvFileInput');
-        if (!fileInput.files.length) {
-            alert('請選擇 CSV 檔案');
-            return;
-        }
-        importCsv(fileInput.files[0]);
-    });
-    document.getElementById('updateStatsBtn').addEventListener('click', updateStatistics);
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const target = btn.dataset.panel;
-            if (target === 'admin') {
-                showAdminPassword();
-            } else {
-                document.getElementById('mainPanel').classList.add('active');
-                document.getElementById('adminPanel').classList.remove('active');
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            }
-        });
-    });
-    document.getElementById('saveAdminSettings').addEventListener('click', saveAdminSettings);
-    document.getElementById('resetAdminSettings').addEventListener('click', resetAdminSettings);
-
-    // ========== 初始化 ==========
-    async function init() {
-        loadSettings();
-        rebuildForm();
-        // 優先從本地讀取記錄
-        const localRecords = localStorage.getItem('accounting_records');
-        if (localRecords) {
-            try {
-                allRecords = JSON.parse(localRecords);
-                renderRecords();
-                updateStatistics();
-            } catch(e) {}
-        }
-        // 背景同步雲端
-        await syncFromCloud();
-    }
-    init();
-</script>
+    </script>
 </body>
 </html>
