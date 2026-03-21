@@ -99,6 +99,12 @@
         .hidden {
             display: none;
         }
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            background: #333;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
@@ -172,6 +178,21 @@
             <input type="file" id="file" accept=".csv,.xlsx,.xls">
             <button class="btn" id="parse">解析並匯入</button>
             <p id="result"></p>
+
+            <!-- 讀取到的資料會顯示在這裡 -->
+            <div class="result-area" id="csvResultArea">
+                <h4>已讀取資料（A、B、C）</h4>
+                <table id="csvTable">
+                    <thead>
+                        <tr>
+                            <th>A（日期時間）</th>
+                            <th>B（員工）</th>
+                            <th>C（金額）</th>
+                        </tr>
+                    </thead>
+                    <tbody id="csvTableBody"></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="modal" class="modal hidden">
@@ -271,11 +292,24 @@
                 const list = arr.slice(start).map(r => ({
                     a: r[0] || "", b: r[1] || "", c: r[2] || ""
                 }));
+
+                // 顯示在頁面下方
+                const tbody = document.getElementById("csvTableBody");
+                tbody.innerHTML = "";
+                list.forEach(item => {
+                    tbody.innerHTML += `<tr>
+                        <td>${item.a}</td>
+                        <td>${item.b}</td>
+                        <td>${item.c}</td>
+                    </tr>`;
+                });
+
+                document.getElementById("result").textContent = `成功讀取 ${list.length} 筆資料，已顯示在下方`;
+
+                // 匯入 Google Sheets
                 fetch(GAS_URL, {
                     method: "POST",
                     body: JSON.stringify({ action: "importCsvData", data: list })
-                }).then(() => {
-                    document.getElementById("result").textContent = `成功匯入 ${list.length} 筆資料`;
                 });
             };
             reader.readAsArrayBuffer(file);
