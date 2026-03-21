@@ -2,782 +2,743 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>銷售系統 - 產品銷售 & 客人收款</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>賣貨系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            user-select: none; /* 提升觸控體驗，避免點選時選中文字 */
+            font-family: Arial, sans-serif;
         }
-
         body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #f1f5f9;
+            background: #f5f5f5;
             padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
-
-        /* 主容器 (手機風格) */
-        .app-container {
-            max-width: 550px;
-            width: 100%;
-            margin: 0 auto;
-            background: white;
-            border-radius: 40px;
-            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2);
-            overflow: hidden;
-            position: relative;
-            transition: all 0.2s;
-        }
-
-        /* 頁面切換 */
         .page {
             display: none;
-            padding: 20px 20px 30px;
+            max-width: 800px;
+            margin: 0 auto;
             background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+            min-height: 90vh;
         }
-
         .page.active {
             display: block;
         }
-
-        /* 頂部導航 */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .top-bar h2 {
-            font-size: 1.6rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #1e293b, #2d3a4a);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-        }
-        .settings-btn {
-            background: #f1f5f9;
-            border: none;
-            font-size: 1.6rem;
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 60px;
-            transition: 0.2s;
-        }
-        .settings-btn:active { background: #e2e8f0; transform: scale(0.96);}
-
-        /* 卡片 */
-        .card {
-            background: #f8fafc;
-            border-radius: 28px;
-            padding: 16px 18px;
+        h1, h2 {
+            text-align: center;
             margin-bottom: 20px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            color: #333;
         }
-        .label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: #475569;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
+        .btn-group {
             display: flex;
-            align-items: center;
-            gap: 8px;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
         }
-        /* 按鈕群組 (員工/貨品/支付) */
-        .button-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 6px;
-        }
-        .choice-btn {
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 60px;
-            padding: 8px 18px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.02);
-        }
-        .choice-btn.active {
-            background: #3b82f6;
-            border-color: #3b82f6;
-            color: white;
-        }
-        /* 貨品多選樣式 */
-        .product-multi-btn {
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 60px;
-            padding: 8px 18px;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-        .product-multi-btn.selected {
-            background: #10b981;
-            border-color: #10b981;
-            color: white;
-        }
-        /* 數字鍵盤 */
-        .numpad {
-            background: #f1f5f9;
-            border-radius: 28px;
-            padding: 12px;
-            margin-top: 8px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-        .num-key {
-            background: white;
+        .btn {
+            padding: 15px 30px;
+            font-size: 18px;
             border: none;
-            padding: 16px 0;
-            font-size: 1.6rem;
-            font-weight: 600;
-            border-radius: 60px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 8px;
             cursor: pointer;
-            transition: 0.05s linear;
-        }
-        .num-key:active { background: #e2e8f0; transform: scale(0.97);}
-        .key-del { background: #fee2e2; color: #b91c1c;}
-        .key-clear { background: #e6f0ff; color: #2563eb;}
-
-        .amount-display {
-            font-size: 2rem;
-            font-weight: 800;
-            background: white;
-            padding: 12px 16px;
-            border-radius: 48px;
-            text-align: right;
-            margin-bottom: 12px;
-            border: 1px solid #e2e8f0;
-            font-family: monospace;
-        }
-
-        /* 支付方式圖標區域 */
-        .payment-icons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 10px;
-        }
-        .pay-option {
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 60px;
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.1s;
-        }
-        .pay-option.active {
-            background: #1e293b;
-            border-color: #1e293b;
+            background: #007bff;
             color: white;
         }
-        .pay-icon {
-            font-size: 1.3rem;
-        }
-
-        .submit-btn {
-            background: #3b82f6;
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 60px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: white;
-            margin: 12px 0 8px;
-            cursor: pointer;
+        .btn:hover {
+            background: #0056b3;
         }
         .back-btn {
-            background: #e2e8f0;
-            color: #1e293b;
-            width: 100%;
-            padding: 12px;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
             border: none;
-            border-radius: 60px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            margin-top: 8px;
+            border-radius: 5px;
             cursor: pointer;
         }
-
-        /* 設定彈窗 (modal) */
-        .modal {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .select-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .select-item {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .select-item.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .product-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            z-index: 1000;
+            gap: 10px;
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
-        .modal-card {
+        .count-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        .count-btn.minus {
+            background: #dc3545;
+        }
+        .payment-methods {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .payment-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100px;
+        }
+        .payment-item.active {
+            border-color: #007bff;
+            background: #e7f3ff;
+        }
+        .payment-item i {
+            font-size: 24px;
+        }
+        .num-keyboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        .num-btn {
+            padding: 20px;
+            font-size: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
             background: white;
-            width: 90%;
-            max-width: 450px;
-            border-radius: 40px;
-            padding: 24px;
-            max-height: 80vh;
-            overflow-y: auto;
         }
-        .modal-card h3 { margin-bottom: 16px; }
-        .setting-item {
+        .num-btn:hover {
+            background: #f0f0f0;
+        }
+        .price-display {
+            text-align: center;
+            font-size: 24px;
             margin-bottom: 20px;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 16px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
-        .setting-item input {
+        .settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            padding: 12px;
-            border-radius: 40px;
-            border: 1px solid #cbd5e1;
-            margin: 6px 0;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
         }
-        .item-list {
-            margin: 12px 0;
-            max-height: 180px;
-            overflow-y: auto;
-            background: #f8fafc;
-            border-radius: 24px;
-            padding: 8px;
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
         }
-        .list-row {
+        .modal input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .modal-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .settings-section {
+            margin-bottom: 30px;
+        }
+        .settings-section h3 {
+            margin-bottom: 10px;
+            color: #007bff;
+        }
+        .list-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 10px;
-            border-bottom: 1px solid #e2e8f0;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
         }
-        .small-btn {
-            background: #ef4444;
+        .delete-btn {
+            background: #dc3545;
             color: white;
             border: none;
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 0.7rem;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
         }
         .add-btn {
-            background: #10b981;
-            margin-top: 6px;
-            width: 100%;
-            padding: 8px;
-            border-radius: 40px;
+            background: #28a745;
             color: white;
             border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
         }
-
-        .footer-note {
-            font-size: 0.7rem;
+        .record-section {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        .record-box {
+            width: 45%;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .record-box h3 {
             text-align: center;
-            color: #94a3b8;
-            margin-top: 16px;
+            margin-bottom: 10px;
+            color: #007bff;
         }
-        hr { margin: 12px 0; }
-        button { cursor: pointer; }
+        .record-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        .record-item:last-child {
+            border-bottom: none;
+        }
+        .record-toggle {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .record-toggle button {
+            padding: 8px 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-<div class="app-container">
-    <!-- 產品銷售頁面 (主頁) -->
-    <div id="productPage" class="page active">
-        <div class="top-bar">
-            <h2>📦 產品銷售</h2>
-            <button class="settings-btn" onclick="openSettings('product')">⚙️</button>
+    <!-- 主頁 -->
+    <div id="homePage" class="page active">
+        <h1>賣貨系統</h1>
+        <div class="btn-group">
+            <button class="btn" onclick="goToPage('productPage')">產品頁面</button>
+            <button class="btn" onclick="goToPage('customerPage')">客人頁面</button>
         </div>
-        <div class="card">
-            <div class="label">📅 日期</div>
-            <input type="date" id="productDate" style="width:100%; padding:12px; border-radius:60px; border:1px solid #cbd5e1; font-size:1rem;">
+        <div class="record-section">
+            <div class="record-box">
+                <h3>產品紀錄</h3>
+                <div id="productRecordList"></div>
+                <div class="record-toggle">
+                    <button onclick="toggleRecord('product')">查看紀錄</button>
+                </div>
+            </div>
+            <div class="record-box">
+                <h3>客人紀錄</h3>
+                <div id="customerRecordList"></div>
+                <div class="record-toggle">
+                    <button onclick="toggleRecord('customer')">查看紀錄</button>
+                </div>
+            </div>
         </div>
-        <div class="card">
-            <div class="label">👩‍💼 員工</div>
-            <div id="productStaffGroup" class="button-group"></div>
+    </div>
+
+    <!-- 產品頁面 -->
+    <div id="productPage" class="page">
+        <button class="settings-btn" onclick="openSettings('product')">設定</button>
+        <h2>產品頁面</h2>
+        <div class="form-group">
+            <label>日期</label>
+            <input type="date" id="productDate">
         </div>
-        <div class="card">
-            <div class="label">🛍️ 貨品 (可多選)</div>
-            <div id="productItemsGroup" class="button-group"></div>
+        <div class="form-group">
+            <label>員工</label>
+            <div class="select-list" id="productStaffList"></div>
         </div>
-        <div class="card">
-            <div class="label">💰 金額</div>
-            <div class="amount-display" id="productAmountDisplay">0</div>
-            <div class="numpad" id="productNumpad"></div>
+        <div class="form-group">
+            <label>貨品</label>
+            <div class="select-list" id="productItemList"></div>
         </div>
-        <div class="card">
-            <div class="label">💳 支付方式</div>
-            <div id="productPaymentGroup" class="payment-icons"></div>
+        <div class="form-group">
+            <label>價錢</label>
+            <div class="price-display" id="productPrice">0</div>
+            <div class="num-keyboard">
+                <button class="num-btn" onclick="inputNum('product', 7)">7</button>
+                <button class="num-btn" onclick="inputNum('product', 8)">8</button>
+                <button class="num-btn" onclick="inputNum('product', 9)">9</button>
+                <button class="num-btn" onclick="inputNum('product', 4)">4</button>
+                <button class="num-btn" onclick="inputNum('product', 5)">5</button>
+                <button class="num-btn" onclick="inputNum('product', 6)">6</button>
+                <button class="num-btn" onclick="inputNum('product', 1)">1</button>
+                <button class="num-btn" onclick="inputNum('product', 2)">2</button>
+                <button class="num-btn" onclick="inputNum('product', 3)">3</button>
+                <button class="num-btn" onclick="inputNum('product', 0)">0</button>
+                <button class="num-btn" onclick="clearPrice('product')">清除</button>
+                <button class="num-btn" onclick="backspacePrice('product')">刪除</button>
+            </div>
         </div>
-        <button class="submit-btn" id="productSubmit">✓ 確定遞交</button>
-        <button class="back-btn" onclick="switchToPage('customer')">⬅ 返回 (切換至客人頁面)</button>
-        <div class="footer-note">點擊右上角⚙️設定員工/貨品</div>
+        <div class="form-group">
+            <label>支付方式</label>
+            <div class="payment-methods" id="productPaymentList"></div>
+        </div>
+        <button class="btn" style="width:100%" onclick="submitProduct()">確定遞交</button>
+        <button class="back-btn" onclick="goToPage('homePage')">返回</button>
     </div>
 
     <!-- 客人頁面 -->
     <div id="customerPage" class="page">
-        <div class="top-bar">
-            <h2>👤 客人收款</h2>
-            <button class="settings-btn" onclick="openSettings('customer')">⚙️</button>
+        <button class="settings-btn" onclick="openSettings('customer')">設定</button>
+        <h2>客人頁面</h2>
+        <div class="form-group">
+            <label>日期</label>
+            <input type="date" id="customerDate">
         </div>
-        <div class="card">
-            <div class="label">📅 日期</div>
-            <input type="date" id="customerDate" style="width:100%; padding:12px; border-radius:60px; border:1px solid #cbd5e1;">
+        <div class="form-group">
+            <label>員工</label>
+            <div class="select-list" id="customerStaffList"></div>
         </div>
-        <div class="card">
-            <div class="label">👩‍💼 員工</div>
-            <div id="customerStaffGroup" class="button-group"></div>
-        </div>
-        <div class="card">
-            <div class="label">💰 收款金額</div>
-            <div class="amount-display" id="customerAmountDisplay">0</div>
-            <div class="numpad" id="customerNumpad"></div>
-        </div>
-        <div class="card">
-            <div class="label">💳 支付方式</div>
-            <div id="customerPaymentGroup" class="payment-icons"></div>
-        </div>
-        <button class="submit-btn" id="customerSubmit">✓ 確定遞交</button>
-        <button class="back-btn" onclick="switchToPage('product')">⬅ 返回 (切換至產品頁面)</button>
-        <div class="footer-note">點擊右上角⚙️設定員工</div>
-    </div>
-</div>
-
-<script>
-    // ------------------- 全域資料 (localStorage 持久) ------------------
-    let appData = {
-        password: "0000",       // 預設密碼
-        employees: ["陳大文", "李小美", "張志強"],
-        products: ["筆記型電腦", "無線滑鼠", "機械鍵盤", "USB-C 充電器", "螢幕支架"]
-    };
-
-    // 載入資料
-    function loadData() {
-        const saved = localStorage.getItem("sales_system_data");
-        if(saved) {
-            try {
-                const d = JSON.parse(saved);
-                appData.password = d.password || "0000";
-                appData.employees = d.employees || ["陳大文", "李小美", "張志強"];
-                appData.products = d.products || ["筆記型電腦", "無線滑鼠", "機械鍵盤", "USB-C 充電器", "螢幕支架"];
-            } catch(e) {}
-        }
-    }
-    function saveData() {
-        localStorage.setItem("sales_system_data", JSON.stringify({ password: appData.password, employees: appData.employees, products: appData.products }));
-    }
-
-    // 頁面狀態
-    let currentProductStaff = "";
-    let currentCustomerStaff = "";
-    let productSelectedProducts = [];   // 存放商品名稱
-    let productAmount = 0;
-    let customerAmount = 0;
-    let productPayment = "";
-    let customerPayment = "";
-
-    // 支付方式配置 (圖標+文字)
-    const paymentMethods = [
-        { id: "cash", label: "現金", icon: "💵" },
-        { id: "fps", label: "轉數快", icon: "⚡" },
-        { id: "alipay", label: "支付寶", icon: "📱" },
-        { id: "payme", label: "PayMe", icon: "💚" },
-        { id: "wechat", label: "微信支付", icon: "🟢" }
-    ];
-
-    // ---------- 輔助函數 ----------
-    function updateProductStaffUI() {
-        const container = document.getElementById("productStaffGroup");
-        if(!container) return;
-        container.innerHTML = appData.employees.map(emp => 
-            `<button class="choice-btn ${currentProductStaff === emp ? 'active' : ''}" data-staff="${emp}">${emp}</button>`
-        ).join('');
-        container.querySelectorAll('.choice-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                currentProductStaff = btn.getAttribute('data-staff');
-                updateProductStaffUI();
-            });
-        });
-    }
-    function updateCustomerStaffUI() {
-        const container = document.getElementById("customerStaffGroup");
-        if(!container) return;
-        container.innerHTML = appData.employees.map(emp => 
-            `<button class="choice-btn ${currentCustomerStaff === emp ? 'active' : ''}" data-staff="${emp}">${emp}</button>`
-        ).join('');
-        container.querySelectorAll('.choice-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                currentCustomerStaff = btn.getAttribute('data-staff');
-                updateCustomerStaffUI();
-            });
-        });
-    }
-
-    // 產品多選UI
-    function updateProductItemsUI() {
-        const container = document.getElementById("productItemsGroup");
-        if(!container) return;
-        container.innerHTML = appData.products.map(prod => 
-            `<button class="product-multi-btn ${productSelectedProducts.includes(prod) ? 'selected' : ''}" data-prod="${prod}">${prod}</button>`
-        ).join('');
-        container.querySelectorAll('.product-multi-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const prodName = btn.getAttribute('data-prod');
-                if(productSelectedProducts.includes(prodName)) {
-                    productSelectedProducts = productSelectedProducts.filter(p => p !== prodName);
-                } else {
-                    productSelectedProducts.push(prodName);
-                }
-                updateProductItemsUI();
-                // 金額不自動加總，金額由鍵盤獨立輸入 (設計保留鍵盤控制)
-            });
-        });
-    }
-
-    // 生成數字鍵盤 (共用)
-    function buildNumpad(targetDisplayId, targetAmountVarCallback) {
-        // 動態建立鍵盤內容，綁定事件
-        const keys = ['7','8','9','4','5','6','1','2','3','00','0','⌫'];
-        const padDiv = document.createElement('div');
-        padDiv.className = 'numpad';
-        keys.forEach(k => {
-            const btn = document.createElement('button');
-            btn.className = 'num-key';
-            if(k === '⌫') btn.classList.add('key-del');
-            btn.textContent = k;
-            btn.addEventListener('click', () => {
-                let currentVal = (targetDisplayId === 'product') ? productAmount : customerAmount;
-                if(k === '⌫') {
-                    let str = currentVal.toString();
-                    if(str === '0') return;
-                    str = str.slice(0, -1);
-                    if(str === '' || str === '-') str = '0';
-                    let newVal = parseInt(str, 10);
-                    if(isNaN(newVal)) newVal = 0;
-                    if(targetDisplayId === 'product') productAmount = newVal;
-                    else customerAmount = newVal;
-                } else {
-                    let str = currentVal.toString();
-                    if(str === '0') str = '';
-                    let add = (k === '00') ? '00' : k;
-                    let newStr = str + add;
-                    let newVal = parseInt(newStr, 10);
-                    if(isNaN(newVal)) newVal = 0;
-                    if(targetDisplayId === 'product') productAmount = newVal;
-                    else customerAmount = newVal;
-                }
-                updateAmountDisplay(targetDisplayId);
-            });
-            padDiv.appendChild(btn);
-        });
-        // 加上清除C按鈕
-        const clearBtn = document.createElement('button');
-        clearBtn.textContent = 'C';
-        clearBtn.classList.add('num-key', 'key-clear');
-        clearBtn.addEventListener('click', () => {
-            if(targetDisplayId === 'product') productAmount = 0;
-            else customerAmount = 0;
-            updateAmountDisplay(targetDisplayId);
-        });
-        padDiv.appendChild(clearBtn);
-        return padDiv;
-    }
-
-    function updateAmountDisplay(type) {
-        if(type === 'product') {
-            const el = document.getElementById("productAmountDisplay");
-            if(el) el.innerText = productAmount.toLocaleString();
-        } else {
-            const el = document.getElementById("customerAmountDisplay");
-            if(el) el.innerText = customerAmount.toLocaleString();
-        }
-    }
-
-    // 支付方式 UI
-    function buildPaymentGroup(containerId, currentPay, setPayCallback) {
-        const container = document.getElementById(containerId);
-        if(!container) return;
-        container.innerHTML = paymentMethods.map(pm => 
-            `<div class="pay-option ${currentPay === pm.id ? 'active' : ''}" data-pay="${pm.id}">
-                <span class="pay-icon">${pm.icon}</span><span>${pm.label}</span>
-            </div>`
-        ).join('');
-        container.querySelectorAll('.pay-option').forEach(opt => {
-            opt.addEventListener('click', () => {
-                const newPay = opt.getAttribute('data-pay');
-                setPayCallback(newPay);
-                buildPaymentGroup(containerId, newPay, setPayCallback);
-            });
-        });
-    }
-
-    // 設定密碼彈窗邏輯
-    let pendingSettingsType = null; // 'product' or 'customer'
-
-    function openSettings(type) {
-        pendingSettingsType = type;
-        const pwd = prompt("🔐 請輸入管理密碼:");
-        if(pwd === appData.password) {
-            showSettingsModal(type);
-        } else {
-            alert("密碼錯誤，無法進入設定");
-        }
-    }
-
-    function showSettingsModal(type) {
-        // 建立modal
-        const modalDiv = document.createElement('div');
-        modalDiv.className = 'modal';
-        const isProductSettings = (type === 'product'); // product頁可改員工+貨品；customer只改員工
-        modalDiv.innerHTML = `
-            <div class="modal-card">
-                <h3>⚙️ 系統設定</h3>
-                <div class="setting-item">
-                    <label>🔑 修改登入密碼</label>
-                    <input type="password" id="newPasswordInput" placeholder="新密碼" value="${appData.password}">
-                    <button id="savePasswordBtn" style="margin-top:6px; background:#3b82f6; color:white; border:none; padding:8px; border-radius:40px;">更新密碼</button>
-                </div>
-                ${isProductSettings ? `
-                <div class="setting-item">
-                    <label>👥 員工管理</label>
-                    <div id="employeeListArea" class="item-list"></div>
-                    <div style="display:flex; gap:8px;">
-                        <input type="text" id="newEmployeeName" placeholder="新員工姓名">
-                        <button id="addEmployeeBtn" class="add-btn" style="width:auto;">➕ 增加</button>
-                    </div>
-                </div>
-                <div class="setting-item">
-                    <label>📦 貨品管理</label>
-                    <div id="productListArea" class="item-list"></div>
-                    <div style="display:flex; gap:8px;">
-                        <input type="text" id="newProductName" placeholder="新貨品名稱">
-                        <button id="addProductBtn" class="add-btn" style="width:auto;">➕ 增加</button>
-                    </div>
-                </div>
-                ` : `
-                <div class="setting-item">
-                    <label>👥 員工管理 (客人頁面)</label>
-                    <div id="employeeListArea" class="item-list"></div>
-                    <div style="display:flex; gap:8px;">
-                        <input type="text" id="newEmployeeName" placeholder="新員工姓名">
-                        <button id="addEmployeeBtn" class="add-btn" style="width:auto;">➕ 增加</button>
-                    </div>
-                </div>
-                `}
-                <button id="closeSettingsBtn" class="back-btn" style="margin-top:12px;">關閉設定</button>
+        <div class="form-group">
+            <label>價錢</label>
+            <div class="price-display" id="customerPrice">0</div>
+            <div class="num-keyboard">
+                <button class="num-btn" onclick="inputNum('customer', 7)">7</button>
+                <button class="num-btn" onclick="inputNum('customer', 8)">8</button>
+                <button class="num-btn" onclick="inputNum('customer', 9)">9</button>
+                <button class="num-btn" onclick="inputNum('customer', 4)">4</button>
+                <button class="num-btn" onclick="inputNum('customer', 5)">5</button>
+                <button class="num-btn" onclick="inputNum('customer', 6)">6</button>
+                <button class="num-btn" onclick="inputNum('customer', 1)">1</button>
+                <button class="num-btn" onclick="inputNum('customer', 2)">2</button>
+                <button class="num-btn" onclick="inputNum('customer', 3)">3</button>
+                <button class="num-btn" onclick="inputNum('customer', 0)">0</button>
+                <button class="num-btn" onclick="clearPrice('customer')">清除</button>
+                <button class="num-btn" onclick="backspacePrice('customer')">刪除</button>
             </div>
-        `;
-        document.body.appendChild(modalDiv);
+        </div>
+        <div class="form-group">
+            <label>支付方式</label>
+            <div class="payment-methods" id="customerPaymentList"></div>
+        </div>
+        <button class="btn" style="width:100%" onclick="submitCustomer()">確定遞交</button>
+        <button class="back-btn" onclick="goToPage('homePage')">返回</button>
+    </div>
 
-        // 渲染員工列表
-        function renderEmployeeList() {
-            const area = modalDiv.querySelector('#employeeListArea');
-            if(area) {
-                area.innerHTML = appData.employees.map((emp, idx) => `
-                    <div class="list-row">
-                        <span>${emp}</span>
-                        <button class="small-btn" data-emp-index="${idx}">刪除</button>
-                    </div>
-                `).join('');
-                area.querySelectorAll('.small-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const idx = parseInt(btn.getAttribute('data-emp-index'));
-                        if(appData.employees.length <= 1) {
-                            alert("至少需要保留一名員工");
-                            return;
-                        }
-                        appData.employees.splice(idx,1);
-                        saveData();
-                        renderEmployeeList();
-                        if(isProductSettings) renderProductList(); 
-                        refreshAllUI(); // 同步主畫面
-                    });
-                });
+    <!-- 設定頁面 -->
+    <div id="settingsPage" class="page">
+        <h2>系統設定</h2>
+        <div class="settings-section">
+            <h3>密碼設定</h3>
+            <input type="password" id="newPassword" placeholder="輸入新密碼">
+            <button class="add-btn" onclick="changePassword()">修改密碼</button>
+        </div>
+        <div class="settings-section">
+            <h3>員工管理</h3>
+            <div id="settingsStaffList"></div>
+            <button class="add-btn" onclick="addStaff()">新增員工</button>
+        </div>
+        <div class="settings-section" id="productSettingsSection">
+            <h3>貨品管理</h3>
+            <div id="settingsItemList"></div>
+            <button class="add-btn" onclick="addItem()">新增貨品</button>
+        </div>
+        <button class="back-btn" onclick="goToPage('homePage')">返回</button>
+    </div>
+
+    <!-- 密碼驗證彈窗 -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <h3>請輸入密碼</h3>
+            <input type="password" id="passwordInput" placeholder="密碼">
+            <div class="modal-btns">
+                <button class="btn" style="background:#6c757d" onclick="closeModal()">取消</button>
+                <button class="btn" onclick="verifyPassword()">確定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化數據
+        let data = {
+            password: '123456',
+            staff: ['員工A', '員工B', '員工C'],
+            items: ['洗剪', '燙髮', '染髮', '護理'],
+            payments: [
+                {name: '現金', icon: 'fa-money-bill-wave'},
+                {name: '轉數快', icon: 'fa-mobile-alt'},
+                {name: '支付寶', icon: 'fa-alipay'},
+                {name: 'PayMe', icon: 'fa-credit-card'},
+                {name: '微信支付', icon: 'fa-weixin'}
+            ],
+            productRecords: [],
+            customerRecords: []
+        };
+
+        // 頁面切換
+        function goToPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            if (pageId === 'productPage') initProductPage();
+            if (pageId === 'customerPage') initCustomerPage();
+            if (pageId === 'settingsPage') initSettingsPage();
+            if (pageId === 'homePage') renderRecords();
+        }
+
+        // 初始化產品頁
+        function initProductPage() {
+            document.getElementById('productDate').valueAsDate = new Date();
+            renderSelectList('productStaffList', data.staff, 'staff');
+            renderProductItems();
+            renderPaymentList('productPaymentList');
+            document.getElementById('productPrice').textContent = '0';
+        }
+
+        // 初始化客人頁
+        function initCustomerPage() {
+            document.getElementById('customerDate').valueAsDate = new Date();
+            renderSelectList('customerStaffList', data.staff, 'staff');
+            renderPaymentList('customerPaymentList');
+            document.getElementById('customerPrice').textContent = '0';
+        }
+
+        // 渲染選擇列表
+        function renderSelectList(containerId, list, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            list.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'select-item';
+                div.textContent = item;
+                div.onclick = () => toggleSelect(div, type);
+                container.appendChild(div);
+            });
+        }
+
+        // 渲染貨品（可計數）
+        function renderProductItems() {
+            const container = document.getElementById('productItemList');
+            container.innerHTML = '';
+            data.items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'product-item';
+                div.innerHTML = `
+                    <span>${item}</span>
+                    <button class="count-btn minus" onclick="changeCount(this, -1)">-</button>
+                    <span class="count">0</span>
+                    <button class="count-btn" onclick="changeCount(this, 1)">+</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 渲染支付方式
+        function renderPaymentList(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            data.payments.forEach(payment => {
+                const div = document.createElement('div');
+                div.className = 'payment-item';
+                div.innerHTML = `<i class="fas ${payment.icon}"></i><span>${payment.name}</span>`;
+                div.onclick = () => toggleSelect(div, 'payment');
+                container.appendChild(div);
+            });
+        }
+
+        // 切換選擇狀態
+        function toggleSelect(el, type) {
+            const container = el.parentElement;
+            if (type === 'staff' || type === 'payment') {
+                container.querySelectorAll('.select-item, .payment-item').forEach(item => item.classList.remove('active'));
+            }
+            el.classList.add('active');
+        }
+
+        // 改變貨品數量
+        function changeCount(btn, delta) {
+            const countSpan = btn.parentElement.querySelector('.count');
+            let count = parseInt(countSpan.textContent) + delta;
+            if (count < 0) count = 0;
+            countSpan.textContent = count;
+        }
+
+        // 數字鍵盤輸入
+        function inputNum(type, num) {
+            const priceEl = document.getElementById(type + 'Price');
+            let price = priceEl.textContent;
+            if (price === '0') price = '';
+            priceEl.textContent = price + num;
+        }
+
+        // 清除價錢
+        function clearPrice(type) {
+            document.getElementById(type + 'Price').textContent = '0';
+        }
+
+        // 刪除最後一位
+        function backspacePrice(type) {
+            const priceEl = document.getElementById(type + 'Price');
+            let price = priceEl.textContent;
+            if (price.length > 1) {
+                priceEl.textContent = price.slice(0, -1);
+            } else {
+                priceEl.textContent = '0';
             }
         }
-        function renderProductList() {
-            if(!isProductSettings) return;
-            const area = modalDiv.querySelector('#productListArea');
-            if(area) {
-                area.innerHTML = appData.products.map((prod, idx) => `
-                    <div class="list-row">
-                        <span>${prod}</span>
-                        <button class="small-btn" data-prod-index="${idx}">刪除</button>
-                    </div>
-                `).join('');
-                area.querySelectorAll('.small-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const idx = parseInt(btn.getAttribute('data-prod-index'));
-                        if(appData.products.length <= 1) {
-                            alert("至少需要保留一件貨品");
-                            return;
-                        }
-                        appData.products.splice(idx,1);
-                        saveData();
-                        renderProductList();
-                        refreshAllUI();
-                    });
-                });
+
+        // 提交產品頁
+        function submitProduct() {
+            const date = document.getElementById('productDate').value;
+            const staff = getSelectedText('productStaffList');
+            const items = getSelectedProducts();
+            const price = document.getElementById('productPrice').textContent;
+            const payment = getSelectedText('productPaymentList');
+
+            if (!date || !staff || items.length === 0 || price === '0' || !payment) {
+                alert('請填寫完整資訊！');
+                return;
+            }
+
+            const record = {date, staff, items: items.join(', '), price, payment};
+            data.productRecords.unshift(record);
+            alert('產品頁提交成功！');
+            goToPage('homePage');
+        }
+
+        // 提交客人頁
+        function submitCustomer() {
+            const date = document.getElementById('customerDate').value;
+            const staff = getSelectedText('customerStaffList');
+            const price = document.getElementById('customerPrice').textContent;
+            const payment = getSelectedText('customerPaymentList');
+
+            if (!date || !staff || price === '0' || !payment) {
+                alert('請填寫完整資訊！');
+                return;
+            }
+
+            const record = {date, staff, price, payment};
+            data.customerRecords.unshift(record);
+            alert('客人頁提交成功！');
+            goToPage('homePage');
+        }
+
+        // 獲取選中文字
+        function getSelectedText(containerId) {
+            const active = document.querySelector(`#${containerId} .active`);
+            return active ? active.textContent.trim() : '';
+        }
+
+        // 獲取選中貨品
+        function getSelectedProducts() {
+            const items = [];
+            document.querySelectorAll('#productItemList .product-item').forEach(item => {
+                const name = item.querySelector('span').textContent;
+                const count = item.querySelector('.count').textContent;
+                if (count > 0) {
+                    items.push(`${name} x${count}`);
+                }
+            });
+            return items;
+        }
+
+        // 打開設定（需驗證密碼）
+        let currentSettingsType = '';
+        function openSettings(type) {
+            currentSettingsType = type;
+            document.getElementById('passwordModal').style.display = 'flex';
+            document.getElementById('passwordInput').value = '';
+        }
+
+        // 關閉彈窗
+        function closeModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+        }
+
+        // 驗證密碼
+        function verifyPassword() {
+            const input = document.getElementById('passwordInput').value;
+            if (input === data.password) {
+                closeModal();
+                goToPage('settingsPage');
+                if (currentSettingsType === 'customer') {
+                    document.getElementById('productSettingsSection').style.display = 'none';
+                } else {
+                    document.getElementById('productSettingsSection').style.display = 'block';
+                }
+            } else {
+                alert('密碼錯誤！');
             }
         }
 
-        renderEmployeeList();
-        if(isProductSettings) renderProductList();
+        // 初始化設定頁
+        function initSettingsPage() {
+            renderSettingsList('settingsStaffList', data.staff, 'staff');
+            renderSettingsList('settingsItemList', data.items, 'item');
+        }
+
+        // 渲染設定列表
+        function renderSettingsList(containerId, list, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            list.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `
+                    <span>${item}</span>
+                    <button class="delete-btn" onclick="deleteItem('${type}', ${index})">刪除</button>
+                `;
+                container.appendChild(div);
+            });
+        }
 
         // 新增員工
-        const addEmpBtn = modalDiv.querySelector('#addEmployeeBtn');
-        const newEmpInput = modalDiv.querySelector('#newEmployeeName');
-        if(addEmpBtn) {
-            addEmpBtn.addEventListener('click', () => {
-                const name = newEmpInput.value.trim();
-                if(name === "") { alert("請輸入員工姓名"); return; }
-                if(appData.employees.includes(name)) { alert("員工已存在"); return; }
-                appData.employees.push(name);
-                saveData();
-                renderEmployeeList();
-                if(isProductSettings) renderProductList();
-                refreshAllUI();
-                newEmpInput.value = "";
-            });
-        }
-        // 新增貨品 (僅產品頁)
-        if(isProductSettings) {
-            const addProdBtn = modalDiv.querySelector('#addProductBtn');
-            const newProdInput = modalDiv.querySelector('#newProductName');
-            if(addProdBtn) {
-                addProdBtn.addEventListener('click', () => {
-                    const prod = newProdInput.value.trim();
-                    if(prod === "") { alert("請輸入貨品名稱"); return; }
-                    if(appData.products.includes(prod)) { alert("貨品已存在"); return; }
-                    appData.products.push(prod);
-                    saveData();
-                    renderProductList();
-                    refreshAllUI();
-                    newProdInput.value = "";
-                });
+        function addStaff() {
+            const name = prompt('請輸入員工姓名：');
+            if (name) {
+                data.staff.push(name);
+                initSettingsPage();
             }
+        }
+
+        // 新增貨品
+        function addItem() {
+            const name = prompt('請輸入貨品名稱：');
+            if (name) {
+                data.items.push(name);
+                initSettingsPage();
+            }
+        }
+
+        // 刪除項目
+        function deleteItem(type, index) {
+            if (type === 'staff') data.staff.splice(index, 1);
+            if (type === 'item') data.items.splice(index, 1);
+            initSettingsPage();
         }
 
         // 修改密碼
-        const savePwd = modalDiv.querySelector('#savePasswordBtn');
-        const pwdInput = modalDiv.querySelector('#newPasswordInput');
-        if(savePwd) {
-            savePwd.addEventListener('click', () => {
-                const newPwd = pwdInput.value.trim();
-                if(newPwd === "") { alert("密碼不可為空"); return; }
-                appData.password = newPwd;
-                saveData();
-                alert("密碼已更新");
+        function changePassword() {
+            const newPwd = document.getElementById('newPassword').value;
+            if (newPwd) {
+                data.password = newPwd;
+                alert('密碼修改成功！');
+                document.getElementById('newPassword').value = '';
+            } else {
+                alert('請輸入新密碼！');
+            }
+        }
+
+        // 渲染紀錄
+        function renderRecords() {
+            renderRecordList('productRecordList', data.productRecords, 'product');
+            renderRecordList('customerRecordList', data.customerRecords, 'customer');
+        }
+
+        // 渲染紀錄列表
+        function renderRecordList(containerId, records, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            records.forEach(record => {
+                const div = document.createElement('div');
+                div.className = 'record-item';
+                if (type === 'product') {
+                    div.innerHTML = `
+                        <strong>${record.date}</strong><br>
+                        員工：${record.staff}<br>
+                        貨品：${record.items}<br>
+                        金額：${record.price}<br>
+                        支付：${record.payment}
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <strong>${record.date}</strong><br>
+                        員工：${record.staff}<br>
+                        金額：${record.price}<br>
+                        支付：${record.payment}
+                    `;
+                }
+                container.appendChild(div);
             });
+            if (records.length === 0) {
+                container.innerHTML = '<div class="record-item">暫無紀錄</div>';
+            }
         }
 
-        const closeBtn = modalDiv.querySelector('#closeSettingsBtn');
-        closeBtn.addEventListener('click', () => {
-            modalDiv.remove();
-        });
-    }
-
-    // 刷新所有UI (員工、貨品、支付)
-    function refreshAllUI() {
-        // 產品頁面
-        updateProductStaffUI();
-        updateProductItemsUI();
-        // 顧客頁面
-        updateCustomerStaffUI();
-        // 支付方式保留
-        buildPaymentGroup("productPaymentGroup", productPayment, (val) => { productPayment = val; buildPaymentGroup("productPaymentGroup", productPayment, (v)=>{productPayment=v; buildPaymentGroup("productPaymentGroup", productPayment, arguments.callee);}); });
-        buildPaymentGroup("customerPaymentGroup", customerPayment, (val) => { customerPayment = val; buildPaymentGroup("customerPaymentGroup", customerPayment, (v)=>{customerPayment=v; buildPaymentGroup("customerPaymentGroup", customerPayment, arguments.callee);}); });
-        // 日期預設
-        if(!document.getElementById("productDate").value) {
-            document.getElementById("productDate").valueAsDate = new Date();
+        // 切換紀錄顯示（密碼控制）
+        function toggleRecord(type) {
+            const password = prompt('請輸入密碼查看紀錄：');
+            if (password === data.password) {
+                const container = document.getElementById(type + 'RecordList');
+                container.style.display = container.style.display === 'none' ? 'block' : 'none';
+            } else {
+                alert('密碼錯誤！');
+            }
         }
-        if(!document.getElementById("customerDate").value) {
-            document.getElementById("customerDate").valueAsDate = new Date();
-        }
-    }
 
-    // 初始化頁面切換
-    function switchToPage(page) {
-        if(page === 'product') {
-            document.getElementById('productPage').classList.add('active');
-            document.getElementById('customerPage').classList.remove('active');
-        } else {
-            document.getElementById('customerPage').classList.add('active');
-            document.getElementById('productPage').classList.remove('active');
-        }
-        refreshAllUI();
-    }
-
-    // 提交邏輯
-    function initSubmit() {
-        document.getElementById("productSubmit").addEventListener("click", () => {
-            const date = document.getElementById("productDate").value;
-            if(!currentProductStaff) { alert("請選擇員工"); return; }
-            if(productSelectedProducts.length === 0) { alert("請至少選擇一件貨品"); return; }
-            if(productAmount <= 0) { alert("請輸入金額(大於0)"); return; }
-            if(!productPayment) { alert("請選擇支付方式"); return; }
-            alert(`✅ 產品銷售已記錄\n日期:${date}\n員工:${currentProductStaff}\n貨品:${productSelectedProducts.join(", ")}\n金額:$${productAmount}\n支付:${paymentMethods.find(p=>p.id===productPayment)?.label}\n(示範遞交完成)`);
-            // 可選重置部分，但根據需求只提示
-        });
-        document.getElementById("customerSubmit").addEventListener("click", () => {
-            const date = document.getElementById("customerDate").value;
-            if(!currentCustomerStaff) { alert("請選擇員工"); return; }
-            if(customerAmount <= 0) { alert("請輸入收款金額"); return; }
-            if(!customerPayment) { alert("請選擇支付方式"); return; }
-            alert(`✅ 客人收款已記錄\n日期:${date}\n員工:${currentCustomerStaff}\n金額:$${customerAmount}\n支付:${paymentMethods.find(p=>p.id===customerPayment)?.label}\n(示範遞交完成)`);
-        });
-    }
-
-    // 動態生成鍵盤及初始值
-    function initNumpads() {
-        const productPad = buildNumpad('product', () => productAmount);
-        const productPadContainer = document.getElementById("productNumpad");
-        productPadContainer.innerHTML = '';
-        productPadContainer.appendChild(productPad);
-
-        const customerPad = buildNumpad('customer', () => customerAmount);
-        const customerPadContainer = document.getElementById("customerNumpad");
-        customerPadContainer.innerHTML = '';
-        customerPadContainer.appendChild(customerPad);
-    }
-
-    // 啟動
-    function init() {
-        loadData();
-        // 預設當前員工
-        if(appData.employees.length) currentProductStaff = appData.employees[0];
-        if(appData.employees.length) currentCustomerStaff = appData.employees[0];
-        productAmount = 0; customerAmount = 0;
-        productPayment = ""; customerPayment = "";
-        productSelectedProducts = [];
-        initNumpads();
-        refreshAllUI();
-        initSubmit();
-        // 預設日期今天
-        const today = new Date().toISOString().slice(0,10);
-        if(!document.getElementById("productDate").value) document.getElementById("productDate").value = today;
-        if(!document.getElementById("customerDate").value) document.getElementById("customerDate").value = today;
-    }
-
-    init();
-    window.switchToPage = switchToPage;
-    window.openSettings = openSettings;
-</script>
+        // 初始化
+        window.onload = function() {
+            renderRecords();
+        };
+    </script>
 </body>
 </html>
