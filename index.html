@@ -194,14 +194,14 @@
         </div>
 
         <div id="admin" class="section hidden">
-            <h3 class="title">CSV / Excel 匯入（智能偵測名字 & 金額）</h3>
-            <p>自動偵測日期、名字、金額，無論在 B、C、D、E、F、G 都能抓到</p>
+            <h3 class="title">CSV / Excel 匯入（嚴格日期過濾）</h3>
+            <p>只計算有「日期+時間」的行，其他字眼全部忽略</p>
             <input type="file" id="file" accept=".csv,.xlsx,.xls">
             <button class="btn" id="parse">解析並匯入</button>
             <p id="result"></p>
 
             <div class="result-area">
-                <h4>已讀取資料（自動偵測）</h4>
+                <h4>已讀取資料（僅日期時間行）</h4>
                 <table>
                     <thead>
                         <tr>
@@ -212,7 +212,6 @@
                 </table>
             </div>
 
-            <!-- 統計區域 -->
             <div class="stats-area" id="statsArea">
                 <h4 class="stats-title">統計結果</h4>
                 <div id="totalAmount"></div>
@@ -236,7 +235,7 @@
     <script>
         const ADMIN_PWD = "admin123";
         const GAS_URL = "https://script.google.com/macros/s/AKfycbyuxyXs2qIp6fuTDCg3YSFMOlMRnJY8Cbjn7x6JRiT-LSQrmbVGan8l623JpzYk3AKGew/exec";
-        const DATE_REGEX = /\d{1,2}\/\d{1,2}\/\d{2,4}\s+\d{1,2}:\d{2}/;
+        const DATE_REGEX = /^\d{1,2}\/\d{1,2}\/\d{2,4}\s+\d{1,2}:\d{2}/;
 
         flatpickr("#date", { dateFormat: "Y-m-d", defaultDate: new Date() });
 
@@ -303,57 +302,42 @@
                 const ws = wb.Sheets[wb.SheetNames[0]];
                 const arr = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
-                let start = -1;
-                for (let i = 0; i < arr.length; i++) {
-                    const a = (arr[i][0] || "").toString();
-                    if (DATE_REGEX.test(a)) {
-                        start = i;
-                        break;
-                    }
-                }
-                if (start === -1) {
-                    document.getElementById("result").textContent = "找不到日期時間";
-                    return;
-                }
-
                 const list = [];
-                for (let i = start; i < arr.length; i++) {
+                for (let i = 0; i < arr.length; i++) {
                     const row = arr[i];
-                    const datetime = row[0] || "";
+                    const datetime = (row[0] || "").toString().trim();
+
+                    // 嚴格過濾：只保留符合日期時間格式的行
+                    if (!DATE_REGEX.test(datetime)) continue;
 
                     let name = "";
                     let amount = "";
 
                     for (let cell of row) {
                         const val = (cell || "").toString().trim();
-
-                        if (!name && /^[A-Za-z]+$/.test(val)) {
-                            name = val;
-                        }
-
-                        if (!amount && /^\d+(\.\d+)?$/.test(val)) {
-                            amount = val;
-                        }
+                        if (!name && /^[A-Za-z]+$/.test(val)) name = val;
+                        if (!amount && /^\d+(\.\d+)?$/.test(val)) amount = val;
                     }
 
-                    list.push({ datetime, name, amount: parseFloat(amount) || 0 });
+                    list.push({
+                        datetime,
+                        name: name || "（無名字）",
+                        amount: parseFloat(amount) || 0
+                    });
                 }
 
-                // 顯示資料
                 const tbody = document.getElementById("csvTable");
                 tbody.innerHTML = "";
                 list.forEach(item => {
                     tbody.innerHTML += `<tr>
                         <td>${item.datetime}</td>
-                        <td>${item.name || "（無名字）"}</td>
+                        <td>${item.name}</td>
                         <td>${item.amount}</td>
                     </tr>`;
                 });
 
-                // 統計
                 calculateStats(list);
-
-                document.getElementById("result").textContent = `成功讀取 ${list.length} 筆資料`;
+                document.getElementById("result").textContent = `成功讀取 ${list.length} 筆有效資料`;
 
                 fetch(GAS_URL, {
                     method: "POST",
@@ -363,18 +347,14 @@
             reader.readAsArrayBuffer(file);
         };
 
-        // 統計功能
         function calculateStats(data) {
-            // 總金額
             const totalAmount = data.reduce((sum, item) => sum + item.amount, 0);
             document.getElementById("totalAmount").innerHTML = `<strong>總金額：</strong> ${totalAmount.toFixed(2)}`;
 
-            // 每位髮型師總金額
             const staffMap = {};
             data.forEach(item => {
                 const name = item.name || "（無名字）";
-                if (!staffMap[name]) staffMap[name] = 0;
-                staffMap[name] += item.amount;
+                staffMap[name] = (staffMap[name] || 0) + item.amount;
             });
 
             let staffHtml = "<strong>每位髮型師總金額：</strong><br>";
@@ -383,12 +363,10 @@
             }
             document.getElementById("staffStats").innerHTML = staffHtml;
 
-            // 每日客人數
             const dailyMap = {};
             data.forEach(item => {
-                const date = item.datetime.split(" ")[0]; // 取日期部分
-                if (!dailyMap[date]) dailyMap[date] = 0;
-                dailyMap[date]++;
+                const date = item.datetime.split(" ")[0];
+                dailyMap[date] = (dailyMap[date] || 0) + 1;
             });
 
             let dailyHtml = "<strong>每日客人數：</strong><br>";
