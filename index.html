@@ -50,7 +50,6 @@
         .home-btn {
             flex: 1;
             min-width: 160px;
-            background: #f8a35e;
             background: linear-gradient(135deg, #ff9f4a, #ff7e2e);
             border: none;
             border-radius: 60px;
@@ -116,13 +115,16 @@
             cursor: pointer;
             transition: all 0.1s;
             font-size: 1.1rem;
+            color: #1f2937;   /* 預設深灰色 */
         }
+        /* 修正：選中時文字顏色保持深色，不變黑色（仍保持清晰） */
         .staff-btn.active {
             border-color: #f97316;
             background: #fff2e5;
+            color: #b45309;   /* 改用橙色系，醒目但不刺眼 */
             transform: scale(0.98);
         }
-        /* 員工代表色 */
+        /* 員工代表色（背景差異，不影響文字） */
         .staff-roy { background: #ffe4cc; border-left: 6px solid #f97316; }
         .staff-ken { background: #e0f2fe; border-left: 6px solid #0ea5e9; }
         .staff-kin { background: #d9f99d; border-left: 6px solid #65a30d; }
@@ -181,8 +183,9 @@
             background: transparent;
             border: none;
             font-weight: 700;
+            cursor: pointer;
         }
-        /* 金額顯示 */
+        /* 總金額 */
         .total-price {
             font-size: 1.8rem;
             font-weight: 800;
@@ -238,7 +241,7 @@
             box-shadow: 0 2px 0 #b45309;
         }
 
-        /* 數字鍵盤自定義 (懸浮) */
+        /* 數字鍵盤浮層 */
         .numpad-overlay {
             position: fixed;
             bottom: 0;
@@ -347,9 +350,6 @@
         .text-center { text-align: center; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         button { cursor: pointer; }
-        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button {
-            opacity: 1;
-        }
         @media (max-width: 550px) {
             .product-item { flex-direction: column; align-items: stretch; }
             .quantity-control { align-self: flex-end; }
@@ -542,13 +542,11 @@
             btn.addEventListener("click", () => {
                 container.querySelectorAll(".staff-btn").forEach(b => b.classList.remove("active"));
                 btn.classList.add("active");
-                // 更新對應頁面的選中員工
                 if(containerId === "salesStaffGroup") window.selectedSalesStaff = { code: staff.code, name: staff.name };
                 else if(containerId === "consumeStaffGroup") window.selectedConsumeStaff = { code: staff.code, name: staff.name };
             });
             container.appendChild(btn);
         });
-        // 預設選中第一個
         if(staffList.length && !selectedCode){
             const first = container.querySelector(".staff-btn");
             if(first) first.click();
@@ -637,12 +635,13 @@
         window.salesTotal = total;
     }
 
-    // 數字鍵盤邏輯
+    // 數字鍵盤邏輯 (統一處理產品數量 & 客人消費金額)
     function showNumpad(initialValue) {
         const overlay = document.getElementById("numpadOverlay");
         const inputEl = currentEditingField?.element;
         overlay.style.display = "block";
-        let tempValue = initialValue;
+        let tempValue = initialValue === "0" ? "" : initialValue; // 允許從空開始
+        if(tempValue === "") tempValue = "0";
         const updateTemp = (val) => {
             tempValue = val;
             if(inputEl && currentEditingField.type === "productQty") inputEl.innerText = tempValue;
@@ -651,27 +650,29 @@
         const closeNumpad = () => {
             overlay.style.display = "none";
             if(currentEditingField?.type === "productQty" && currentEditingField.productName) {
-                let newQty = parseInt(tempValue) || 0;
+                let newQty = parseInt(tempValue, 10);
+                if(isNaN(newQty)) newQty = 0;
                 salesQuantities[currentEditingField.productName] = newQty;
                 updateProductQtyDisplay(currentEditingField.productName);
                 calcSalesTotal();
             } else if(currentEditingField?.type === "amount") {
-                let newAmount = parseFloat(tempValue) || 0;
+                let newAmount = parseFloat(tempValue);
+                if(isNaN(newAmount)) newAmount = 0;
                 document.getElementById("consumeAmount").value = newAmount.toFixed(2);
                 window.consumeAmountValue = newAmount;
             }
             currentEditingField = null;
         };
-        // 移除舊監聽
-        const newGrid = overlay.querySelector(".numpad-grid");
-        const newClone = newGrid.cloneNode(true);
-        newGrid.parentNode.replaceChild(newClone, newGrid);
-        newClone.querySelectorAll(".numpad-btn").forEach(btn => {
+        // 移除舊監聽，重建按鈕事件
+        const newGrid = overlay.querySelector(".numpad-grid").cloneNode(true);
+        overlay.querySelector(".numpad-grid").replaceWith(newGrid);
+        newGrid.querySelectorAll(".numpad-btn").forEach(btn => {
             btn.addEventListener("click", (e) => {
                 const val = btn.dataset.val;
                 const func = btn.dataset.func;
                 if(val !== undefined) {
-                    tempValue = tempValue === "0" ? val : tempValue + val;
+                    let newVal = tempValue === "0" ? val : tempValue + val;
+                    tempValue = newVal;
                     updateTemp(tempValue);
                 } else if(func === "del") {
                     tempValue = tempValue.slice(0, -1);
@@ -820,7 +821,6 @@
         salesQuantities = {};
         renderProductList();
         document.getElementById("salesTotalAmount").innerText = "0";
-        // 切回首頁
         showPage("home");
     }
 
