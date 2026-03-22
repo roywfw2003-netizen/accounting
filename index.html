@@ -121,11 +121,10 @@
         // ==================== 預設 API 地址（已幫您填好） ====================
         const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbyuxyXs2qIp6fuTDCg3YSFMOlMRnJY8Cbjn7x6JRiT-LSQrmbVGan8l623JpzYk3AKGew/exec";
         
-        // 如果 localStorage 中沒有 API 地址，則使用預設值
         let API_URL = localStorage.getItem('apiUrl');
         if (!API_URL) {
             API_URL = DEFAULT_API_URL;
-            localStorage.setItem('apiUrl', API_URL);  // 自動儲存
+            localStorage.setItem('apiUrl', API_URL);
         }
 
         // 本地儲存 KEY
@@ -179,7 +178,6 @@
             }
         }
 
-        // 頁面切換
         function goToPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -193,7 +191,6 @@
             }
         }
 
-        // ==================== 產品頁邏輯 ====================
         function initProductPage() {
             document.getElementById('productDate').valueAsDate = new Date();
             renderStaffSelect('productStaffList', 'productStaffIdDisplay');
@@ -296,7 +293,6 @@
             });
         }
 
-        // ==================== 客人頁邏輯 ====================
         function initCustomerPage() {
             document.getElementById('customerDate').valueAsDate = new Date();
             renderStaffSelect('customerStaffList', 'customerStaffIdDisplay');
@@ -317,7 +313,6 @@
             return active ? active.innerText : '';
         }
 
-        // ==================== 提交與同步 ====================
         async function submitProduct() {
             if (!API_URL) {
                 alert('請先在「系統設定」中設定 Google Sheets API 地址，否則資料將無法同步至雲端。\n若僅使用本地儲存，可忽略此提示繼續提交。');
@@ -428,7 +423,6 @@
             alert('同步完成');
         }
 
-        // ==================== 記錄顯示與設定 ====================
         function renderRecords() {
             const container = document.getElementById('allRecordsList');
             if (!records.length) { container.innerHTML = '<div style="padding:20px;text-align:center;">暫無記錄</div>'; return; }
