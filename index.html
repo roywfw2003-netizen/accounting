@@ -18,7 +18,7 @@
         }
         .page {
             display: none;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
             padding: 20px;
@@ -49,6 +49,7 @@
             cursor: pointer;
             background: #007bff;
             color: white;
+            transition: background 0.3s;
         }
         .btn:hover {
             background: #0056b3;
@@ -64,6 +65,10 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background 0.3s;
+        }
+        .back-btn:hover {
+            background: #5a6268;
         }
         .form-group {
             margin-bottom: 20px;
@@ -90,6 +95,10 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             cursor: pointer;
+            transition: all 0.3s;
+        }
+        .select-item:hover {
+            border-color: #007bff;
         }
         .select-item.active {
             background: #007bff;
@@ -112,9 +121,16 @@
             background: #28a745;
             color: white;
             cursor: pointer;
+            transition: background 0.3s;
+        }
+        .count-btn:hover {
+            background: #218838;
         }
         .count-btn.minus {
             background: #dc3545;
+        }
+        .count-btn.minus:hover {
+            background: #c82333;
         }
         .payment-methods {
             display: flex;
@@ -131,6 +147,10 @@
             border-radius: 8px;
             cursor: pointer;
             width: 100px;
+            transition: all 0.3s;
+        }
+        .payment-item:hover {
+            border-color: #007bff;
         }
         .payment-item.active {
             border-color: #007bff;
@@ -153,9 +173,11 @@
             border-radius: 8px;
             cursor: pointer;
             background: white;
+            transition: all 0.3s;
         }
         .num-btn:hover {
             background: #f0f0f0;
+            border-color: #007bff;
         }
         .price-display {
             text-align: center;
@@ -164,6 +186,7 @@
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
+            background: #f9f9f9;
         }
         .settings-btn {
             position: absolute;
@@ -175,6 +198,10 @@
             padding: 8px 15px;
             border-radius: 5px;
             cursor: pointer;
+            transition: background 0.3s;
+        }
+        .settings-btn:hover {
+            background: #5a6268;
         }
         .modal {
             display: none;
@@ -186,6 +213,7 @@
             background: rgba(0,0,0,0.5);
             justify-content: center;
             align-items: center;
+            z-index: 1000;
         }
         .modal-content {
             background: white;
@@ -227,6 +255,10 @@
             padding: 5px 10px;
             border-radius: 5px;
             cursor: pointer;
+            transition: background 0.3s;
+        }
+        .delete-btn:hover {
+            background: #c82333;
         }
         .add-btn {
             background: #28a745;
@@ -236,15 +268,20 @@
             border-radius: 5px;
             cursor: pointer;
             margin-top: 10px;
+            transition: background 0.3s;
+        }
+        .add-btn:hover {
+            background: #218838;
         }
         .record-section {
             margin-top: 30px;
             display: flex;
             gap: 20px;
             justify-content: center;
+            flex-wrap: wrap;
         }
         .record-box {
-            width: 45%;
+            width: 100%;
             background: white;
             padding: 15px;
             border-radius: 8px;
@@ -255,13 +292,37 @@
             margin-bottom: 10px;
             color: #007bff;
         }
-        .record-item {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
+        /* Excel 風格表格 */
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
             font-size: 14px;
         }
-        .record-item:last-child {
-            border-bottom: none;
+        .records-table thead {
+            background: #007bff;
+            color: white;
+        }
+        .records-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #ddd;
+        }
+        .records-table td {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+        }
+        .records-table tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .records-table tbody tr:hover {
+            background: #f0f0f0;
+        }
+        .record-empty {
+            text-align: center;
+            padding: 20px;
+            color: #999;
         }
         .record-toggle {
             text-align: center;
@@ -274,6 +335,13 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background 0.3s;
+        }
+        .record-toggle button:hover {
+            background: #218838;
+        }
+        .table-container {
+            overflow-x: auto;
         }
     </style>
 </head>
@@ -288,14 +356,39 @@
         <div class="record-section">
             <div class="record-box">
                 <h3>產品紀錄</h3>
-                <div id="productRecordList"></div>
+                <div class="table-container">
+                    <table class="records-table" id="productRecordTable">
+                        <thead>
+                            <tr>
+                                <th>日期時間</th>
+                                <th>員工</th>
+                                <th>貨品</th>
+                                <th>金額</th>
+                                <th>支付方式</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productRecordList"></tbody>
+                    </table>
+                </div>
                 <div class="record-toggle">
                     <button onclick="toggleRecord('product')">查看紀錄</button>
                 </div>
             </div>
             <div class="record-box">
                 <h3>客人紀錄</h3>
-                <div id="customerRecordList"></div>
+                <div class="table-container">
+                    <table class="records-table" id="customerRecordTable">
+                        <thead>
+                            <tr>
+                                <th>日期時間</th>
+                                <th>員工</th>
+                                <th>金額</th>
+                                <th>支付方式</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerRecordList"></tbody>
+                    </table>
+                </div>
                 <div class="record-toggle">
                     <button onclick="toggleRecord('customer')">查看紀錄</button>
                 </div>
@@ -408,7 +501,7 @@
     <div id="passwordModal" class="modal">
         <div class="modal-content">
             <h3>請輸入密碼</h3>
-            <input type="password" id="passwordInput" placeholder="密碼">
+            <input type="password" id="passwordInput" placeholder="密碼" onkeypress="handlePasswordKeypress(event)">
             <div class="modal-btns">
                 <button class="btn" style="background:#6c757d" onclick="closeModal()">取消</button>
                 <button class="btn" onclick="verifyPassword()">確定</button>
@@ -558,7 +651,10 @@
                 return;
             }
 
-            const record = {date, staff, items: items.join(', '), price, payment};
+            const now = new Date();
+            const dateTime = date + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            
+            const record = {dateTime, staff, items: items.join(', '), price, payment};
             data.productRecords.unshift(record);
             alert('產品頁提交成功！');
             goToPage('homePage');
@@ -576,7 +672,10 @@
                 return;
             }
 
-            const record = {date, staff, price, payment};
+            const now = new Date();
+            const dateTime = date + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            
+            const record = {dateTime, staff, price, payment};
             data.customerRecords.unshift(record);
             alert('客人頁提交成功！');
             goToPage('homePage');
@@ -607,11 +706,19 @@
             currentSettingsType = type;
             document.getElementById('passwordModal').style.display = 'flex';
             document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordInput').focus();
         }
 
         // 關閉彈窗
         function closeModal() {
             document.getElementById('passwordModal').style.display = 'none';
+        }
+
+        // 密碼輸入框回車鍵
+        function handlePasswordKeypress(event) {
+            if (event.key === 'Enter') {
+                verifyPassword();
+            }
         }
 
         // 驗證密碼
@@ -627,6 +734,8 @@
                 }
             } else {
                 alert('密碼錯誤！');
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
             }
         }
 
@@ -654,8 +763,8 @@
         // 新增員工
         function addStaff() {
             const name = prompt('請輸入員工姓名：');
-            if (name) {
-                data.staff.push(name);
+            if (name && name.trim()) {
+                data.staff.push(name.trim());
                 initSettingsPage();
             }
         }
@@ -663,8 +772,8 @@
         // 新增貨品
         function addItem() {
             const name = prompt('請輸入貨品名稱：');
-            if (name) {
-                data.items.push(name);
+            if (name && name.trim()) {
+                data.items.push(name.trim());
                 initSettingsPage();
             }
         }
@@ -679,8 +788,8 @@
         // 修改密碼
         function changePassword() {
             const newPwd = document.getElementById('newPassword').value;
-            if (newPwd) {
-                data.password = newPwd;
+            if (newPwd && newPwd.trim()) {
+                data.password = newPwd.trim();
                 alert('密碼修改成功！');
                 document.getElementById('newPassword').value = '';
             } else {
@@ -690,47 +799,49 @@
 
         // 渲染紀錄
         function renderRecords() {
-            renderRecordList('productRecordList', data.productRecords, 'product');
-            renderRecordList('customerRecordList', data.customerRecords, 'customer');
+            renderRecordTable('productRecordList', data.productRecords, 'product');
+            renderRecordTable('customerRecordList', data.customerRecords, 'customer');
         }
 
-        // 渲染紀錄列表
-        function renderRecordList(containerId, records, type) {
+        // 渲染紀錄表格（改為 Excel 風格）
+        function renderRecordTable(containerId, records, type) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
+            
+            if (records.length === 0) {
+                container.innerHTML = '<tr><td colspan="5" class="record-empty">暫無紀錄</td></tr>';
+                return;
+            }
+
             records.forEach(record => {
-                const div = document.createElement('div');
-                div.className = 'record-item';
+                const tr = document.createElement('tr');
                 if (type === 'product') {
-                    div.innerHTML = `
-                        <strong>${record.date}</strong><br>
-                        員工：${record.staff}<br>
-                        貨品：${record.items}<br>
-                        金額：${record.price}<br>
-                        支付：${record.payment}
+                    tr.innerHTML = `
+                        <td>${record.dateTime}</td>
+                        <td>${record.staff}</td>
+                        <td>${record.items}</td>
+                        <td>$${record.price}</td>
+                        <td>${record.payment}</td>
                     `;
                 } else {
-                    div.innerHTML = `
-                        <strong>${record.date}</strong><br>
-                        員工：${record.staff}<br>
-                        金額：${record.price}<br>
-                        支付：${record.payment}
+                    tr.innerHTML = `
+                        <td>${record.dateTime}</td>
+                        <td>${record.staff}</td>
+                        <td>$${record.price}</td>
+                        <td>${record.payment}</td>
                     `;
                 }
-                container.appendChild(div);
+                container.appendChild(tr);
             });
-            if (records.length === 0) {
-                container.innerHTML = '<div class="record-item">暫無紀錄</div>';
-            }
         }
 
         // 切換紀錄顯示（密碼控制）
         function toggleRecord(type) {
             const password = prompt('請輸入密碼查看紀錄：');
             if (password === data.password) {
-                const container = document.getElementById(type + 'RecordList');
-                container.style.display = container.style.display === 'none' ? 'block' : 'none';
-            } else {
+                const table = document.getElementById(type + 'RecordTable');
+                table.style.display = table.style.display === 'none' ? 'table' : 'none';
+            } else if (password !== null) {
                 alert('密碼錯誤！');
             }
         }
