@@ -1,81 +1,858 @@
-// 穩定版 Google Sheets 寫入程式（複製全部）
-function doPost(e) {
-  try {
-    // 強制解析數據（兼容所有格式）
-    let data = {};
-    if (e.postData.contents.indexOf("data=") > -1) {
-      data = JSON.parse(decodeURIComponent(e.postData.contents.split("data=")[1]));
-    } else {
-      data = JSON.parse(e.postData.contents);
-    }
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>賣貨系統 - 本地+雲端雙儲存</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, 微軟正黑體;
+        }
+        body {
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .page {
+            display: none;
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            min-height: 85vh;
+            position: relative;
+        }
+        .page.active {
+            display: block;
+        }
+        h1, h2, h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .back-btn {
+            background: #6c757d;
+        }
+        .back-btn:hover {
+            background: #5a6268;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .select-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        .select-item {
+            padding: 10px 18px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .select-item:hover {
+            border-color: #007bff;
+        }
+        .select-item.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .count-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .count-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .count-btn.minus {
+            background: #dc3545;
+        }
+        .count-btn.plus {
+            background: #28a745;
+        }
+        .price-display {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #007bff;
+            padding: 20px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .num-keyboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        .num-btn {
+            padding: 20px;
+            font-size: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            background: white;
+        }
+        .settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 15px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+        }
+        .staff-id-display {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .add-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        /* 新增記錄列表樣式 */
+        .records-list {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        .record-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .record-item:nth-child(even) {
+            background: #f8f9fa;
+        }
+        .record-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #007bff;
+        }
+        .record-details {
+            font-size: 14px;
+            color: #666;
+        }
+        .sync-status {
+            font-size: 12px;
+            color: #28a745;
+            margin-top: 5px;
+        }
+        .sync-error {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <!-- 首頁 -->
+    <div id="homePage" class="page active">
+        <h1>賣貨管理系統</h1>
+        <button class="btn" onclick="goToPage('productPage')">產品銷售記錄</button>
+        <button class="btn" onclick="goToPage('customerPage')">客人消費記錄</button>
+        <button class="btn" onclick="goToPage('recordsPage')">查看所有記錄</button>
+        <button class="btn" onclick="goToPage('settingsPage')">系統設定</button>
+    </div>
 
-    // 驗證必要參數
-    if (!data.sheetType || !data.record) {
-      return ContentService.createTextOutput(JSON.stringify({
-        success: false,
-        msg: "缺少必要參數"
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
+    <!-- 產品頁面 -->
+    <div id="productPage" class="page">
+        <button class="settings-btn" onclick="goToPage('settingsPage')">系統設定</button>
+        <h2>產品銷售記錄</h2>
+        
+        <div class="form-group">
+            <label>交易日期</label>
+            <input type="date" id="productDate" required>
+        </div>
 
-    // 獲取試算表（重點：用 ID 確保準確）
-    const ssId = "替換成你的Google Sheets ID"; // ← 這裡要改！
-    const ss = SpreadsheetApp.openById(ssId);
-    const sheetName = data.sheetType === "customer" ? "客人" : "產品";
-    const sheet = ss.getSheetByName(sheetName);
+        <div class="form-group">
+            <label>銷售員工</label>
+            <div class="select-list" id="productStaffList"></div>
+            <div class="staff-id-display">員工工號：<span id="productStaffIdDisplay">-</span></div>
+        </div>
 
-    if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({
-        success: false,
-        msg: "找不到工作表：" + sheetName + "，請確認工作表名稱正確"
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
+        <div class="form-group">
+            <label>選擇產品</label>
+            <div id="productItemsList"></div>
+        </div>
 
-    // 處理日期
-    const dateParts = data.record.date ? data.record.date.split("-") : ["", "", ""];
-    
-    // 準備寫入數據（嚴格對應 A-I 欄）
-    const row = [
-      dateParts[0] || "",  // A:年
-      dateParts[1] || "",  // B:月
-      dateParts[2] || "",  // C:日
-      data.record.staff ? data.record.staff.charAt(0).toUpperCase() : "", // D:首字母
-      data.record.staff || "",  // E:員工名字
-      data.record.staffId || "",// F:工號
-      data.record.items || "",  // G:產品
-      data.record.price || "",  // H:價錢
-      data.record.payment || "" // I:支付方式
-    ];
+        <div class="form-group">
+            <label>交易金額</label>
+            <div class="price-display" id="productPrice">0</div>
+            <div class="num-keyboard">
+                <button class="num-btn" onclick="inputNumber('product', 7)">7</button>
+                <button class="num-btn" onclick="inputNumber('product', 8)">8</button>
+                <button class="num-btn" onclick="inputNumber('product', 9)">9</button>
+                <button class="num-btn" onclick="inputNumber('product', 4)">4</button>
+                <button class="num-btn" onclick="inputNumber('product', 5)">5</button>
+                <button class="num-btn" onclick="inputNumber('product', 6)">6</button>
+                <button class="num-btn" onclick="inputNumber('product', 1)">1</button>
+                <button class="num-btn" onclick="inputNumber('product', 2)">2</button>
+                <button class="num-btn" onclick="inputNumber('product', 3)">3</button>
+                <button class="num-btn" onclick="inputNumber('product', 0)">0</button>
+                <button class="num-btn" onclick="clearPrice('product')">清除</button>
+                <button class="num-btn" onclick="backspacePrice('product')">刪除</button>
+            </div>
+        </div>
 
-    // 寫入數據（強制在第一行後插入）
-    sheet.appendRow(row);
+        <div class="form-group">
+            <label>支付方式</label>
+            <div class="select-list" id="productPaymentList"></div>
+        </div>
 
-    // 返回成功
-    return ContentService.createTextOutput(JSON.stringify({
-      success: true,
-      msg: "數據已成功寫入 Google Sheets",
-      row: row
-    })).setMimeType(ContentService.MimeType.JSON);
+        <button class="btn" onclick="submitProductForm()">確定提交</button>
+        <button class="btn back-btn" onclick="goToPage('homePage')">返回首頁</button>
+    </div>
 
-  } catch (error) {
-    // 詳細錯誤信息
-    return ContentService.createTextOutput(JSON.stringify({
-      success: false,
-      msg: "錯誤詳情：" + error.toString(),
-      line: error.lineNumber || "未知行數"
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
+    <!-- 客人頁面 -->
+    <div id="customerPage" class="page">
+        <button class="settings-btn" onclick="goToPage('settingsPage')">系統設定</button>
+        <h2>客人消費記錄</h2>
+        
+        <div class="form-group">
+            <label>交易日期</label>
+            <input type="date" id="customerDate" required>
+        </div>
 
-// 測試接口（用於驗證）
-function doGet() {
-  return ContentService.createTextOutput("API 運行正常！當前時間：" + new Date().toString())
-    .setMimeType(ContentService.MimeType.TEXT);
-}
+        <div class="form-group">
+            <label>服務員工</label>
+            <div class="select-list" id="customerStaffList"></div>
+            <div class="staff-id-display">員工工號：<span id="customerStaffIdDisplay">-</span></div>
+        </div>
 
-// 手動測試寫入（用於調試）
-function testWriteData() {
-  const ss = SpreadsheetApp.openById("替換成你的Google Sheets ID");
-  const sheet = ss.getSheetByName("產品");
-  sheet.appendRow(["2026", "03", "22", "A", "員工A", "A001", "紅罐x1", "178", "現金"]);
-  console.log("測試數據已寫入");
-}
+        <div class="form-group">
+            <label>消費金額</label>
+            <div class="price-display" id="customerPrice">0</div>
+            <div class="num-keyboard">
+                <button class="num-btn" onclick="inputNumber('customer', 7)">7</button>
+                <button class="num-btn" onclick="inputNumber('customer', 8)">8</button>
+                <button class="num-btn" onclick="inputNumber('customer', 9)">9</button>
+                <button class="num-btn" onclick="inputNumber('customer', 4)">4</button>
+                <button class="num-btn" onclick="inputNumber('customer', 5)">5</button>
+                <button class="num-btn" onclick="inputNumber('customer', 6)">6</button>
+                <button class="num-btn" onclick="inputNumber('customer', 1)">1</button>
+                <button class="num-btn" onclick="inputNumber('customer', 2)">2</button>
+                <button class="num-btn" onclick="inputNumber('customer', 3)">3</button>
+                <button class="num-btn" onclick="inputNumber('customer', 0)">0</button>
+                <button class="num-btn" onclick="clearPrice('customer')">清除</button>
+                <button class="num-btn" onclick="backspacePrice('customer')">刪除</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>支付方式</label>
+            <div class="select-list" id="customerPaymentList"></div>
+        </div>
+
+        <button class="btn" onclick="submitCustomerForm()">確定提交</button>
+        <button class="btn back-btn" onclick="goToPage('homePage')">返回首頁</button>
+    </div>
+
+    <!-- 記錄查詢頁面 -->
+    <div id="recordsPage" class="page">
+        <h2>所有交易記錄（本地儲存）</h2>
+        <button class="btn" onclick="syncAllToGoogle()">同步所有記錄到 Google Sheets</button>
+        <div class="records-list" id="allRecordsList"></div>
+        <button class="btn back-btn" onclick="goToPage('homePage')">返回首頁</button>
+    </div>
+
+    <!-- 設定頁面 -->
+    <div id="settingsPage" class="page">
+        <h2>系統設定</h2>
+        
+        <div class="form-group">
+            <label>Google Sheets API 地址</label>
+            <input type="text" id="apiUrl" placeholder="輸入 Apps Script 部署地址" 
+                   value="替換成你的Apps Script URL">
+            <button class="add-btn" onclick="saveApiUrl()">保存API地址</button>
+        </div>
+
+        <div class="form-group">
+            <label>員工管理</label>
+            <div id="settingsStaffList"></div>
+            <button class="add-btn" onclick="addNewStaff()">新增員工</button>
+        </div>
+
+        <div class="form-group">
+            <label>產品管理</label>
+            <div id="settingsProductList"></div>
+            <button class="add-btn" onclick="addNewProduct()">新增產品</button>
+        </div>
+
+        <button class="btn" onclick="clearAllLocalRecords()">清空本地記錄</button>
+        <button class="btn back-btn" onclick="goToPage('homePage')">返回首頁</button>
+    </div>
+
+    <script>
+        // 核心配置
+        const CONFIG = {
+            API_URL: localStorage.getItem('apiUrl') || "替換成你的Apps Script URL",
+            ADMIN_PWD: "123456"
+        };
+
+        // 系統數據
+        const SYSTEM = {
+            staff: JSON.parse(localStorage.getItem('staffList')) || [
+                { name: "員工A", id: "A001" },
+                { name: "員工B", id: "B002" },
+                { name: "員工C", id: "C003" }
+            ],
+            products: JSON.parse(localStorage.getItem('productList')) || [
+                { name: "紅罐", price: 178 },
+                { name: "猩猩粉", price: 100 },
+                { name: "打底水", price: 148 }
+            ],
+            payments: ["現金", "轉數快", "支付寶", "PayMe", "微信支付"],
+            records: JSON.parse(localStorage.getItem('salesRecords')) || [],
+            manualPrice: false
+        };
+
+        // 頁面切換
+        function goToPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            if (pageId === 'productPage') initProduct();
+            if (pageId === 'customerPage') initCustomer();
+            if (pageId === 'recordsPage') showAllRecords();
+            if (pageId === 'settingsPage') initSettings();
+        }
+
+        // 初始化產品頁
+        function initProduct() {
+            document.getElementById('productDate').valueAsDate = new Date();
+            renderStaff('productStaffList', 'productStaffIdDisplay');
+            renderProducts('productItemsList');
+            renderPayments('productPaymentList');
+            document.getElementById('productPrice').textContent = '0';
+            SYSTEM.manualPrice = false;
+        }
+
+        // 初始化客人頁
+        function initCustomer() {
+            document.getElementById('customerDate').valueAsDate = new Date();
+            renderStaff('customerStaffList', 'customerStaffIdDisplay');
+            renderPayments('customerPaymentList');
+            document.getElementById('customerPrice').textContent = '0';
+        }
+
+        // 初始化設定頁
+        function initSettings() {
+            document.getElementById('apiUrl').value = CONFIG.API_URL;
+            renderSettingsStaff();
+            renderSettingsProducts();
+        }
+
+        // 渲染員工列表
+        function renderStaff(containerId, displayId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            SYSTEM.staff.forEach(staff => {
+                const item = document.createElement('div');
+                item.className = 'select-item';
+                item.textContent = staff.name;
+                item.onclick = () => {
+                    container.querySelectorAll('.select-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    document.getElementById(displayId).textContent = staff.id;
+                };
+                container.appendChild(item);
+            });
+        }
+
+        // 渲染產品列表
+        function renderProducts(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            SYSTEM.products.forEach((p, i) => {
+                container.innerHTML += `
+                <div class="product-item">
+                    <div>
+                        <div>${p.name}</div>
+                        <div style="color:#666;font-size:14px;">$${p.price}</div>
+                    </div>
+                    <div class="count-controls">
+                        <button class="count-btn minus" onclick="changeCount(${i}, -1)">-</button>
+                        <span id="cnt${i}" style="font-size:18px;">0</span>
+                        <button class="count-btn plus" onclick="changeCount(${i}, 1)">+</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        // 渲染支付方式
+        function renderPayments(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            SYSTEM.payments.forEach(method => {
+                const item = document.createElement('div');
+                item.className = 'select-item';
+                item.textContent = method;
+                item.onclick = () => {
+                    container.querySelectorAll('.select-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                };
+                container.appendChild(item);
+            });
+        }
+
+        // 渲染設定頁員工列表
+        function renderSettingsStaff() {
+            const container = document.getElementById('settingsStaffList');
+            container.innerHTML = '';
+            
+            SYSTEM.staff.forEach((s, i) => {
+                container.innerHTML += `
+                <div class="list-item">
+                    <span>${s.name} (${s.id})</span>
+                    <button class="delete-btn" onclick="deleteStaff(${i})">刪除</button>
+                </div>`;
+            });
+        }
+
+        // 渲染設定頁產品列表
+        function renderSettingsProducts() {
+            const container = document.getElementById('settingsProductList');
+            container.innerHTML = '';
+            
+            SYSTEM.products.forEach((p, i) => {
+                container.innerHTML += `
+                <div class="list-item">
+                    <span>${p.name} - $${p.price}</span>
+                    <button class="delete-btn" onclick="deleteProduct(${i})">刪除</button>
+                </div>`;
+            });
+        }
+
+        // 改變產品數量
+        function changeCount(index, delta) {
+            const cnt = document.getElementById(`cnt${index}`);
+            let num = parseInt(cnt.textContent) + delta;
+            num = Math.max(0, num);
+            cnt.textContent = num;
+            
+            if (!SYSTEM.manualPrice) calculateTotal();
+        }
+
+        // 計算總價
+        function calculateTotal() {
+            let total = 0;
+            SYSTEM.products.forEach((p, i) => {
+                total += p.price * parseInt(document.getElementById(`cnt${i}`).textContent);
+            });
+            document.getElementById('productPrice').textContent = total;
+        }
+
+        // 數字輸入
+        function inputNumber(type, num) {
+            const priceEl = document.getElementById(`${type}Price`);
+            let price = priceEl.textContent;
+            
+            if (type === 'product') SYSTEM.manualPrice = true;
+            price = price === '0' ? '' : price;
+            priceEl.textContent = price + num;
+        }
+
+        // 清除價格
+        function clearPrice(type) {
+            const priceEl = document.getElementById(`${type}Price`);
+            if (type === 'product') {
+                SYSTEM.manualPrice = false;
+                SYSTEM.products.forEach((_, i) => document.getElementById(`cnt${i}`).textContent = '0');
+                calculateTotal();
+            } else {
+                priceEl.textContent = '0';
+            }
+        }
+
+        // 刪除最後一位
+        function backspacePrice(type) {
+            const priceEl = document.getElementById(`${type}Price`);
+            let price = priceEl.textContent;
+            
+            if (type === 'product') SYSTEM.manualPrice = true;
+            priceEl.textContent = price.length > 1 ? price.slice(0, -1) : '0';
+        }
+
+        // 新增員工
+        function addNewStaff() {
+            const name = prompt('員工姓名：');
+            if (!name) return;
+            
+            const id = prompt('員工工號：');
+            if (!id) return;
+            
+            SYSTEM.staff.push({ name, id });
+            localStorage.setItem('staffList', JSON.stringify(SYSTEM.staff));
+            renderSettingsStaff();
+        }
+
+        // 刪除員工
+        function deleteStaff(index) {
+            if (confirm('確定刪除？')) {
+                SYSTEM.staff.splice(index, 1);
+                localStorage.setItem('staffList', JSON.stringify(SYSTEM.staff));
+                renderSettingsStaff();
+            }
+        }
+
+        // 新增產品
+        function addNewProduct() {
+            const name = prompt('產品名稱：');
+            if (!name) return;
+            
+            const price = parseInt(prompt('產品價格：'));
+            if (isNaN(price) || price < 0) {
+                alert('價格必須是數字！');
+                return;
+            }
+            
+            SYSTEM.products.push({ name, price });
+            localStorage.setItem('productList', JSON.stringify(SYSTEM.products));
+            renderSettingsProducts();
+        }
+
+        // 刪除產品
+        function deleteProduct(index) {
+            if (confirm('確定刪除？')) {
+                SYSTEM.products.splice(index, 1);
+                localStorage.setItem('productList', JSON.stringify(SYSTEM.products));
+                renderSettingsProducts();
+            }
+        }
+
+        // 保存API地址
+        function saveApiUrl() {
+            const url = document.getElementById('apiUrl').value.trim();
+            if (url) {
+                CONFIG.API_URL = url;
+                localStorage.setItem('apiUrl', url);
+                alert('API地址保存成功！');
+            }
+        }
+
+        // 獲取選中值
+        function getSelected(containerId) {
+            const active = document.querySelector(`#${containerId} .select-item.active`);
+            return active ? active.textContent : '';
+        }
+
+        // 保存本地記錄
+        function saveLocalRecord(record) {
+            record.id = Date.now(); // 唯一ID
+            record.syncStatus = 'pending'; // 同步狀態：pending/success/error
+            record.syncMsg = '';
+            SYSTEM.records.unshift(record);
+            
+            // 只保留最近1000條
+            if (SYSTEM.records.length > 1000) SYSTEM.records.pop();
+            
+            localStorage.setItem('salesRecords', JSON.stringify(SYSTEM.records));
+            return record;
+        }
+
+        // 提交產品表單
+        async function submitProductForm() {
+            // 驗證數據
+            const date = document.getElementById('productDate').value;
+            const staff = getSelected('productStaffList');
+            const staffId = document.getElementById('productStaffIdDisplay').textContent;
+            const price = document.getElementById('productPrice').textContent;
+            const payment = getSelected('productPaymentList');
+            
+            if (!date || !staff || price === '0' || !payment) {
+                alert('請填寫完整信息！');
+                return;
+            }
+            
+            // 獲取產品
+            let products = [];
+            SYSTEM.products.forEach((p, i) => {
+                const cnt = parseInt(document.getElementById(`cnt${i}`).textContent);
+                if (cnt > 0) products.push(`${p.name} x${cnt}`);
+            });
+            
+            // 構建記錄
+            const record = {
+                type: 'product',
+                date: date,
+                staff: staff,
+                staffId: staffId,
+                products: products.join('，'),
+                price: price,
+                payment: payment,
+                createTime: new Date().toLocaleString()
+            };
+            
+            // 保存本地記錄
+            const savedRecord = saveLocalRecord(record);
+            
+            // 同步到Google Sheets
+            syncToGoogle(savedRecord);
+            
+            // 重置表單
+            alert('記錄已保存！正在同步到Google Sheets...');
+            initProduct();
+        }
+
+        // 提交客人表單
+        async function submitCustomerForm() {
+            // 驗證數據
+            const date = document.getElementById('customerDate').value;
+            const staff = getSelected('customerStaffList');
+            const staffId = document.getElementById('customerStaffIdDisplay').textContent;
+            const price = document.getElementById('customerPrice').textContent;
+            const payment = getSelected('customerPaymentList');
+            
+            if (!date || !staff || price === '0' || !payment) {
+                alert('請填寫完整信息！');
+                return;
+            }
+            
+            // 構建記錄
+            const record = {
+                type: 'customer',
+                date: date,
+                staff: staff,
+                staffId: staffId,
+                products: '',
+                price: price,
+                payment: payment,
+                createTime: new Date().toLocaleString()
+            };
+            
+            // 保存本地記錄
+            const savedRecord = saveLocalRecord(record);
+            
+            // 同步到Google Sheets
+            syncToGoogle(savedRecord);
+            
+            // 重置表單
+            alert('記錄已保存！正在同步到Google Sheets...');
+            initCustomer();
+        }
+
+        // 同步到Google Sheets
+        async function syncToGoogle(record) {
+            try {
+                const response = await fetch(CONFIG.API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    body: 'data=' + encodeURIComponent(JSON.stringify({
+                        sheetType: record.type,
+                        record: {
+                            date: record.date,
+                            staff: record.staff,
+                            staffId: record.staffId,
+                            items: record.products,
+                            price: record.price,
+                            payment: record.payment
+                        }
+                    }))
+                });
+                
+                const result = await response.json();
+                
+                // 更新同步狀態
+                const idx = SYSTEM.records.findIndex(r => r.id === record.id);
+                if (idx !== -1) {
+                    SYSTEM.records[idx].syncStatus = result.success ? 'success' : 'error';
+                    SYSTEM.records[idx].syncMsg = result.msg;
+                    localStorage.setItem('salesRecords', JSON.stringify(SYSTEM.records));
+                }
+                
+                if (result.success) {
+                    console.log('同步成功：', result.msg);
+                } else {
+                    alert('同步失敗：' + result.msg);
+                }
+                
+            } catch (error) {
+                // 更新同步狀態
+                const idx = SYSTEM.records.findIndex(r => r.id === record.id);
+                if (idx !== -1) {
+                    SYSTEM.records[idx].syncStatus = 'error';
+                    SYSTEM.records[idx].syncMsg = '網絡錯誤：' + error.toString();
+                    localStorage.setItem('salesRecords', JSON.stringify(SYSTEM.records));
+                }
+                
+                console.error('同步錯誤：', error);
+            }
+        }
+
+        // 顯示所有記錄
+        function showAllRecords() {
+            const container = document.getElementById('allRecordsList');
+            container.innerHTML = '';
+            
+            if (SYSTEM.records.length === 0) {
+                container.innerHTML = '<div style="padding:20px;text-align:center;color:#666;">暫無記錄</div>';
+                return;
+            }
+            
+            SYSTEM.records.forEach(record => {
+                const statusClass = record.syncStatus === 'success' ? 'sync-status' : 'sync-status sync-error';
+                const statusText = record.syncStatus === 'success' ? 
+                    '✅ 已同步到Google Sheets' : 
+                    record.syncStatus === 'error' ? `❌ 同步失敗：${record.syncMsg}` : '⏳ 等待同步';
+                
+                container.innerHTML += `
+                <div class="record-item">
+                    <div class="record-header">
+                        ${record.type === 'product' ? '產品銷售' : '客人消費'} | ${record.date} | ${record.createTime}
+                    </div>
+                    <div class="record-details">
+                        員工：${record.staff} (${record.staffId})<br>
+                        產品：${record.products || '無'}<br>
+                        金額：$${record.price} | 支付：${record.payment}
+                    </div>
+                    <div class="${statusClass}">${statusText}</div>
+                </div>`;
+            });
+        }
+
+        // 同步所有記錄
+        async function syncAllToGoogle() {
+            const unsynced = SYSTEM.records.filter(r => r.syncStatus !== 'success');
+            
+            if (unsynced.length === 0) {
+                alert('所有記錄都已同步！');
+                return;
+            }
+            
+            if (confirm(`有 ${unsynced.length} 條記錄未同步，是否立即同步？`)) {
+                let successCount = 0;
+                
+                for (const record of unsynced) {
+                    try {
+                        await syncToGoogle(record);
+                        successCount++;
+                    } catch (e) {
+                        console.error('同步單條失敗：', e);
+                    }
+                }
+                
+                alert(`同步完成！成功：${successCount}/${unsynced.length}`);
+                showAllRecords();
+            }
+        }
+
+        // 清空本地記錄
+        function clearAllLocalRecords() {
+            if (confirm('確定清空所有本地記錄？此操作不可恢復！')) {
+                SYSTEM.records = [];
+                localStorage.removeItem('salesRecords');
+                showAllRecords();
+                alert('本地記錄已清空');
+            }
+        }
+
+        // 初始化
+        window.onload = () => {
+            goToPage('homePage');
+        };
+    </script>
+</body>
+</html>
