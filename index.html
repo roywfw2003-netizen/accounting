@@ -89,7 +89,7 @@
         <button class="btn back-btn" onclick="goToPage('homePage')">← 返回</button>
     </div>
 
-    <!-- 設定頁（含 API 地址設定） -->
+    <!-- 設定頁 -->
     <div id="settingsPage" class="page">
         <h2>⚙️ 系統設定</h2>
         
@@ -115,11 +115,18 @@
         <button class="btn" onclick="clearLocalRecords()">🗑️ 清空本地記錄</button>
         <button class="btn back-btn" onclick="goToPage('homePage')">← 返回</button>
     </div>
-    <footer>數據自動同步至您設定的 Google Sheets</footer>
+    <footer>數據自動同步至 Google Sheets</footer>
 
     <script>
-        // ==================== 設定 ====================
-        let API_URL = localStorage.getItem('apiUrl') || '';
+        // ==================== 預設 API 地址（已幫您填好） ====================
+        const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbyuxyXs2qIp6fuTDCg3YSFMOlMRnJY8Cbjn7x6JRiT-LSQrmbVGan8l623JpzYk3AKGew/exec";
+        
+        // 如果 localStorage 中沒有 API 地址，則使用預設值
+        let API_URL = localStorage.getItem('apiUrl');
+        if (!API_URL) {
+            API_URL = DEFAULT_API_URL;
+            localStorage.setItem('apiUrl', API_URL);  // 自動儲存
+        }
 
         // 本地儲存 KEY
         const STAFF_KEY = "staffList";
@@ -337,7 +344,6 @@
             
             if (API_URL) await syncToGoogle(record);
             else {
-                // 無 API 時標記為本機儲存
                 const idx = records.findIndex(r => r.createTime === record.createTime && r.price === record.price);
                 if (idx !== -1) { records[idx].syncStatus = 'local'; records[idx].syncMsg = '僅本地儲存'; saveRecords(); }
             }
