@@ -42,6 +42,8 @@
         .add-btn { background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; margin-top: 10px; }
         .btn-small { width: auto; padding: 8px 16px; margin-top: 8px; }
         footer { text-align: center; margin-top: 20px; font-size: 0.7rem; color: #94a3b8; }
+        .api-url-input { width: 100%; padding: 12px; font-size: 0.9rem; border: 1px solid #cbd5e1; border-radius: 40px; margin-bottom: 8px; }
+        .api-status { font-size: 0.75rem; margin-top: 4px; color: #64748b; }
     </style>
 </head>
 <body>
@@ -87,24 +89,44 @@
         <button class="btn back-btn" onclick="goToPage('homePage')">← 返回</button>
     </div>
 
-    <!-- 設定頁 -->
+    <!-- 設定頁（含 API 地址設定） -->
     <div id="settingsPage" class="page">
         <h2>⚙️ 系統設定</h2>
-        <div class="form-group"><label>👥 員工管理</label><div id="settingsStaffList"></div><button class="add-btn" onclick="addStaff()">＋ 新增員工</button></div>
-        <div class="form-group"><label>📦 產品管理</label><div id="settingsProductList"></div><button class="add-btn" onclick="addProduct()">＋ 新增產品</button></div>
+        
+        <div class="form-group">
+            <label>🔗 Google Sheets API 地址</label>
+            <input type="text" id="apiUrlInput" class="api-url-input" placeholder="https://script.google.com/macros/s/.../exec">
+            <button class="add-btn" onclick="saveApiUrl()" style="margin-top:0;">儲存 API 地址</button>
+            <div class="api-status" id="apiUrlStatus"></div>
+        </div>
+
+        <div class="form-group">
+            <label>👥 員工管理</label>
+            <div id="settingsStaffList"></div>
+            <button class="add-btn" onclick="addStaff()">＋ 新增員工</button>
+        </div>
+
+        <div class="form-group">
+            <label>📦 產品管理</label>
+            <div id="settingsProductList"></div>
+            <button class="add-btn" onclick="addProduct()">＋ 新增產品</button>
+        </div>
+
         <button class="btn" onclick="clearLocalRecords()">🗑️ 清空本地記錄</button>
         <button class="btn back-btn" onclick="goToPage('homePage')">← 返回</button>
     </div>
-    <footer>數據自動同步至 Google Sheets</footer>
+    <footer>數據自動同步至您設定的 Google Sheets</footer>
 
     <script>
-        // ==================== 前端邏輯 ====================
-        const API_URL = window.location.origin + window.location.pathname; // 自動使用當前網址
+        // ==================== 設定 ====================
+        let API_URL = localStorage.getItem('apiUrl') || '';
 
+        // 本地儲存 KEY
         const STAFF_KEY = "staffList";
         const PRODUCT_KEY = "productList";
         const RECORDS_KEY = "salesRecords";
 
+        // 系統預設資料
         let staffList = JSON.parse(localStorage.getItem(STAFF_KEY)) || [
             { name: "陳大文", id: "A001" },
             { name: "李小美", id: "B002" },
@@ -121,19 +143,50 @@
         let productManualPrice = false;
         let productSelectedCounts = [];
 
+        // ==================== 輔助函數 ====================
         function saveStaff() { localStorage.setItem(STAFF_KEY, JSON.stringify(staffList)); }
         function saveProducts() { localStorage.setItem(PRODUCT_KEY, JSON.stringify(productList)); }
         function saveRecords() { localStorage.setItem(RECORDS_KEY, JSON.stringify(records)); }
 
+        function updateApiStatus() {
+            const statusDiv = document.getElementById('apiUrlStatus');
+            if (API_URL) {
+                statusDiv.innerHTML = `✅ 目前 API 地址：${API_URL}`;
+                statusDiv.style.color = '#10b981';
+            } else {
+                statusDiv.innerHTML = `⚠️ 尚未設定 API 地址，資料將僅儲存於本地，無法同步至 Google Sheets。`;
+                statusDiv.style.color = '#f59e0b';
+            }
+        }
+
+        function saveApiUrl() {
+            const input = document.getElementById('apiUrlInput');
+            const url = input.value.trim();
+            if (url) {
+                API_URL = url;
+                localStorage.setItem('apiUrl', url);
+                updateApiStatus();
+                alert('API 地址已儲存！');
+            } else {
+                alert('請輸入有效的網址');
+            }
+        }
+
+        // 頁面切換
         function goToPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             if (id === 'productPage') initProductPage();
             if (id === 'customerPage') initCustomerPage();
             if (id === 'recordsPage') renderRecords();
-            if (id === 'settingsPage') renderSettings();
+            if (id === 'settingsPage') {
+                renderSettings();
+                document.getElementById('apiUrlInput').value = API_URL;
+                updateApiStatus();
+            }
         }
 
+        // ==================== 產品頁邏輯 ====================
         function initProductPage() {
             document.getElementById('productDate').valueAsDate = new Date();
             renderStaffSelect('productStaffList', 'productStaffIdDisplay');
@@ -236,6 +289,7 @@
             });
         }
 
+        // ==================== 客人頁邏輯 ====================
         function initCustomerPage() {
             document.getElementById('customerDate').valueAsDate = new Date();
             renderStaffSelect('customerStaffList', 'customerStaffIdDisplay');
@@ -256,7 +310,13 @@
             return active ? active.innerText : '';
         }
 
+        // ==================== 提交與同步 ====================
         async function submitProduct() {
+            if (!API_URL) {
+                alert('請先在「系統設定」中設定 Google Sheets API 地址，否則資料將無法同步至雲端。\n若僅使用本地儲存，可忽略此提示繼續提交。');
+                if (!confirm('是否仍要儲存（僅本地）？')) return;
+            }
+
             const date = document.getElementById('productDate').value;
             const staffName = document.querySelector('#productStaffList .select-item.active')?.innerText;
             const staffId = getSelectedStaffId('productStaffList');
@@ -274,12 +334,24 @@
             };
             records.unshift(record);
             saveRecords();
-            await syncToGoogle(record);
-            alert('已提交，將同步至雲端');
+            
+            if (API_URL) await syncToGoogle(record);
+            else {
+                // 無 API 時標記為本機儲存
+                const idx = records.findIndex(r => r.createTime === record.createTime && r.price === record.price);
+                if (idx !== -1) { records[idx].syncStatus = 'local'; records[idx].syncMsg = '僅本地儲存'; saveRecords(); }
+            }
+            
+            alert('已提交，資料已儲存至本機。' + (API_URL ? '正在同步至雲端…' : '請至系統設定填入 API 地址以啟用雲端同步。'));
             initProductPage();
         }
 
         async function submitCustomer() {
+            if (!API_URL) {
+                alert('請先在「系統設定」中設定 Google Sheets API 地址，否則資料將無法同步至雲端。\n若僅使用本地儲存，可忽略此提示繼續提交。');
+                if (!confirm('是否仍要儲存（僅本地）？')) return;
+            }
+
             const date = document.getElementById('customerDate').value;
             const staffName = document.querySelector('#customerStaffList .select-item.active')?.innerText;
             const staffId = getSelectedStaffId('customerStaffList');
@@ -296,8 +368,14 @@
             };
             records.unshift(record);
             saveRecords();
-            await syncToGoogle(record);
-            alert('已提交，將同步至雲端');
+            
+            if (API_URL) await syncToGoogle(record);
+            else {
+                const idx = records.findIndex(r => r.createTime === record.createTime && r.price === record.price);
+                if (idx !== -1) { records[idx].syncStatus = 'local'; records[idx].syncMsg = '僅本地儲存'; saveRecords(); }
+            }
+            
+            alert('已提交，資料已儲存至本機。' + (API_URL ? '正在同步至雲端…' : '請至系統設定填入 API 地址以啟用雲端同步。'));
             initCustomerPage();
         }
 
@@ -333,13 +411,18 @@
         }
 
         async function syncAll() {
-            const pending = records.filter(r => r.syncStatus !== 'success');
-            if (pending.length === 0) { alert('所有記錄已同步'); return; }
+            if (!API_URL) {
+                alert('請先在「系統設定」中設定 Google Sheets API 地址。');
+                return;
+            }
+            const pending = records.filter(r => r.syncStatus !== 'success' && r.syncStatus !== 'local');
+            if (pending.length === 0) { alert('所有記錄已同步或僅本機儲存'); return; }
             for (let r of pending) await syncToGoogle(r);
             renderRecords();
             alert('同步完成');
         }
 
+        // ==================== 記錄顯示與設定 ====================
         function renderRecords() {
             const container = document.getElementById('allRecordsList');
             if (!records.length) { container.innerHTML = '<div style="padding:20px;text-align:center;">暫無記錄</div>'; return; }
@@ -352,7 +435,7 @@
                         金額：$${r.price} | 支付：${r.payment}
                     </div>
                     <div class="sync-status ${r.syncStatus === 'error' ? 'sync-error' : ''}">
-                        ${r.syncStatus === 'success' ? '✅ 已同步' : r.syncStatus === 'error' ? `❌ 同步失敗：${r.syncMsg || ''}` : '⏳ 等待同步'}
+                        ${r.syncStatus === 'success' ? '✅ 已同步' : r.syncStatus === 'error' ? `❌ 同步失敗：${r.syncMsg || ''}` : r.syncStatus === 'local' ? '💾 僅本地儲存' : '⏳ 等待同步'}
                     </div>
                 </div>
             `).join('');
