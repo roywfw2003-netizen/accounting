@@ -55,17 +55,15 @@
             background: #0056b3;
         }
         .back-btn {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 20px;
+            width: 100%;
+            padding: 15px 30px;
             background: #6c757d;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             transition: background 0.3s;
+            margin-top: 10px;
         }
         .back-btn:hover {
             background: #5a6268;
@@ -108,20 +106,39 @@
         .product-item {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 10px;
-            padding: 8px 15px;
+            padding: 12px 15px;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .product-name {
+            font-weight: bold;
+        }
+        .product-price {
+            color: #666;
+            font-size: 14px;
+        }
+        .count-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
         .count-btn {
-            width: 30px;
-            height: 30px;
+            width: 36px;
+            height: 36px;
             border: none;
             border-radius: 50%;
             background: #28a745;
             color: white;
             cursor: pointer;
             transition: background 0.3s;
+            font-size: 18px;
         }
         .count-btn:hover {
             background: #218838;
@@ -132,21 +149,28 @@
         .count-btn.minus:hover {
             background: #c82333;
         }
+        .count {
+            font-size: 18px;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
         .payment-methods {
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
+            justify-content: center;
         }
         .payment-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            gap: 8px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
             cursor: pointer;
-            width: 100px;
+            width: 110px;
             transition: all 0.3s;
         }
         .payment-item:hover {
@@ -156,8 +180,14 @@
             border-color: #007bff;
             background: #e7f3ff;
         }
-        .payment-item i {
-            font-size: 24px;
+        .payment-logo {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+        }
+        .payment-name {
+            font-size: 14px;
+            font-weight: 500;
         }
         .num-keyboard {
             display: grid;
@@ -181,12 +211,20 @@
         }
         .price-display {
             text-align: center;
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: bold;
             margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 15px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
             background: #f9f9f9;
+            color: #007bff;
+        }
+        .auto-calc-info {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
         }
         .settings-btn {
             position: absolute;
@@ -245,7 +283,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px;
+            padding: 10px;
             border-bottom: 1px solid #eee;
         }
         .delete-btn {
@@ -292,7 +330,6 @@
             margin-bottom: 10px;
             color: #007bff;
         }
-        /* Excel 風格表格 */
         .records-table {
             width: 100%;
             border-collapse: collapse;
@@ -414,6 +451,7 @@
         </div>
         <div class="form-group">
             <label>價錢</label>
+            <div class="auto-calc-info">自動計算：點選貨品數量自動計價，手動輸入可覆蓋</div>
             <div class="price-display" id="productPrice">0</div>
             <div class="num-keyboard">
                 <button class="num-btn" onclick="inputNum('product', 7)">7</button>
@@ -490,7 +528,7 @@
             <button class="add-btn" onclick="addStaff()">新增員工</button>
         </div>
         <div class="settings-section" id="productSettingsSection">
-            <h3>貨品管理</h3>
+            <h3>貨品管理（名稱 / 價錢）</h3>
             <div id="settingsItemList"></div>
             <button class="add-btn" onclick="addItem()">新增貨品</button>
         </div>
@@ -514,16 +552,36 @@
         let data = {
             password: '123456',
             staff: ['員工A', '員工B', '員工C'],
-            items: ['洗剪', '燙髮', '染髮', '護理'],
+            items: [
+                {name: '紅罐', price: 178},
+                {name: '猩猩粉', price: 100},
+                {name: '打底水', price: 148}
+            ],
             payments: [
-                {name: '現金', icon: 'fa-money-bill-wave'},
-                {name: '轉數快', icon: 'fa-mobile-alt'},
-                {name: '支付寶', icon: 'fa-alipay'},
-                {name: 'PayMe', icon: 'fa-credit-card'},
-                {name: '微信支付', icon: 'fa-weixin'}
+                {
+                    name: '現金',
+                    logo: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjQiIGN5PSIyNCIgcj0iMjAiIGZpbGw9IiNGRkM5MDAiLz48dGV4dCB4PSIyNCIgeT0iMzAiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzMzMiPuWKoDwvdGV4dD48L3N2Zz4='
+                },
+                {
+                    name: '轉數快',
+                    logo: 'https://www.hkma.gov.hk/media/img/chi/key-functions/financial-infrastructure/infrastructure/fps/fps-logo.png'
+                },
+                {
+                    name: '支付寶',
+                    logo: 'https://gw.alipayobjects.com/zos/rmsportal/XuVpGqBFxXplzvLjJBZB.svg'
+                },
+                {
+                    name: 'PayMe',
+                    logo: 'https://www.payme.com.hk/content/dam/payme/global/images/payme-logo.svg'
+                },
+                {
+                    name: '微信支付',
+                    logo: 'https://pay.weixin.qq.com/wiki/doc/api/img/logo.png'
+                }
             ],
             productRecords: [],
-            customerRecords: []
+            customerRecords: [],
+            manualPrice: false
         };
 
         // 頁面切換
@@ -544,6 +602,7 @@
             renderProductItems();
             renderPaymentList('productPaymentList');
             document.getElementById('productPrice').textContent = '0';
+            data.manualPrice = false;
         }
 
         // 初始化客人頁
@@ -567,31 +626,39 @@
             });
         }
 
-        // 渲染貨品（可計數）
+        // 渲染貨品（可計數 + 顯示價錢）
         function renderProductItems() {
             const container = document.getElementById('productItemList');
             container.innerHTML = '';
-            data.items.forEach(item => {
+            data.items.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'product-item';
                 div.innerHTML = `
-                    <span>${item}</span>
-                    <button class="count-btn minus" onclick="changeCount(this, -1)">-</button>
-                    <span class="count">0</span>
-                    <button class="count-btn" onclick="changeCount(this, 1)">+</button>
+                    <div class="product-info">
+                        <span class="product-name">${item.name}</span>
+                        <span class="product-price">$${item.price}</span>
+                    </div>
+                    <div class="count-controls">
+                        <button class="count-btn minus" onclick="changeCount(${index}, -1)">-</button>
+                        <span class="count" id="count-${index}">0</span>
+                        <button class="count-btn" onclick="changeCount(${index}, 1)">+</button>
+                    </div>
                 `;
                 container.appendChild(div);
             });
         }
 
-        // 渲染支付方式
+        // 渲染支付方式（Logo）
         function renderPaymentList(containerId) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
             data.payments.forEach(payment => {
                 const div = document.createElement('div');
                 div.className = 'payment-item';
-                div.innerHTML = `<i class="fas ${payment.icon}"></i><span>${payment.name}</span>`;
+                div.innerHTML = `
+                    <img src="${payment.logo}" alt="${payment.name}" class="payment-logo">
+                    <span class="payment-name">${payment.name}</span>
+                `;
                 div.onclick = () => toggleSelect(div, 'payment');
                 container.appendChild(div);
             });
@@ -606,16 +673,34 @@
             el.classList.add('active');
         }
 
-        // 改變貨品數量
-        function changeCount(btn, delta) {
-            const countSpan = btn.parentElement.querySelector('.count');
-            let count = parseInt(countSpan.textContent) + delta;
+        // 改變貨品數量 + 自動計算價錢
+        function changeCount(index, delta) {
+            const countEl = document.getElementById(`count-${index}`);
+            let count = parseInt(countEl.textContent) + delta;
             if (count < 0) count = 0;
-            countSpan.textContent = count;
+            countEl.textContent = count;
+            
+            // 自動計算總價
+            if (!data.manualPrice) {
+                calculateTotalPrice();
+            }
         }
 
-        // 數字鍵盤輸入
+        // 計算總價
+        function calculateTotalPrice() {
+            let total = 0;
+            data.items.forEach((item, index) => {
+                const count = parseInt(document.getElementById(`count-${index}`).textContent);
+                total += item.price * count;
+            });
+            document.getElementById('productPrice').textContent = total.toString();
+        }
+
+        // 數字鍵盤輸入（手動覆蓋）
         function inputNum(type, num) {
+            if (type === 'product') {
+                data.manualPrice = true;
+            }
             const priceEl = document.getElementById(type + 'Price');
             let price = priceEl.textContent;
             if (price === '0') price = '';
@@ -624,11 +709,19 @@
 
         // 清除價錢
         function clearPrice(type) {
-            document.getElementById(type + 'Price').textContent = '0';
+            if (type === 'product') {
+                data.manualPrice = false;
+                calculateTotalPrice();
+            } else {
+                document.getElementById(type + 'Price').textContent = '0';
+            }
         }
 
         // 刪除最後一位
         function backspacePrice(type) {
+            if (type === 'product') {
+                data.manualPrice = true;
+            }
             const priceEl = document.getElementById(type + 'Price');
             let price = priceEl.textContent;
             if (price.length > 1) {
@@ -690,11 +783,10 @@
         // 獲取選中貨品
         function getSelectedProducts() {
             const items = [];
-            document.querySelectorAll('#productItemList .product-item').forEach(item => {
-                const name = item.querySelector('span').textContent;
-                const count = item.querySelector('.count').textContent;
+            data.items.forEach((item, index) => {
+                const count = parseInt(document.getElementById(`count-${index}`).textContent);
                 if (count > 0) {
-                    items.push(`${name} x${count}`);
+                    items.push(`${item.name} x${count}`);
                 }
             });
             return items;
@@ -752,8 +844,9 @@
             list.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'list-item';
+                const displayText = type === 'item' ? `${item.name} - $${item.price}` : item;
                 div.innerHTML = `
-                    <span>${item}</span>
+                    <span>${displayText}</span>
                     <button class="delete-btn" onclick="deleteItem('${type}', ${index})">刪除</button>
                 `;
                 container.appendChild(div);
@@ -769,13 +862,20 @@
             }
         }
 
-        // 新增貨品
+        // 新增貨品（含價錢）
         function addItem() {
             const name = prompt('請輸入貨品名稱：');
-            if (name && name.trim()) {
-                data.items.push(name.trim());
-                initSettingsPage();
+            if (!name || !name.trim()) return;
+            
+            const priceStr = prompt('請輸入貨品價錢：');
+            const price = parseInt(priceStr);
+            if (isNaN(price) || price <= 0) {
+                alert('請輸入有效價錢！');
+                return;
             }
+            
+            data.items.push({name: name.trim(), price: price});
+            initSettingsPage();
         }
 
         // 刪除項目
@@ -803,7 +903,7 @@
             renderRecordTable('customerRecordList', data.customerRecords, 'customer');
         }
 
-        // 渲染紀錄表格（改為 Excel 風格）
+        // 渲染紀錄表格
         function renderRecordTable(containerId, records, type) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
