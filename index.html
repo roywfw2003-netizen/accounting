@@ -380,6 +380,15 @@
         .table-container {
             overflow-x: auto;
         }
+        /* 新增工號輸入框樣式 */
+        .staff-id-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -444,6 +453,7 @@
         <div class="form-group">
             <label>員工</label>
             <div class="select-list" id="productStaffList"></div>
+            <input type="text" id="productStaffId" class="staff-id-input" placeholder="請輸入工號">
         </div>
         <div class="form-group">
             <label>貨品</label>
@@ -487,6 +497,7 @@
         <div class="form-group">
             <label>員工</label>
             <div class="select-list" id="customerStaffList"></div>
+            <input type="text" id="customerStaffId" class="staff-id-input" placeholder="請輸入工號">
         </div>
         <div class="form-group">
             <label>價錢</label>
@@ -548,6 +559,9 @@
     </div>
 
     <script>
+        // 配置 Google Apps Script API 網址（替換為你的實際 URL）
+        const API_URL = "https://script.google.com/macros/s/你的部署ID/exec";
+        
         // 初始化數據
         let data = {
             password: '123456',
@@ -602,6 +616,7 @@
             renderProductItems();
             renderPaymentList('productPaymentList');
             document.getElementById('productPrice').textContent = '0';
+            document.getElementById('productStaffId').value = '';
             data.manualPrice = false;
         }
 
@@ -611,6 +626,7 @@
             renderSelectList('customerStaffList', data.staff, 'staff');
             renderPaymentList('customerPaymentList');
             document.getElementById('customerPrice').textContent = '0';
+            document.getElementById('customerStaffId').value = '';
         }
 
         // 渲染選擇列表
@@ -731,10 +747,33 @@
             }
         }
 
+        // 上傳數據到 Google Sheets
+        async function uploadToGoogleSheet(sheetType, recordData) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sheetType: sheetType,
+                        record: recordData
+                    })
+                });
+                
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('上傳失敗:', error);
+                return { success: false, message: '網絡錯誤，請稍後再試' };
+            }
+        }
+
         // 提交產品頁
-        function submitProduct() {
+        async function submitProduct() {
             const date = document.getElementById('productDate').value;
             const staff = getSelectedText('productStaffList');
+            const staffId = document.getElementById('productStaffId').value.trim();
             const items = getSelectedProducts();
             const price = document.getElementById('productPrice').textContent;
             const payment = getSelectedText('productPaymentList');
@@ -744,19 +783,37 @@
                 return;
             }
 
-            const now = new Date();
-            const dateTime = date + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            // 準備上傳數據
+            const recordData = {
+                date: date,
+                staff: staff,
+                staffId: staffId,
+                items: items.join(', '),
+                price: price,
+                payment: payment
+            };
+
+            // 上傳到 Google Sheets
+            const uploadResult = await uploadToGoogleSheet('product', recordData);
             
-            const record = {dateTime, staff, items: items.join(', '), price, payment};
-            data.productRecords.unshift(record);
-            alert('產品頁提交成功！');
-            goToPage('homePage');
+            if (uploadResult.success) {
+                const now = new Date();
+                const dateTime = date + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+                
+                const record = {dateTime, staff, items: items.join(', '), price, payment};
+                data.productRecords.unshift(record);
+                alert('產品頁提交成功！數據已儲存到 Google Sheets');
+                goToPage('homePage');
+            } else {
+                alert('提交失敗：' + uploadResult.message);
+            }
         }
 
         // 提交客人頁
-        function submitCustomer() {
+        async function submitCustomer() {
             const date = document.getElementById('customerDate').value;
             const staff = getSelectedText('customerStaffList');
+            const staffId = document.getElementById('customerStaffId').value.trim();
             const price = document.getElementById('customerPrice').textContent;
             const payment = getSelectedText('customerPaymentList');
 
@@ -765,13 +822,30 @@
                 return;
             }
 
-            const now = new Date();
-            const dateTime = date + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            // 準備上傳數據
+            const recordData = {
+                date: date,
+                staff: staff,
+                staffId: staffId,
+                items: '', // 客人頁沒有產品
+                price: price,
+                payment: payment
+            };
+
+            // 上傳到 Google Sheets
+            const uploadResult = await uploadToGoogleSheet('customer', recordData);
             
-            const record = {dateTime, staff, price, payment};
-            data.customerRecords.unshift(record);
-            alert('客人頁提交成功！');
-            goToPage('homePage');
+            if (uploadResult.success) {
+                const now = new Date();
+                const dateTime = date + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+                
+                const record = {dateTime, staff, price, payment};
+                data.customerRecords.unshift(record);
+                alert('客人頁提交成功！數據已儲存到 Google Sheets');
+                goToPage('homePage');
+            } else {
+                alert('提交失敗：' + uploadResult.message);
+            }
         }
 
         // 獲取選中文字
