@@ -207,7 +207,6 @@
             cursor: pointer;
             margin-top: 15px;
         }
-        /* 新增記錄列表樣式 */
         .records-list {
             margin-top: 20px;
             max-height: 400px;
@@ -359,7 +358,7 @@
         <div class="form-group">
             <label>Google Sheets API 地址</label>
             <input type="text" id="apiUrl" placeholder="輸入 Apps Script 部署地址" 
-                   value="替換成你的Apps Script URL">
+                   value="請替換為你的 Apps Script URL">
             <button class="add-btn" onclick="saveApiUrl()">保存API地址</button>
         </div>
 
@@ -381,9 +380,8 @@
 
     <script>
         // 核心配置
-        const CONFIG = {
-            API_URL: localStorage.getItem('apiUrl') || "替換成你的Apps Script URL",
-            ADMIN_PWD: "123456"
+        let CONFIG = {
+            API_URL: localStorage.getItem('apiUrl') || ""
         };
 
         // 系統數據
@@ -627,6 +625,8 @@
                 CONFIG.API_URL = url;
                 localStorage.setItem('apiUrl', url);
                 alert('API地址保存成功！');
+            } else {
+                alert('請輸入有效的 API 地址');
             }
         }
 
@@ -652,6 +652,12 @@
 
         // 提交產品表單
         async function submitProductForm() {
+            // 驗證 API 地址
+            if (!CONFIG.API_URL) {
+                alert('請先在「系統設定」中填入 Google Sheets API 地址！');
+                return;
+            }
+
             // 驗證數據
             const date = document.getElementById('productDate').value;
             const staff = getSelected('productStaffList');
@@ -677,7 +683,7 @@
                 date: date,
                 staff: staff,
                 staffId: staffId,
-                products: products.join('，'),
+                products: products.join('，'),  // 注意字段名為 products
                 price: price,
                 payment: payment,
                 createTime: new Date().toLocaleString()
@@ -687,7 +693,7 @@
             const savedRecord = saveLocalRecord(record);
             
             // 同步到Google Sheets
-            syncToGoogle(savedRecord);
+            await syncToGoogle(savedRecord);
             
             // 重置表單
             alert('記錄已保存！正在同步到Google Sheets...');
@@ -696,6 +702,12 @@
 
         // 提交客人表單
         async function submitCustomerForm() {
+            // 驗證 API 地址
+            if (!CONFIG.API_URL) {
+                alert('請先在「系統設定」中填入 Google Sheets API 地址！');
+                return;
+            }
+
             // 驗證數據
             const date = document.getElementById('customerDate').value;
             const staff = getSelected('customerStaffList');
@@ -714,7 +726,7 @@
                 date: date,
                 staff: staff,
                 staffId: staffId,
-                products: '',
+                products: '',  // 客人頁面無產品，留空
                 price: price,
                 payment: payment,
                 createTime: new Date().toLocaleString()
@@ -724,7 +736,7 @@
             const savedRecord = saveLocalRecord(record);
             
             // 同步到Google Sheets
-            syncToGoogle(savedRecord);
+            await syncToGoogle(savedRecord);
             
             // 重置表單
             alert('記錄已保存！正在同步到Google Sheets...');
@@ -746,7 +758,7 @@
                             date: record.date,
                             staff: record.staff,
                             staffId: record.staffId,
-                            items: record.products,
+                            items: record.products,   // 使用 items 字段，後端會兼容
                             price: record.price,
                             payment: record.payment
                         }
@@ -759,14 +771,14 @@
                 const idx = SYSTEM.records.findIndex(r => r.id === record.id);
                 if (idx !== -1) {
                     SYSTEM.records[idx].syncStatus = result.success ? 'success' : 'error';
-                    SYSTEM.records[idx].syncMsg = result.msg;
+                    SYSTEM.records[idx].syncMsg = result.msg || '';
                     localStorage.setItem('salesRecords', JSON.stringify(SYSTEM.records));
                 }
                 
-                if (result.success) {
-                    console.log('同步成功：', result.msg);
+                if (!result.success) {
+                    console.error('同步失敗：', result.msg);
                 } else {
-                    alert('同步失敗：' + result.msg);
+                    console.log('同步成功');
                 }
                 
             } catch (error) {
@@ -793,7 +805,7 @@
             }
             
             SYSTEM.records.forEach(record => {
-                const statusClass = record.syncStatus === 'success' ? 'sync-status' : 'sync-status sync-error';
+                const statusClass = record.syncStatus === 'success' ? 'sync-status' : (record.syncStatus === 'error' ? 'sync-status sync-error' : 'sync-status');
                 const statusText = record.syncStatus === 'success' ? 
                     '✅ 已同步到Google Sheets' : 
                     record.syncStatus === 'error' ? `❌ 同步失敗：${record.syncMsg}` : '⏳ 等待同步';
@@ -815,6 +827,11 @@
 
         // 同步所有記錄
         async function syncAllToGoogle() {
+            if (!CONFIG.API_URL) {
+                alert('請先在「系統設定」中填入 Google Sheets API 地址！');
+                return;
+            }
+
             const unsynced = SYSTEM.records.filter(r => r.syncStatus !== 'success');
             
             if (unsynced.length === 0) {
@@ -851,6 +868,9 @@
 
         // 初始化
         window.onload = () => {
+            // 載入 API 地址
+            const savedUrl = localStorage.getItem('apiUrl');
+            if (savedUrl) CONFIG.API_URL = savedUrl;
             goToPage('homePage');
         };
     </script>
