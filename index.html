@@ -2,131 +2,386 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
-    <title>賣貨管理系統 | Hair World</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>賣貨系統 - 極簡版</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, 'Segoe UI', 'Noto Sans', Roboto, Helvetica, Arial, sans-serif; }
-        body { background: #cfe7ff; padding: 20px; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .app { max-width: 800px; width: 100%; margin: 0 auto; }
-        .card { background: white; border-radius: 32px; box-shadow: 0 12px 28px rgba(0,0,0,0.08); padding: 24px 20px; margin-bottom: 24px; }
-        .home-grid { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; margin-top: 20px; }
-        .home-btn, .home-link { flex: 1; min-width: 140px; background: linear-gradient(135deg, #ff9f4a, #ff7e2e); border: none; border-radius: 60px; padding: 18px 12px; font-size: 1.3rem; font-weight: 700; color: white; box-shadow: 0 8px 0 #b45309; cursor: pointer; text-align: center; text-decoration: none; display: inline-block; transition: 0.08s linear; }
-        .home-btn:active, .home-link:active { transform: translateY(4px); box-shadow: 0 4px 0 #b45309; }
+        * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+        body { background: #cfe7ff; padding: 20px; margin: 0; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 32px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+        button { background: #f97316; border: none; padding: 12px 20px; border-radius: 40px; color: white; font-weight: bold; cursor: pointer; flex: 1; }
         .page { display: none; }
-        .page.active { display: block; }
-        label { font-weight: 600; color: #2c3e4e; margin-bottom: 6px; display: block; font-size: 0.95rem; }
-        select, input { width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 60px; font-size: 1rem; background: #fff; }
-        select:focus, input:focus { border-color: #f97316; outline: none; }
-        .staff-group { display: flex; gap: 15px; flex-wrap: wrap; margin: 15px 0; }
-        .staff-btn { flex: 1; text-align: center; padding: 12px 8px; border-radius: 48px; font-weight: 700; background: #f1f5f9; border: 2px solid transparent; cursor: pointer; font-size: 1.1rem; color: #1f2937; }
-        .staff-btn.active { border-color: #f97316; background: #fff2e5; color: #b45309; transform: scale(0.98); }
-        .product-item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; background: #fef9f0; border-radius: 40px; padding: 12px 16px; margin-bottom: 12px; gap: 12px; }
-        .product-info { flex: 2; min-width: 120px; font-weight: 600; }
-        .product-price { color: #f97316; font-weight: 700; }
-        .quantity-control { display: flex; align-items: center; gap: 12px; background: white; border-radius: 60px; padding: 4px 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .qty-btn { background: #f1f5f9; border: none; width: 44px; height: 44px; font-size: 1.6rem; font-weight: bold; border-radius: 40px; cursor: pointer; }
-        .qty-num { font-size: 1.3rem; font-weight: 700; min-width: 40px; text-align: center; cursor: pointer; }
-        .total-price { font-size: 1.8rem; font-weight: 800; color: #f97316; text-align: right; padding: 10px 0; border-top: 2px dashed #ffe0c0; margin-top: 12px; }
-        .payment-group { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
-        .payment-btn { flex: 1; min-width: 90px; background: #f1f5f9; border: none; padding: 12px 8px; border-radius: 60px; font-weight: 600; font-size: 0.95rem; cursor: pointer; }
-        .payment-btn.active { background: #f97316; color: white; box-shadow: 0 2px 6px rgba(249,115,22,0.4); }
-        .submit-btn { background: #f97316; color: white; width: 100%; padding: 16px; border: none; border-radius: 60px; font-size: 1.4rem; font-weight: 800; margin-top: 20px; cursor: pointer; box-shadow: 0 5px 0 #b45309; }
-        .submit-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #b45309; }
-        .numpad-overlay { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top-left-radius: 32px; border-top-right-radius: 32px; box-shadow: 0 -4px 20px rgba(0,0,0,0.2); padding: 20px 16px 30px; z-index: 1000; display: none; }
-        .numpad-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .numpad-btn { background: #f8fafc; border: none; padding: 20px 0; font-size: 1.8rem; font-weight: 600; border-radius: 56px; cursor: pointer; }
-        .numpad-btn:active { background: #e2e8f0; transform: scale(0.96); }
-        .numpad-close { background: #f97316; color: white; grid-column: span 2; }
-        .numpad-clear { background: #94a3b8; color: white; }
-        .numpad-del { background: #ef4444; color: white; }
-        .record-item { background: #fef9f0; border-radius: 28px; padding: 16px; margin-bottom: 14px; border-left: 6px solid #f97316; }
-        .record-header { display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 8px; font-weight: 700; }
-        .sync-badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 40px; background: #eee; }
-        .sync-success { background: #d1fae5; color: #15803d; }
+        .active { display: block; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; }
+        select, input { width: 100%; padding: 12px; border-radius: 40px; border: 1px solid #ccc; }
+        .staff-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .staff-btn { background: #f1f5f9; color: #1f2937; padding: 8px 16px; border-radius: 40px; cursor: pointer; }
+        .staff-btn.active { background: #f97316; color: white; }
+        .product-item { display: flex; justify-content: space-between; align-items: center; background: #fef9f0; padding: 10px; border-radius: 40px; margin-bottom: 8px; }
+        .qty-control { display: flex; gap: 8px; align-items: center; }
+        .qty-btn { background: #e2e8f0; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem; }
+        .total { font-size: 1.5rem; font-weight: bold; text-align: right; margin-top: 12px; border-top: 1px solid #ddd; padding-top: 12px; }
+        .payment-group { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+        .payment-btn { background: #f1f5f9; color: #1f2937; padding: 8px 16px; border-radius: 40px; cursor: pointer; }
+        .payment-btn.active { background: #f97316; color: white; }
+        .record-item { background: #fef9f0; border-radius: 20px; padding: 12px; margin-bottom: 12px; }
+        .sync-success { background: #d1fae5; color: #15803d; display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
         .sync-pending { background: #fef9c3; color: #854d0e; }
-        .setting-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-        .small-btn { background: #e2e8f0; border: none; padding: 12px 16px; border-radius: 40px; font-weight: 600; cursor: pointer; }
-        .danger-btn { background: #fee2e2; color: #b91c1c; }
-        hr { margin: 20px 0; border-color: #ffe0c0; }
-        .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        @media (max-width: 550px) { .product-item { flex-direction: column; align-items: stretch; } .quantity-control { align-self: flex-end; } .home-btn, .home-link { min-width: 120px; font-size: 1.1rem; padding: 14px 8px; } }
     </style>
 </head>
 <body>
-<div class="app">
-    <div id="homePage" class="page active">
-        <div class="card"><h2 style="color:#b45309; text-align:center;">📋 賣貨管理系統</h2>
-            <div class="home-grid">
-                <button class="home-btn" data-page="sales">🛍️ 產品銷售</button>
-                <button class="home-btn" data-page="consumption">👥 客人消費</button>
-                <button class="home-btn" data-page="records">📜 查看記錄</button>
-                <button class="home-btn" data-page="settings">⚙️ 系統設定</button>
-                <a href="https://roywfw2003-netizen.github.io/hairworld-booking/" target="_blank" rel="noopener noreferrer" class="home-link">👨‍🎓 學生預約</a>
-            </div>
-        </div>
+<div class="container">
+    <div class="btn-group">
+        <button data-page="sales">🛍️ 產品銷售</button>
+        <button data-page="consumption">👥 客人消費</button>
+        <button data-page="records">📜 查看記錄</button>
     </div>
 
+    <!-- 產品銷售頁 -->
     <div id="salesPage" class="page">
-        <div class="card">
-            <div class="flex-between"><h2 style="color:#b45309;">🛍️ 產品銷售</h2><button class="small-btn" id="backHomeFromSales">🏠 首頁</button></div>
-            <div><label>📅 日期</label><input type="date" id="salesDate" value=""></div>
-            <div><label>👤 員工</label><div class="staff-group" id="salesStaffGroup"></div></div>
-            <div><label>📦 產品列表</label><div id="productListContainer"></div><div class="total-price">總金額: <span id="salesTotalAmount">0</span> 元</div></div>
-            <div><label>💳 支付方式</label><div class="payment-group" id="salesPaymentGroup"></div></div>
-            <button class="submit-btn" id="submitSalesBtn">✔️ 提交銷售</button>
+        <h3>🛍️ 產品銷售</h3>
+        <div class="form-group">
+            <label>日期</label>
+            <input type="date" id="salesDate">
         </div>
+        <div class="form-group">
+            <label>員工</label>
+            <div class="staff-group" id="salesStaff"></div>
+        </div>
+        <div class="form-group">
+            <label>產品</label>
+            <div id="productList"></div>
+            <div class="total">總金額: <span id="totalAmount">0</span> 元</div>
+        </div>
+        <div class="form-group">
+            <label>支付方式</label>
+            <div class="payment-group" id="salesPayment"></div>
+        </div>
+        <button id="submitSales">提交銷售</button>
     </div>
 
+    <!-- 客人消費頁 -->
     <div id="consumptionPage" class="page">
-        <div class="card">
-            <div class="flex-between"><h2 style="color:#b45309;">👥 客人消費</h2><button class="small-btn" id="backHomeFromConsumption">🏠 首頁</button></div>
-            <div><label>📅 日期</label><input type="date" id="consumeDate" value=""></div>
-            <div><label>👤 員工</label><div class="staff-group" id="consumeStaffGroup"></div></div>
-            <div><label>💰 金額</label><input type="text" id="consumeAmount" readonly placeholder="點擊下方鍵盤輸入" style="background:#f9fafb; font-size:1.8rem; font-weight:bold; text-align:right;"></div>
-            <div><label>💳 支付方式</label><div class="payment-group" id="consumePaymentGroup"></div></div>
-            <button class="submit-btn" id="submitConsumeBtn">✔️ 提交消費</button>
+        <h3>👥 客人消費</h3>
+        <div class="form-group">
+            <label>日期</label>
+            <input type="date" id="consumeDate">
         </div>
+        <div class="form-group">
+            <label>員工</label>
+            <div class="staff-group" id="consumeStaff"></div>
+        </div>
+        <div class="form-group">
+            <label>金額</label>
+            <input type="number" id="consumeAmount" placeholder="輸入金額" step="1">
+        </div>
+        <div class="form-group">
+            <label>支付方式</label>
+            <div class="payment-group" id="consumePayment"></div>
+        </div>
+        <button id="submitConsume">提交消費</button>
     </div>
 
+    <!-- 記錄頁 -->
     <div id="recordsPage" class="page">
-        <div class="card">
-            <div class="flex-between"><h2 style="color:#b45309;">📜 交易記錄</h2><button class="small-btn" id="backHomeFromRecords">🏠 首頁</button><button class="small-btn" id="manualSyncBtn">🔄 手動同步</button></div>
-            <div id="recordsList" style="margin-top: 20px;"></div>
-        </div>
-    </div>
-
-    <div id="settingsPage" class="page">
-        <div class="card">
-            <div class="flex-between"><h2 style="color:#b45309;">⚙️ 系統設定</h2><button class="small-btn" id="backHomeFromSettings">🏠 首頁</button></div>
-            <div><label>🔗 同步伺服器</label><input type="text" id="apiKeyDisplay" readonly value="已啟用 (Apps Script 連線)" style="background:#f0f0f0;"></div>
-            <hr>
-            <div><label>👥 員工管理</label><div id="staffManageList"></div><div class="setting-row"><input type="text" id="newStaffName" placeholder="員工姓名" style="flex:2;"><input type="text" id="newStaffCode" placeholder="工號/代碼" style="flex:1;"><button class="small-btn" id="addStaffBtn">➕ 新增</button></div></div>
-            <hr>
-            <div><label>📦 產品管理</label><div id="productManageList"></div><div class="setting-row"><input type="text" id="newProductName" placeholder="產品名稱" style="flex:2;"><input type="number" id="newProductPrice" placeholder="價格" style="flex:1;"><button class="small-btn" id="addProductBtn">➕ 新增</button></div></div>
-            <hr>
-            <button class="small-btn danger-btn" id="clearLocalDataBtn">🗑️ 清空所有本地記錄</button>
-        </div>
-    </div>
-
-    <div id="numpadOverlay" class="numpad-overlay">
-        <div class="numpad-grid">
-            <button class="numpad-btn" data-val="1">1</button><button class="numpad-btn" data-val="2">2</button><button class="numpad-btn" data-val="3">3</button><button class="numpad-btn numpad-del" data-func="del">⌫</button>
-            <button class="numpad-btn" data-val="4">4</button><button class="numpad-btn" data-val="5">5</button><button class="numpad-btn" data-val="6">6</button><button class="numpad-btn" data-val="7">7</button>
-            <button class="numpad-btn" data-val="8">8</button><button class="numpad-btn" data-val="9">9</button><button class="numpad-btn" data-val="0">0</button><button class="numpad-btn numpad-clear" data-func="clear">C</button>
-            <button class="numpad-btn numpad-close" data-func="close">完成</button>
-        </div>
+        <h3>📜 交易記錄</h3>
+        <button id="manualSyncBtn" style="margin-bottom: 12px;">🔄 手動同步</button>
+        <div id="recordsList"></div>
     </div>
 </div>
 
 <script>
-(function() {
-    // 請將此網址改為您新部署的 Apps Script 網址
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzlJUimQtdpkAf9OKXKussUPbIZ5BKea1RPd9F70h2xnbCv1-6DUe-sJxOAj4JxASwwpA/exec';
+// 極簡版賣貨系統 – 使用 Apps Script 同步
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzzS0zDqtSt-R-4ZMpMWeN0cLOTWlTxDwOZ8DgQA2KWI8UT56SRnIuXJ9T7OPE-CUvgYA/exec';
 
-    // 其餘程式碼與上一版相同（此處省略以節省篇幅，但實際使用時請包含完整功能）
-    // 為了確保可執行，請複製完整的程式碼（下方將提供完整版）
-})();
+// 固定資料
+let staffList = [
+    { code: "1", name: "Roy" },
+    { code: "2", name: "Ken" },
+    { code: "3", name: "Kin" }
+];
+let productList = [
+    { name: "紅罐", price: 178 },
+    { name: "猩猩粉", price: 100 },
+    { name: "打底水", price: 148 }
+];
+const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付"];
+
+let records = [];
+let salesQuantities = {};
+let selectedSalesStaff = null;
+let selectedConsumeStaff = null;
+let selectedSalesPayment = "現金";
+let selectedConsumePayment = "現金";
+
+// 載入本地記錄
+function loadRecords() {
+    const stored = localStorage.getItem("salesRecords");
+    if (stored) records = JSON.parse(stored);
+    renderRecords();
+}
+function saveRecords() {
+    localStorage.setItem("salesRecords", JSON.stringify(records));
+}
+
+// 同步到 Apps Script
+async function syncToSheet(record) {
+    try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(record)
+        });
+        const data = await res.json();
+        if (res.ok && data.result === 'success') return true;
+        else throw new Error(data.message || '同步失敗');
+    } catch (err) {
+        console.error(err);
+        return false;
+    }
+}
+
+// 新增記錄
+async function addRecord(recordData) {
+    const newId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
+    const newRecord = { id: newId, syncStatus: "pending", ...recordData };
+    records.unshift(newRecord);
+    saveRecords();
+    renderRecords();
+
+    const success = await syncToSheet(newRecord);
+    const idx = records.findIndex(r => r.id === newId);
+    if (idx !== -1) {
+        records[idx].syncStatus = success ? "success" : "failed";
+        if (!success) records[idx].syncError = "同步失敗，可手動重試";
+        saveRecords();
+        renderRecords();
+    }
+    return success;
+}
+
+// 手動同步
+async function manualSync() {
+    const failed = records.filter(r => r.syncStatus === "failed");
+    if (failed.length === 0) { alert("沒有需要同步的記錄"); return; }
+    let count = 0;
+    for (let rec of failed) {
+        const ok = await syncToSheet(rec);
+        if (ok) {
+            rec.syncStatus = "success";
+            delete rec.syncError;
+            count++;
+        }
+    }
+    saveRecords();
+    renderRecords();
+    alert(`手動同步完成：成功 ${count} 筆，失敗 ${failed.length - count} 筆`);
+}
+
+// 渲染記錄
+function renderRecords() {
+    const container = document.getElementById("recordsList");
+    if (!container) return;
+    if (records.length === 0) {
+        container.innerHTML = "<div>暫無記錄</div>";
+        return;
+    }
+    let html = "";
+    records.forEach(rec => {
+        let statusClass = "", statusText = "";
+        if (rec.syncStatus === "success") { statusClass = "sync-success"; statusText = "已同步"; }
+        else if (rec.syncStatus === "failed") { statusClass = "sync-failed"; statusText = "同步失敗"; }
+        else { statusClass = "sync-pending"; statusText = "待同步"; }
+        const typeLabel = rec.type === "sales" ? "🛍️ 產品銷售" : "👥 客人消費";
+        const detail = rec.type === "sales" ? `明細: ${rec.details}` : `金額: $${rec.amount}`;
+        html += `
+            <div class="record-item">
+                <div><strong>${typeLabel}</strong> <span class="${statusClass}">${statusText}</span></div>
+                <div>📅 ${rec.date} ｜ 👤 ${rec.staffName} (${rec.staffCode})</div>
+                <div>💰 ${rec.type==='sales'? `總額 $${rec.amount}` : `消費 $${rec.amount}`} ｜ 💳 ${rec.payment}</div>
+                <div>${detail}</div>
+                ${rec.syncError ? `<div style="color:#b91c1c;">⚠️ ${rec.syncError}</div>` : ''}
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+// 渲染員工按鈕
+function renderStaff(containerId, selectedCode, onChange) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    staffList.forEach(s => {
+        const btn = document.createElement("div");
+        btn.className = "staff-btn" + (selectedCode === s.code ? " active" : "");
+        btn.textContent = `${s.name} (${s.code})`;
+        btn.onclick = () => {
+            document.querySelectorAll(`#${containerId} .staff-btn`).forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            onChange(s.code, s.name);
+        };
+        container.appendChild(btn);
+    });
+    if (staffList.length && !selectedCode) onChange(staffList[0].code, staffList[0].name);
+}
+
+// 渲染支付方式
+function renderPayment(containerId, selected, onChange) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    PAYMENTS.forEach(p => {
+        const btn = document.createElement("div");
+        btn.className = "payment-btn" + (selected === p ? " active" : "");
+        btn.textContent = p;
+        btn.onclick = () => {
+            document.querySelectorAll(`#${containerId} .payment-btn`).forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            onChange(p);
+        };
+        container.appendChild(btn);
+    });
+}
+
+// 產品列表渲染
+function renderProducts() {
+    const container = document.getElementById("productList");
+    if (!container) return;
+    let html = "";
+    productList.forEach(p => {
+        const qty = salesQuantities[p.name] || 0;
+        html += `
+            <div class="product-item">
+                <span><strong>${p.name}</strong> $${p.price}</span>
+                <div class="qty-control">
+                    <button class="qty-btn" data-name="${p.name}" data-delta="-1">−</button>
+                    <span>${qty}</span>
+                    <button class="qty-btn" data-name="${p.name}" data-delta="1">+</button>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+    document.querySelectorAll(".qty-btn").forEach(btn => {
+        btn.onclick = () => {
+            const name = btn.dataset.name;
+            const delta = parseInt(btn.dataset.delta);
+            const newVal = Math.max(0, (salesQuantities[name] || 0) + delta);
+            salesQuantities[name] = newVal;
+            renderProducts();
+            calcTotal();
+        };
+    });
+    calcTotal();
+}
+function calcTotal() {
+    let total = 0;
+    productList.forEach(p => total += (salesQuantities[p.name] || 0) * p.price);
+    document.getElementById("totalAmount").innerText = total;
+    return total;
+}
+
+// 提交銷售
+async function submitSales() {
+    const date = document.getElementById("salesDate").value;
+    if (!date) { alert("請選擇日期"); return; }
+    if (!selectedSalesStaff) { alert("請選擇員工"); return; }
+    const payment = selectedSalesPayment;
+    let items = [], total = 0;
+    productList.forEach(p => {
+        const qty = salesQuantities[p.name] || 0;
+        if (qty > 0) {
+            items.push(`${p.name} x${qty}`);
+            total += qty * p.price;
+        }
+    });
+    if (items.length === 0) { alert("請至少選擇一件產品"); return; }
+    const record = {
+        type: "sales",
+        date,
+        staffCode: selectedSalesStaff.code,
+        staffName: selectedSalesStaff.name,
+        amount: total,
+        payment,
+        details: items.join("、"),
+        createdAt: new Date().toISOString()
+    };
+    const ok = await addRecord(record);
+    alert(ok ? "銷售記錄已儲存並同步成功！" : "記錄已儲存但同步失敗，稍後可手動同步");
+    salesQuantities = {};
+    renderProducts();
+    document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
+    document.querySelector("#salesPage").classList.remove("active");
+    document.querySelector("#recordsPage").classList.add("active");
+    renderRecords();
+}
+
+// 提交消費
+async function submitConsumption() {
+    const date = document.getElementById("consumeDate").value;
+    if (!date) { alert("請選擇日期"); return; }
+    if (!selectedConsumeStaff) { alert("請選擇員工"); return; }
+    const amount = parseFloat(document.getElementById("consumeAmount").value);
+    if (isNaN(amount) || amount <= 0) { alert("請輸入正確金額"); return; }
+    const payment = selectedConsumePayment;
+    const record = {
+        type: "consumption",
+        date,
+        staffCode: selectedConsumeStaff.code,
+        staffName: selectedConsumeStaff.name,
+        amount,
+        payment,
+        details: `消費金額 $${amount}`,
+        createdAt: new Date().toISOString()
+    };
+    const ok = await addRecord(record);
+    alert(ok ? "消費記錄已儲存並同步成功！" : "記錄已儲存但同步失敗，稍後可手動同步");
+    document.getElementById("consumeAmount").value = "";
+    document.querySelector("#consumptionPage").classList.remove("active");
+    document.querySelector("#recordsPage").classList.add("active");
+    renderRecords();
+}
+
+// 頁面切換
+function showPage(pageId) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(pageId + "Page").classList.add("active");
+    if (pageId === "sales") {
+        document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
+        renderProducts();
+    }
+    if (pageId === "consumption") {
+        document.getElementById("consumeDate").value = new Date().toISOString().slice(0,10);
+    }
+    if (pageId === "records") renderRecords();
+}
+
+// 初始化
+document.querySelectorAll("[data-page]").forEach(btn => {
+    btn.onclick = () => showPage(btn.dataset.page);
+});
+document.getElementById("submitSales").onclick = submitSales;
+document.getElementById("submitConsume").onclick = submitConsumption;
+document.getElementById("manualSyncBtn").onclick = manualSync;
+
+renderStaff("salesStaff", selectedSalesStaff?.code, (code, name) => selectedSalesStaff = { code, name });
+renderStaff("consumeStaff", selectedConsumeStaff?.code, (code, name) => selectedConsumeStaff = { code, name });
+renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p);
+renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p);
+
+// 預設選中第一個員工
+if (!selectedSalesStaff) {
+    const s = staffList[0];
+    selectedSalesStaff = { code: s.code, name: s.name };
+    selectedConsumeStaff = { code: s.code, name: s.name };
+}
+renderStaff("salesStaff", selectedSalesStaff.code, (c,n)=>selectedSalesStaff={code:c,name:n});
+renderStaff("consumeStaff", selectedConsumeStaff.code, (c,n)=>selectedConsumeStaff={code:c,name:n});
+
+loadRecords();
+showPage("sales");
 </script>
 </body>
 </html>
