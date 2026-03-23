@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>賣貨系統 | 簡易版</title>
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
+    <title>賣貨管理系統 | Hair World</title>
     <style>
         * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
         body { background: #cfe7ff; padding: 20px; margin: 0; }
@@ -31,6 +29,11 @@
         .sync-pending { background: #fef9c3; color: #854d0e; }
         .login-status { background: #e2e8f0; border-radius: 40px; padding: 8px 16px; margin-bottom: 20px; text-align: center; font-size: 0.9rem; }
         .login-status button { background: #f97316; color: white; border: none; padding: 4px 12px; border-radius: 30px; cursor: pointer; margin-left: 10px; }
+        .setting-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+        .small-btn { background: #e2e8f0; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-size: 0.9rem; }
+        .danger-btn { background: #fee2e2; color: #b91c1c; }
+        hr { margin: 20px 0; border-color: #ffe0c0; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     </style>
 </head>
 <body>
@@ -41,36 +44,64 @@
         <button data-page="sales">🛍️ 產品銷售</button>
         <button data-page="consumption">👥 客人消費</button>
         <button data-page="records">📜 查看記錄</button>
+        <button data-page="settings">⚙️ 系統設定</button>
+        <a href="https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html" target="_blank" class="home-link">👨‍🎓 學生預約</a>
     </div>
 
+    <!-- 產品銷售頁 -->
     <div id="salesPage" class="page">
         <h3>🛍️ 產品銷售</h3>
-        <div class="form-group"><label>日期</label><input type="date" id="salesDate"></div>
-        <div class="form-group"><label>員工</label><div class="staff-group" id="salesStaff"></div></div>
-        <div class="form-group"><label>產品</label><div id="productList"></div><div class="total">總金額: <span id="totalAmount">0</span> 元</div></div>
-        <div class="form-group"><label>支付方式</label><div class="payment-group" id="salesPayment"></div></div>
+        <div class="form-group"><label>📅 日期</label><input type="date" id="salesDate"></div>
+        <div class="form-group"><label>👤 員工</label><div class="staff-group" id="salesStaff"></div></div>
+        <div class="form-group"><label>📦 產品</label><div id="productList"></div><div class="total">總金額: <span id="totalAmount">0</span> 元</div></div>
+        <div class="form-group"><label>💳 支付方式</label><div class="payment-group" id="salesPayment"></div></div>
         <button id="submitSales">提交銷售</button>
     </div>
 
+    <!-- 客人消費頁 -->
     <div id="consumptionPage" class="page">
         <h3>👥 客人消費</h3>
-        <div class="form-group"><label>日期</label><input type="date" id="consumeDate"></div>
-        <div class="form-group"><label>員工</label><div class="staff-group" id="consumeStaff"></div></div>
-        <div class="form-group"><label>金額</label><input type="number" id="consumeAmount" placeholder="輸入金額" step="1"></div>
-        <div class="form-group"><label>支付方式</label><div class="payment-group" id="consumePayment"></div></div>
+        <div class="form-group"><label>📅 日期</label><input type="date" id="consumeDate"></div>
+        <div class="form-group"><label>👤 員工</label><div class="staff-group" id="consumeStaff"></div></div>
+        <div class="form-group"><label>💰 金額</label><input type="number" id="consumeAmount" placeholder="輸入金額" step="1"></div>
+        <div class="form-group"><label>💳 支付方式</label><div class="payment-group" id="consumePayment"></div></div>
         <button id="submitConsume">提交消費</button>
     </div>
 
+    <!-- 記錄頁 -->
     <div id="recordsPage" class="page">
         <h3>📜 交易記錄</h3>
         <button id="manualSyncBtn" style="margin-bottom:12px;">🔄 手動同步</button>
         <div id="recordsList"></div>
     </div>
+
+    <!-- 設定頁 -->
+    <div id="settingsPage" class="page">
+        <h3>⚙️ 系統設定</h3>
+        <hr>
+        <h4>👥 員工管理</h4>
+        <div id="staffManageList"></div>
+        <div class="setting-row">
+            <input type="text" id="newStaffName" placeholder="員工姓名" style="flex:2;">
+            <input type="text" id="newStaffCode" placeholder="工號" style="flex:1;">
+            <button class="small-btn" id="addStaffBtn">➕ 新增</button>
+        </div>
+        <hr>
+        <h4>📦 產品管理</h4>
+        <div id="productManageList"></div>
+        <div class="setting-row">
+            <input type="text" id="newProductName" placeholder="產品名稱" style="flex:2;">
+            <input type="number" id="newProductPrice" placeholder="價格" style="flex:1;">
+            <button class="small-btn" id="addProductBtn">➕ 新增</button>
+        </div>
+        <hr>
+        <button class="small-btn danger-btn" id="clearLocalDataBtn">🗑️ 清空所有本地記錄</button>
+    </div>
 </div>
 
 <script>
-// ========== 請將此處替換為您的 OAuth 用戶端編號 ==========
-const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com';  // 例如：123456789-abcdefg.apps.googleusercontent.com
+// ========== 請替換為您的 OAuth 用戶端編號 ==========
+const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com';
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
@@ -79,6 +110,7 @@ let gapiInited = false;
 let gisInited = false;
 let gapiReady = false;
 
+// 全域資料
 let staffList = [
     { code: "1", name: "Roy" },
     { code: "2", name: "Ken" },
@@ -97,12 +129,20 @@ let selectedSalesPayment = "現金";
 let selectedConsumePayment = "現金";
 const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付"];
 
+// 本地儲存
 function loadLocalData() {
-    const stored = localStorage.getItem("salesRecords");
-    if (stored) records = JSON.parse(stored);
+    const storedStaff = localStorage.getItem("staffList");
+    if (storedStaff) staffList = JSON.parse(storedStaff);
+    const storedProducts = localStorage.getItem("productList");
+    if (storedProducts) productList = JSON.parse(storedProducts);
+    const storedRecords = localStorage.getItem("salesRecords");
+    if (storedRecords) records = JSON.parse(storedRecords);
 }
+function saveStaff() { localStorage.setItem("staffList", JSON.stringify(staffList)); }
+function saveProducts() { localStorage.setItem("productList", JSON.stringify(productList)); }
 function saveRecords() { localStorage.setItem("salesRecords", JSON.stringify(records)); }
 
+// Google API 初始化
 function gapiLoaded() {
     gapi.load('client', initGapiClient);
 }
@@ -125,17 +165,19 @@ function gisLoaded() {
 function maybeEnableButtons() {
     if (gapiInited && gisInited) {
         gapiReady = true;
-        document.getElementById('loginStatus').innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權 <button id="authBtn">登入 Google</button>';
+        const statusDiv = document.getElementById('loginStatus');
+        statusDiv.innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權 <button id="authBtn">登入 Google</button>';
         document.getElementById('authBtn').onclick = () => {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) throw resp;
-                document.getElementById('loginStatus').innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
+                statusDiv.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
             };
             tokenClient.requestAccessToken();
         };
     }
 }
 
+// 寫入試算表
 async function appendToSheet(values) {
     const range = 'Sheet1!A:J';
     const params = {
@@ -145,7 +187,7 @@ async function appendToSheet(values) {
         resource: { values: [values] }
     };
     try {
-        const response = await gapi.client.sheets.spreadsheets.values.append(params);
+        await gapi.client.sheets.spreadsheets.values.append(params);
         return { success: true };
     } catch (err) {
         return { success: false, error: err.message };
@@ -203,6 +245,7 @@ async function manualSyncAll() {
     alert(`手動同步完成：成功 ${count} 筆，失敗 ${failed.length - count} 筆`);
 }
 
+// UI 渲染函數
 function renderStaff(containerId, selectedCode, onChange) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
@@ -211,7 +254,7 @@ function renderStaff(containerId, selectedCode, onChange) {
         btn.className = "staff-btn" + (selectedCode === s.code ? " active" : "");
         btn.textContent = `${s.name} (${s.code})`;
         btn.onclick = () => {
-            document.querySelectorAll(`#${containerId} .staff-btn`).forEach(b => b.classList.remove("active"));
+            container.querySelectorAll(".staff-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             onChange(s.code, s.name);
         };
@@ -226,7 +269,7 @@ function renderPayment(containerId, selected, onChange) {
         btn.className = "payment-btn" + (selected === p ? " active" : "");
         btn.textContent = p;
         btn.onclick = () => {
-            document.querySelectorAll(`#${containerId} .payment-btn`).forEach(b => b.classList.remove("active"));
+            container.querySelectorAll(".payment-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             onChange(p);
         };
@@ -267,7 +310,6 @@ function calcTotal() {
     let total = 0;
     productList.forEach(p => total += (salesQuantities[p.name] || 0) * p.price);
     document.getElementById("totalAmount").innerText = total;
-    return total;
 }
 function renderRecords() {
     const container = document.getElementById("recordsList");
@@ -294,6 +336,7 @@ function renderRecords() {
     container.innerHTML = html;
 }
 
+// 提交銷售
 async function submitSales() {
     if (!gapiReady) { alert("請先登入 Google 並授權"); return; }
     const date = document.getElementById("salesDate").value;
@@ -326,6 +369,7 @@ async function submitSales() {
     document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
     showPage("records");
 }
+// 提交消費
 async function submitConsumption() {
     if (!gapiReady) { alert("請先登入 Google 並授權"); return; }
     const date = document.getElementById("consumeDate").value;
@@ -350,6 +394,7 @@ async function submitConsumption() {
     showPage("records");
 }
 
+// 頁面切換
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     document.getElementById(pageId + "Page").classList.add("active");
@@ -361,15 +406,89 @@ function showPage(pageId) {
         document.getElementById("consumeDate").value = new Date().toISOString().slice(0,10);
     }
     if (pageId === "records") renderRecords();
+    if (pageId === "settings") {
+        renderStaffManageList();
+        renderProductManageList();
+    }
 }
 
+// 設定頁管理
+function renderStaffManageList() {
+    const container = document.getElementById("staffManageList");
+    if (!container) return;
+    container.innerHTML = "";
+    staffList.forEach((staff, idx) => {
+        const div = document.createElement("div");
+        div.className = "setting-row";
+        div.innerHTML = `<span style="flex:2;"><strong>${staff.name}</strong> (${staff.code})</span><button class="small-btn danger-btn" data-idx="${idx}">刪除</button>`;
+        div.querySelector("button").onclick = () => {
+            staffList.splice(idx, 1);
+            saveStaff();
+            renderStaffManageList();
+            renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+            renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+        };
+        container.appendChild(div);
+    });
+}
+function renderProductManageList() {
+    const container = document.getElementById("productManageList");
+    if (!container) return;
+    container.innerHTML = "";
+    productList.forEach((prod, idx) => {
+        const div = document.createElement("div");
+        div.className = "setting-row";
+        div.innerHTML = `<span style="flex:2;">${prod.name} - $${prod.price}</span><button class="small-btn danger-btn" data-idx="${idx}">刪除</button>`;
+        div.querySelector("button").onclick = () => {
+            productList.splice(idx, 1);
+            saveProducts();
+            renderProductManageList();
+            renderProducts();
+        };
+        container.appendChild(div);
+    });
+}
+
+// 事件綁定
 document.querySelectorAll("[data-page]").forEach(btn => {
     btn.onclick = () => showPage(btn.dataset.page);
 });
 document.getElementById("submitSales").onclick = submitSales;
 document.getElementById("submitConsume").onclick = submitConsumption;
 document.getElementById("manualSyncBtn").onclick = manualSyncAll;
+document.getElementById("addStaffBtn").onclick = () => {
+    const name = document.getElementById("newStaffName").value.trim();
+    const code = document.getElementById("newStaffCode").value.trim();
+    if (!name || !code) { alert("請填寫員工姓名與工號"); return; }
+    staffList.push({ code, name });
+    saveStaff();
+    renderStaffManageList();
+    renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+    renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+    document.getElementById("newStaffName").value = "";
+    document.getElementById("newStaffCode").value = "";
+};
+document.getElementById("addProductBtn").onclick = () => {
+    const name = document.getElementById("newProductName").value.trim();
+    const price = parseFloat(document.getElementById("newProductPrice").value);
+    if (!name || isNaN(price) || price <= 0) { alert("請填寫產品名稱與正確價格"); return; }
+    productList.push({ name, price });
+    saveProducts();
+    renderProductManageList();
+    renderProducts();
+    document.getElementById("newProductName").value = "";
+    document.getElementById("newProductPrice").value = "";
+};
+document.getElementById("clearLocalDataBtn").onclick = () => {
+    if (confirm("⚠️ 確定清空所有本地記錄？此操作無法復原！")) {
+        records = [];
+        saveRecords();
+        renderRecords();
+        alert("已清空所有記錄");
+    }
+};
 
+// 初始化
 function initUI() {
     renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
     renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
@@ -381,11 +500,14 @@ function initUI() {
     }
     renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
     renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+    renderStaffManageList();
+    renderProductManageList();
 }
 loadLocalData();
 initUI();
 showPage("sales");
 
+// 確保 Google API 載入後自動呼叫回調
 window.gapiLoaded = gapiLoaded;
 window.gisLoaded = gisLoaded;
 </script>
