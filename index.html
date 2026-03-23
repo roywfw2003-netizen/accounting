@@ -3,100 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>賣貨系統 - 極簡版</title>
+    <title>賣貨管理系統 | Hair World</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
     <style>
-        * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+        * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
         body { background: #cfe7ff; padding: 20px; margin: 0; }
         .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 32px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-        button { background: #f97316; border: none; padding: 12px 20px; border-radius: 40px; color: white; font-weight: bold; cursor: pointer; flex: 1; }
+        button, .home-link { background: #f97316; border: none; padding: 12px 20px; border-radius: 40px; color: white; font-weight: bold; cursor: pointer; flex: 1; text-align: center; text-decoration: none; display: inline-block; }
         .page { display: none; }
         .active { display: block; }
         .form-group { margin-bottom: 16px; }
         label { display: block; margin-bottom: 6px; font-weight: 600; }
         select, input { width: 100%; padding: 12px; border-radius: 40px; border: 1px solid #ccc; }
-        .staff-group { display: flex; gap: 8px; flex-wrap: wrap; }
-        .staff-btn { background: #f1f5f9; color: #1f2937; padding: 8px 16px; border-radius: 40px; cursor: pointer; }
-        .staff-btn.active { background: #f97316; color: white; }
+        .staff-group, .payment-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+        .staff-btn, .payment-btn { background: #f1f5f9; color: #1f2937; padding: 8px 16px; border-radius: 40px; cursor: pointer; }
+        .staff-btn.active, .payment-btn.active { background: #f97316; color: white; }
         .product-item { display: flex; justify-content: space-between; align-items: center; background: #fef9f0; padding: 10px; border-radius: 40px; margin-bottom: 8px; }
         .qty-control { display: flex; gap: 8px; align-items: center; }
-        .qty-btn { background: #e2e8f0; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem; }
+        .qty-btn { background: #e2e8f0; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; }
         .total { font-size: 1.5rem; font-weight: bold; text-align: right; margin-top: 12px; border-top: 1px solid #ddd; padding-top: 12px; }
-        .payment-group { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-        .payment-btn { background: #f1f5f9; color: #1f2937; padding: 8px 16px; border-radius: 40px; cursor: pointer; }
-        .payment-btn.active { background: #f97316; color: white; }
         .record-item { background: #fef9f0; border-radius: 20px; padding: 12px; margin-bottom: 12px; }
-        .sync-success { background: #d1fae5; color: #15803d; display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
+        .sync-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
+        .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
         .sync-pending { background: #fef9c3; color: #854d0e; }
+        .login-status { background: #e2e8f0; border-radius: 40px; padding: 8px 16px; margin-bottom: 20px; text-align: center; font-size: 0.9rem; }
+        .login-status button { background: #f97316; color: white; border: none; padding: 4px 12px; border-radius: 30px; cursor: pointer; margin-left: 10px; }
     </style>
 </head>
 <body>
 <div class="container">
+    <div id="loginStatus" class="login-status">載入中...</div>
+
     <div class="btn-group">
         <button data-page="sales">🛍️ 產品銷售</button>
         <button data-page="consumption">👥 客人消費</button>
         <button data-page="records">📜 查看記錄</button>
+        <a href="https://roywfw2003-netizen.github.io/hairworld-booking/" target="_blank" class="home-link">👨‍🎓 學生預約</a>
     </div>
 
-    <!-- 產品銷售頁 -->
     <div id="salesPage" class="page">
         <h3>🛍️ 產品銷售</h3>
-        <div class="form-group">
-            <label>日期</label>
-            <input type="date" id="salesDate">
-        </div>
-        <div class="form-group">
-            <label>員工</label>
-            <div class="staff-group" id="salesStaff"></div>
-        </div>
-        <div class="form-group">
-            <label>產品</label>
-            <div id="productList"></div>
-            <div class="total">總金額: <span id="totalAmount">0</span> 元</div>
-        </div>
-        <div class="form-group">
-            <label>支付方式</label>
-            <div class="payment-group" id="salesPayment"></div>
-        </div>
+        <div class="form-group"><label>日期</label><input type="date" id="salesDate"></div>
+        <div class="form-group"><label>員工</label><div class="staff-group" id="salesStaff"></div></div>
+        <div class="form-group"><label>產品</label><div id="productList"></div><div class="total">總金額: <span id="totalAmount">0</span> 元</div></div>
+        <div class="form-group"><label>支付方式</label><div class="payment-group" id="salesPayment"></div></div>
         <button id="submitSales">提交銷售</button>
     </div>
 
-    <!-- 客人消費頁 -->
     <div id="consumptionPage" class="page">
         <h3>👥 客人消費</h3>
-        <div class="form-group">
-            <label>日期</label>
-            <input type="date" id="consumeDate">
-        </div>
-        <div class="form-group">
-            <label>員工</label>
-            <div class="staff-group" id="consumeStaff"></div>
-        </div>
-        <div class="form-group">
-            <label>金額</label>
-            <input type="number" id="consumeAmount" placeholder="輸入金額" step="1">
-        </div>
-        <div class="form-group">
-            <label>支付方式</label>
-            <div class="payment-group" id="consumePayment"></div>
-        </div>
+        <div class="form-group"><label>日期</label><input type="date" id="consumeDate"></div>
+        <div class="form-group"><label>員工</label><div class="staff-group" id="consumeStaff"></div></div>
+        <div class="form-group"><label>金額</label><input type="number" id="consumeAmount" placeholder="輸入金額" step="1"></div>
+        <div class="form-group"><label>支付方式</label><div class="payment-group" id="consumePayment"></div></div>
         <button id="submitConsume">提交消費</button>
     </div>
 
-    <!-- 記錄頁 -->
     <div id="recordsPage" class="page">
         <h3>📜 交易記錄</h3>
-        <button id="manualSyncBtn" style="margin-bottom: 12px;">🔄 手動同步</button>
+        <button id="manualSyncBtn" style="margin-bottom:12px;">🔄 手動同步</button>
         <div id="recordsList"></div>
     </div>
 </div>
 
 <script>
-// 極簡版賣貨系統 – 使用 Apps Script 同步
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzzS0zDqtSt-R-4ZMpMWeN0cLOTWlTxDwOZ8DgQA2KWI8UT56SRnIuXJ9T7OPE-CUvgYA/exec';
+// ========== 請替換為您的 OAuth 用戶端編號 ==========
+const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com';  // 例如：123456789-abcdefg.apps.googleusercontent.com
+const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
-// 固定資料
+let tokenClient;
+let gapiInited = false;
+let gisInited = false;
+let gapiReady = false;
+
 let staffList = [
     { code: "1", name: "Roy" },
     { code: "2", name: "Ken" },
@@ -107,44 +90,85 @@ let productList = [
     { name: "猩猩粉", price: 100 },
     { name: "打底水", price: 148 }
 ];
-const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付"];
-
 let records = [];
 let salesQuantities = {};
 let selectedSalesStaff = null;
 let selectedConsumeStaff = null;
 let selectedSalesPayment = "現金";
 let selectedConsumePayment = "現金";
+const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付"];
 
-// 載入本地記錄
-function loadRecords() {
+function loadLocalData() {
     const stored = localStorage.getItem("salesRecords");
     if (stored) records = JSON.parse(stored);
-    renderRecords();
 }
-function saveRecords() {
-    localStorage.setItem("salesRecords", JSON.stringify(records));
-}
+function saveRecords() { localStorage.setItem("salesRecords", JSON.stringify(records)); }
 
-// 同步到 Apps Script
-async function syncToSheet(record) {
-    try {
-        const res = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(record)
-        });
-        const data = await res.json();
-        if (res.ok && data.result === 'success') return true;
-        else throw new Error(data.message || '同步失敗');
-    } catch (err) {
-        console.error(err);
-        return false;
+function gapiLoaded() {
+    gapi.load('client', initGapiClient);
+}
+async function initGapiClient() {
+    await gapi.client.init({
+        discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+    });
+    gapiInited = true;
+    maybeEnableButtons();
+}
+function gisLoaded() {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: '',
+    });
+    gisInited = true;
+    maybeEnableButtons();
+}
+function maybeEnableButtons() {
+    if (gapiInited && gisInited) {
+        gapiReady = true;
+        document.getElementById('loginStatus').innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權 <button id="authBtn">登入 Google</button>';
+        document.getElementById('authBtn').onclick = () => {
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) throw resp;
+                document.getElementById('loginStatus').innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
+            };
+            tokenClient.requestAccessToken();
+        };
     }
 }
 
-// 新增記錄
+async function appendToSheet(values) {
+    const range = 'Sheet1!A:J';
+    const params = {
+        spreadsheetId: SPREADSHEET_ID,
+        range: range,
+        valueInputOption: 'USER_ENTERED',
+        resource: { values: [values] }
+    };
+    try {
+        const response = await gapi.client.sheets.spreadsheets.values.append(params);
+        return { success: true };
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+}
+
+async function syncToSheet(record) {
+    const row = [
+        record.id || '',
+        record.type || '',
+        record.date || '',
+        record.staffCode || '',
+        record.staffName || '',
+        record.amount || '',
+        record.payment || '',
+        record.details || '',
+        record.createdAt || '',
+        record.syncStatus || ''
+    ];
+    return await appendToSheet(row);
+}
+
 async function addRecord(recordData) {
     const newId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
     const newRecord = { id: newId, syncStatus: "pending", ...recordData };
@@ -152,19 +176,18 @@ async function addRecord(recordData) {
     saveRecords();
     renderRecords();
 
-    const success = await syncToSheet(newRecord);
+    const result = await syncToSheet(newRecord);
     const idx = records.findIndex(r => r.id === newId);
     if (idx !== -1) {
-        records[idx].syncStatus = success ? "success" : "failed";
-        if (!success) records[idx].syncError = "同步失敗，可手動重試";
+        records[idx].syncStatus = result.success ? "success" : "failed";
+        if (!result.success) records[idx].syncError = result.error;
         saveRecords();
         renderRecords();
     }
-    return success;
+    return result.success;
 }
 
-// 手動同步
-async function manualSync() {
+async function manualSyncAll() {
     const failed = records.filter(r => r.syncStatus === "failed");
     if (failed.length === 0) { alert("沒有需要同步的記錄"); return; }
     let count = 0;
@@ -181,36 +204,6 @@ async function manualSync() {
     alert(`手動同步完成：成功 ${count} 筆，失敗 ${failed.length - count} 筆`);
 }
 
-// 渲染記錄
-function renderRecords() {
-    const container = document.getElementById("recordsList");
-    if (!container) return;
-    if (records.length === 0) {
-        container.innerHTML = "<div>暫無記錄</div>";
-        return;
-    }
-    let html = "";
-    records.forEach(rec => {
-        let statusClass = "", statusText = "";
-        if (rec.syncStatus === "success") { statusClass = "sync-success"; statusText = "已同步"; }
-        else if (rec.syncStatus === "failed") { statusClass = "sync-failed"; statusText = "同步失敗"; }
-        else { statusClass = "sync-pending"; statusText = "待同步"; }
-        const typeLabel = rec.type === "sales" ? "🛍️ 產品銷售" : "👥 客人消費";
-        const detail = rec.type === "sales" ? `明細: ${rec.details}` : `金額: $${rec.amount}`;
-        html += `
-            <div class="record-item">
-                <div><strong>${typeLabel}</strong> <span class="${statusClass}">${statusText}</span></div>
-                <div>📅 ${rec.date} ｜ 👤 ${rec.staffName} (${rec.staffCode})</div>
-                <div>💰 ${rec.type==='sales'? `總額 $${rec.amount}` : `消費 $${rec.amount}`} ｜ 💳 ${rec.payment}</div>
-                <div>${detail}</div>
-                ${rec.syncError ? `<div style="color:#b91c1c;">⚠️ ${rec.syncError}</div>` : ''}
-            </div>
-        `;
-    });
-    container.innerHTML = html;
-}
-
-// 渲染員工按鈕
 function renderStaff(containerId, selectedCode, onChange) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
@@ -225,10 +218,7 @@ function renderStaff(containerId, selectedCode, onChange) {
         };
         container.appendChild(btn);
     });
-    if (staffList.length && !selectedCode) onChange(staffList[0].code, staffList[0].name);
 }
-
-// 渲染支付方式
 function renderPayment(containerId, selected, onChange) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
@@ -244,8 +234,6 @@ function renderPayment(containerId, selected, onChange) {
         container.appendChild(btn);
     });
 }
-
-// 產品列表渲染
 function renderProducts() {
     const container = document.getElementById("productList");
     if (!container) return;
@@ -282,9 +270,33 @@ function calcTotal() {
     document.getElementById("totalAmount").innerText = total;
     return total;
 }
+function renderRecords() {
+    const container = document.getElementById("recordsList");
+    if (!container) return;
+    if (records.length === 0) { container.innerHTML = "<div>暫無記錄</div>"; return; }
+    let html = "";
+    records.forEach(rec => {
+        let statusClass = "", statusText = "";
+        if (rec.syncStatus === "success") { statusClass = "sync-success"; statusText = "已同步"; }
+        else if (rec.syncStatus === "failed") { statusClass = "sync-failed"; statusText = "同步失敗"; }
+        else { statusClass = "sync-pending"; statusText = "待同步"; }
+        const typeLabel = rec.type === "sales" ? "🛍️ 產品銷售" : "👥 客人消費";
+        const detail = rec.type === "sales" ? `明細: ${rec.details}` : `金額: $${rec.amount}`;
+        html += `
+            <div class="record-item">
+                <div><strong>${typeLabel}</strong> <span class="sync-badge ${statusClass}">${statusText}</span></div>
+                <div>📅 ${rec.date} ｜ 👤 ${rec.staffName} (${rec.staffCode})</div>
+                <div>💰 ${rec.type==='sales'? `總額 $${rec.amount}` : `消費 $${rec.amount}`} ｜ 💳 ${rec.payment}</div>
+                <div>${detail}</div>
+                ${rec.syncError ? `<div style="color:#b91c1c;">⚠️ ${rec.syncError}</div>` : ''}
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
 
-// 提交銷售
 async function submitSales() {
+    if (!gapiReady) { alert("請先登入 Google 並授權"); return; }
     const date = document.getElementById("salesDate").value;
     if (!date) { alert("請選擇日期"); return; }
     if (!selectedSalesStaff) { alert("請選擇員工"); return; }
@@ -313,13 +325,10 @@ async function submitSales() {
     salesQuantities = {};
     renderProducts();
     document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
-    document.querySelector("#salesPage").classList.remove("active");
-    document.querySelector("#recordsPage").classList.add("active");
-    renderRecords();
+    showPage("records");
 }
-
-// 提交消費
 async function submitConsumption() {
+    if (!gapiReady) { alert("請先登入 Google 並授權"); return; }
     const date = document.getElementById("consumeDate").value;
     if (!date) { alert("請選擇日期"); return; }
     if (!selectedConsumeStaff) { alert("請選擇員工"); return; }
@@ -339,12 +348,9 @@ async function submitConsumption() {
     const ok = await addRecord(record);
     alert(ok ? "消費記錄已儲存並同步成功！" : "記錄已儲存但同步失敗，稍後可手動同步");
     document.getElementById("consumeAmount").value = "";
-    document.querySelector("#consumptionPage").classList.remove("active");
-    document.querySelector("#recordsPage").classList.add("active");
-    renderRecords();
+    showPage("records");
 }
 
-// 頁面切換
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     document.getElementById(pageId + "Page").classList.add("active");
@@ -358,30 +364,33 @@ function showPage(pageId) {
     if (pageId === "records") renderRecords();
 }
 
-// 初始化
 document.querySelectorAll("[data-page]").forEach(btn => {
     btn.onclick = () => showPage(btn.dataset.page);
 });
 document.getElementById("submitSales").onclick = submitSales;
 document.getElementById("submitConsume").onclick = submitConsumption;
-document.getElementById("manualSyncBtn").onclick = manualSync;
+document.getElementById("manualSyncBtn").onclick = manualSyncAll;
 
-renderStaff("salesStaff", selectedSalesStaff?.code, (code, name) => selectedSalesStaff = { code, name });
-renderStaff("consumeStaff", selectedConsumeStaff?.code, (code, name) => selectedConsumeStaff = { code, name });
-renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p);
-renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p);
-
-// 預設選中第一個員工
-if (!selectedSalesStaff) {
-    const s = staffList[0];
-    selectedSalesStaff = { code: s.code, name: s.name };
-    selectedConsumeStaff = { code: s.code, name: s.name };
+function initUI() {
+    renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+    renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+    renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p);
+    renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p);
+    if (!selectedSalesStaff && staffList.length) {
+        selectedSalesStaff = { code: staffList[0].code, name: staffList[0].name };
+        selectedConsumeStaff = { code: staffList[0].code, name: staffList[0].name };
+    }
+    renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+    renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
 }
-renderStaff("salesStaff", selectedSalesStaff.code, (c,n)=>selectedSalesStaff={code:c,name:n});
-renderStaff("consumeStaff", selectedConsumeStaff.code, (c,n)=>selectedConsumeStaff={code:c,name:n});
-
-loadRecords();
+loadLocalData();
+initUI();
 showPage("sales");
+
+window.gapiLoaded = gapiLoaded;
+window.gisLoaded = gisLoaded;
 </script>
+<script src="https://apis.google.com/js/api.js?onload=gapiLoaded"></script>
+<script src="https://accounts.google.com/gsi/client?onload=gisLoaded"></script>
 </body>
 </html>
