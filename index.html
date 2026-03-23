@@ -2,588 +2,100 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
-    <title>賣貨管理系統 | Hair World</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheets 寫入測試</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, 'Segoe UI', 'Noto Sans', Roboto, Helvetica, Arial, sans-serif; }
-        body { background: #cfe7ff; padding: 20px; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .app { max-width: 800px; width: 100%; margin: 0 auto; }
-        .card { background: white; border-radius: 32px; box-shadow: 0 12px 28px rgba(0,0,0,0.08); padding: 24px 20px; margin-bottom: 24px; }
-        .home-grid { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; margin-top: 20px; }
-        .home-btn, .home-link { flex: 1; min-width: 140px; background: linear-gradient(135deg, #ff9f4a, #ff7e2e); border: none; border-radius: 60px; padding: 18px 12px; font-size: 1.3rem; font-weight: 700; color: white; box-shadow: 0 8px 0 #b45309; cursor: pointer; text-align: center; text-decoration: none; display: inline-block; transition: 0.08s linear; }
-        .home-btn:active, .home-link:active { transform: translateY(4px); box-shadow: 0 4px 0 #b45309; }
-        .page { display: none; }
-        .page.active { display: block; }
-        label { font-weight: 600; color: #2c3e4e; margin-bottom: 6px; display: block; font-size: 0.95rem; }
-        select, input { width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 60px; font-size: 1rem; background: #fff; }
-        select:focus, input:focus { border-color: #f97316; outline: none; }
-        .staff-group { display: flex; gap: 15px; flex-wrap: wrap; margin: 15px 0; }
-        .staff-btn { flex: 1; text-align: center; padding: 12px 8px; border-radius: 48px; font-weight: 700; background: #f1f5f9; border: 2px solid transparent; cursor: pointer; font-size: 1.1rem; color: #1f2937; }
-        .staff-btn.active { border-color: #f97316; background: #fff2e5; color: #b45309; transform: scale(0.98); }
-        .product-item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; background: #fef9f0; border-radius: 40px; padding: 12px 16px; margin-bottom: 12px; gap: 12px; }
-        .product-info { flex: 2; min-width: 120px; font-weight: 600; }
-        .product-price { color: #f97316; font-weight: 700; }
-        .quantity-control { display: flex; align-items: center; gap: 12px; background: white; border-radius: 60px; padding: 4px 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .qty-btn { background: #f1f5f9; border: none; width: 44px; height: 44px; font-size: 1.6rem; font-weight: bold; border-radius: 40px; cursor: pointer; }
-        .qty-num { font-size: 1.3rem; font-weight: 700; min-width: 40px; text-align: center; cursor: pointer; }
-        .total-price { font-size: 1.8rem; font-weight: 800; color: #f97316; text-align: right; padding: 10px 0; border-top: 2px dashed #ffe0c0; margin-top: 12px; }
-        .payment-group { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
-        .payment-btn { flex: 1; min-width: 90px; background: #f1f5f9; border: none; padding: 12px 8px; border-radius: 60px; font-weight: 600; font-size: 0.95rem; cursor: pointer; }
-        .payment-btn.active { background: #f97316; color: white; box-shadow: 0 2px 6px rgba(249,115,22,0.4); }
-        .submit-btn { background: #f97316; color: white; width: 100%; padding: 16px; border: none; border-radius: 60px; font-size: 1.4rem; font-weight: 800; margin-top: 20px; cursor: pointer; box-shadow: 0 5px 0 #b45309; }
-        .submit-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #b45309; }
-        .numpad-overlay { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top-left-radius: 32px; border-top-right-radius: 32px; box-shadow: 0 -4px 20px rgba(0,0,0,0.2); padding: 20px 16px 30px; z-index: 1000; display: none; }
-        .numpad-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .numpad-btn { background: #f8fafc; border: none; padding: 20px 0; font-size: 1.8rem; font-weight: 600; border-radius: 56px; cursor: pointer; }
-        .numpad-btn:active { background: #e2e8f0; transform: scale(0.96); }
-        .numpad-close { background: #f97316; color: white; grid-column: span 2; }
-        .numpad-clear { background: #94a3b8; color: white; }
-        .numpad-del { background: #ef4444; color: white; }
-        .record-item { background: #fef9f0; border-radius: 28px; padding: 16px; margin-bottom: 14px; border-left: 6px solid #f97316; }
-        .record-header { display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 8px; font-weight: 700; }
-        .sync-badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 40px; background: #eee; }
-        .sync-success { background: #d1fae5; color: #15803d; }
-        .sync-failed { background: #ffe4e2; color: #b91c1c; }
-        .sync-pending { background: #fef9c3; color: #854d0e; }
-        .setting-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-        .small-btn { background: #e2e8f0; border: none; padding: 12px 16px; border-radius: 40px; font-weight: 600; cursor: pointer; }
-        .danger-btn { background: #fee2e2; color: #b91c1c; }
-        hr { margin: 20px 0; border-color: #ffe0c0; }
-        .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        @media (max-width: 550px) { .product-item { flex-direction: column; align-items: stretch; } .quantity-control { align-self: flex-end; } .home-btn, .home-link { min-width: 120px; font-size: 1.1rem; padding: 14px 8px; } }
+        body { font-family: sans-serif; padding: 20px; }
+        button { padding: 10px 20px; font-size: 16px; margin: 10px; }
+        #status { margin-top: 20px; padding: 10px; background: #f0f0f0; }
     </style>
 </head>
 <body>
-<div class="app">
-    <!-- 首頁 -->
-    <div id="homePage" class="page active">
-        <div class="card"><h2 style="color:#b45309; text-align:center;">📋 賣貨管理系統</h2>
-            <div class="home-grid">
-                <button class="home-btn" data-page="sales">🛍️ 產品銷售</button>
-                <button class="home-btn" data-page="consumption">👥 客人消費</button>
-                <button class="home-btn" data-page="records">📜 查看記錄</button>
-                <button class="home-btn" data-page="settings">⚙️ 系統設定</button>
-                <a href="https://roywfw2003-netizen.github.io/hairworld-booking/" target="_blank" rel="noopener noreferrer" class="home-link">👨‍🎓 學生預約</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- 產品銷售頁 -->
-    <div id="salesPage" class="page">
-        <div class="card">
-            <div class="flex-between"><h2 style="color:#b45309;">🛍️ 產品銷售</h2><button class="small-btn" id="backHomeFromSales">🏠 首頁</button></div>
-            <div class="mt-2"><label>📅 日期</label><input type="date" id="salesDate" value=""></div>
-            <div class="mt-2"><label>👤 員工</label><div class="staff-group" id="salesStaffGroup"></div></div>
-            <div class="mt-2"><label>📦 產品列表</label><div id="productListContainer"></div><div class="total-price">總金額: <span id="salesTotalAmount">0</span> 元</div></div>
-            <div class="mt-2"><label>💳 支付方式</label><div class="payment-group" id="salesPaymentGroup"></div></div>
-            <button class="submit-btn" id="submitSalesBtn">✔️ 提交銷售</button>
-        </div>
-    </div>
-
-    <!-- 客人消費頁 -->
-    <div id="consumptionPage" class="page">
-        <div class="card">
-            <div class="flex-between"><h2 style="color:#b45309;">👥 客人消費</h2><button class="small-btn" id="backHomeFromConsumption">🏠 首頁</button></div>
-            <div class="mt-2"><label>📅 日期</label><input type="date" id="consumeDate" value=""></div>
-            <div class="mt-2"><label>👤 員工</label><div class="staff-group" id="consumeStaffGroup"></div></div>
-            <div class="mt-2"><label>💰 金額</label><input type="text" id="consumeAmount" readonly placeholder="點擊下方鍵盤輸入" style="background:#f9fafb; font-size:1.8rem; font-weight:bold; text-align:right;"></div>
-            <div class="mt-2"><label>💳 支付方式</label><div class="payment-group" id="consumePaymentGroup"></div></div>
-            <button class="submit-btn" id="submitConsumeBtn">✔️ 提交消費</button>
-        </div>
-    </div>
-
-    <!-- 記錄頁 -->
-    <div id="recordsPage" class="page">
-        <div class="card">
-            <div class="flex-between"><h2 style="color:#b45309;">📜 交易記錄</h2><button class="small-btn" id="backHomeFromRecords">🏠 首頁</button><button class="small-btn" id="manualSyncBtn">🔄 手動同步</button></div>
-            <div id="recordsList" style="margin-top: 20px;"></div>
-        </div>
-    </div>
-
-    <!-- 設定頁 -->
-    <div id="settingsPage" class="page">
-        <div class="card">
-            <div class="flex-between"><h2 style="color:#b45309;">⚙️ 系統設定</h2><button class="small-btn" id="backHomeFromSettings">🏠 首頁</button></div>
-            <div class="mt-2"><label>🔗 同步伺服器</label><input type="text" id="apiKeyDisplay" readonly value="已啟用 (Apps Script 連線)" style="background:#f0f0f0;"></div>
-            <hr>
-            <div class="mt-2"><label>👥 員工管理</label><div id="staffManageList"></div><div class="setting-row"><input type="text" id="newStaffName" placeholder="員工姓名" style="flex:2;"><input type="text" id="newStaffCode" placeholder="工號/代碼" style="flex:1;"><button class="small-btn" id="addStaffBtn">➕ 新增</button></div></div>
-            <hr>
-            <div class="mt-2"><label>📦 產品管理</label><div id="productManageList"></div><div class="setting-row"><input type="text" id="newProductName" placeholder="產品名稱" style="flex:2;"><input type="number" id="newProductPrice" placeholder="價格" style="flex:1;"><button class="small-btn" id="addProductBtn">➕ 新增</button></div></div>
-            <hr>
-            <button class="small-btn danger-btn" id="clearLocalDataBtn">🗑️ 清空所有本地記錄</button>
-        </div>
-    </div>
-
-    <!-- 數字鍵盤 -->
-    <div id="numpadOverlay" class="numpad-overlay">
-        <div class="numpad-grid">
-            <button class="numpad-btn" data-val="1">1</button><button class="numpad-btn" data-val="2">2</button><button class="numpad-btn" data-val="3">3</button><button class="numpad-btn numpad-del" data-func="del">⌫</button>
-            <button class="numpad-btn" data-val="4">4</button><button class="numpad-btn" data-val="5">5</button><button class="numpad-btn" data-val="6">6</button><button class="numpad-btn" data-val="7">7</button>
-            <button class="numpad-btn" data-val="8">8</button><button class="numpad-btn" data-val="9">9</button><button class="numpad-btn" data-val="0">0</button><button class="numpad-btn numpad-clear" data-func="clear">C</button>
-            <button class="numpad-btn numpad-close" data-func="close">完成</button>
-        </div>
-    </div>
-</div>
+<h2>Google Sheets 寫入測試</h2>
+<p>請點擊「登入並授權」按鈕，同意後自動寫入一筆測試資料到您的試算表。</p>
+<button id="authBtn">登入並授權</button>
+<div id="status">等待操作...</div>
 
 <script>
-(function() {
-    // ========== 使用您提供的 Apps Script 網址 ==========
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzlJUimQtdpkAf9OKXKussUPbIZ5BKea1RPd9F70h2xnbCv1-6DUe-sJxOAj4JxASwwpA/exec';
+    const CLIENT_ID = '你的用戶端編號';  // 請替換為您的 OAuth 2.0 用戶端編號
+    const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
+    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
-    // ========== 全域資料 ==========
-    let staffList = [
-        { code: "1", name: "Roy" },
-        { code: "2", name: "Ken" },
-        { code: "3", name: "Kin" }
-    ];
-    let productList = [
-        { name: "紅罐", price: 178 },
-        { name: "猩猩粉", price: 100 },
-        { name: "打底水", price: 148 }
-    ];
-    let records = [];
-    let salesQuantities = {};
-    let currentEditingField = null;
-    const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付"];
+    let tokenClient;
+    let gapiInited = false;
+    let gisInited = false;
 
-    window.selectedSalesStaff = null;
-    window.selectedConsumeStaff = null;
-    window.selectedSalesPayment = "現金";
-    window.selectedConsumePayment = "現金";
-
-    // ========== 本地儲存 ==========
-    function loadLocalData() {
-        const storedStaff = localStorage.getItem("staffList");
-        if(storedStaff) staffList = JSON.parse(storedStaff);
-        const storedProducts = localStorage.getItem("productList");
-        if(storedProducts) productList = JSON.parse(storedProducts);
-        const storedRecords = localStorage.getItem("salesRecords");
-        if(storedRecords) records = JSON.parse(storedRecords);
+    function gapiLoaded() {
+        gapi.load('client', initializeGapiClient);
     }
-    function saveStaff() { localStorage.setItem("staffList", JSON.stringify(staffList)); }
-    function saveProducts() { localStorage.setItem("productList", JSON.stringify(productList)); }
-    function saveRecords() { localStorage.setItem("salesRecords", JSON.stringify(records)); }
 
-    // ========== 同步到 Google Sheets (經由 Apps Script) ==========
-    async function syncToGoogleSheets(record) {
+    async function initializeGapiClient() {
+        await gapi.client.init({
+            discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+        });
+        gapiInited = true;
+        maybeEnableButtons();
+    }
+
+    function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: SCOPES,
+            callback: '', // 稍後定義
+        });
+        gisInited = true;
+        maybeEnableButtons();
+    }
+
+    function maybeEnableButtons() {
+        if (gapiInited && gisInited) {
+            document.getElementById('authBtn').disabled = false;
+            document.getElementById('status').innerHTML = '✅ 已準備就緒，請按上方按鈕登入授權。';
+        }
+    }
+
+    async function appendTestData() {
+        const range = 'Sheet1!A:J';
+        const values = [[
+            'test_' + Date.now(),
+            'test',
+            new Date().toISOString().slice(0,10),
+            '1',
+            'Roy',
+            '100',
+            '現金',
+            '測試寫入',
+            new Date().toISOString(),
+            'pending'
+        ]];
+        const params = {
+            spreadsheetId: SPREADSHEET_ID,
+            range: range,
+            valueInputOption: 'USER_ENTERED',
+            resource: { values: values }
+        };
         try {
-            const response = await fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(record)
-            });
-            const data = await response.json();
-            if (response.ok && data.result === 'success') {
-                return { success: true };
-            } else {
-                return { success: false, error: data.message || `HTTP ${response.status}` };
-            }
+            const response = await gapi.client.sheets.spreadsheets.values.append(params);
+            document.getElementById('status').innerHTML = '✅ 寫入成功！請檢查試算表。' + JSON.stringify(response.result);
         } catch (err) {
-            return { success: false, error: err.message };
+            document.getElementById('status').innerHTML = '❌ 寫入失敗：' + err.message;
         }
     }
 
-    async function addRecord(recordData) {
-        const newId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
-        const newRecord = { id: newId, syncStatus: "pending", ...recordData };
-        records.unshift(newRecord);
-        saveRecords();
-        renderRecordsList();
-
-        const result = await syncToGoogleSheets(newRecord);
-        const index = records.findIndex(r => r.id === newId);
-        if(index !== -1) {
-            records[index].syncStatus = result.success ? "success" : "failed";
-            if(!result.success) records[index].syncError = result.error;
-            saveRecords();
-            renderRecordsList();
-        }
-        return result.success;
-    }
-
-    async function manualSyncAll() {
-        const failedRecords = records.filter(r => r.syncStatus === "failed");
-        if(failedRecords.length === 0) {
-            alert("沒有需要同步的失敗記錄");
-            return;
-        }
-        let syncedCount = 0;
-        for(let rec of failedRecords) {
-            const result = await syncToGoogleSheets(rec);
-            if(result.success) {
-                rec.syncStatus = "success";
-                delete rec.syncError;
-                syncedCount++;
-            } else {
-                rec.syncError = result.error;
-            }
-        }
-        saveRecords();
-        renderRecordsList();
-        alert(`手動同步完成：成功 ${syncedCount} 筆，失敗 ${failedRecords.length - syncedCount} 筆`);
-    }
-
-    // ========== 渲染記錄列表 ==========
-    function renderRecordsList() {
-        const container = document.getElementById("recordsList");
-        if(!container) return;
-        if(records.length === 0) {
-            container.innerHTML = '<div class="text-center" style="padding:40px;">暫無記錄</div>';
-            return;
-        }
-        let html = "";
-        records.forEach(rec => {
-            let statusClass = "", statusText = "";
-            if(rec.syncStatus === "success") { statusClass = "sync-success"; statusText = "✅ 已同步"; }
-            else if(rec.syncStatus === "failed") { statusClass = "sync-failed"; statusText = "❌ 同步失敗"; }
-            else { statusClass = "sync-pending"; statusText = "⏳ 待同步"; }
-            const typeLabel = rec.type === "sales" ? "🛍️ 產品銷售" : "👥 客人消費";
-            const detail = rec.type === "sales" ? `產品明細: ${rec.details}` : `金額: $${rec.amount}`;
-            html += `
-                <div class="record-item">
-                    <div class="record-header">
-                        <span>${typeLabel}</span>
-                        <span class="sync-badge ${statusClass}">${statusText}</span>
-                    </div>
-                    <div>📅 ${rec.date} ｜ 👤 ${rec.staffName} (${rec.staffCode})</div>
-                    <div>💰 ${rec.type==='sales'? `總額 $${rec.amount}` : `消費 $${rec.amount}`} ｜ 💳 ${rec.payment}</div>
-                    <div class="small-text" style="font-size:0.8rem; color:#555;">${detail}</div>
-                    ${rec.syncError ? `<div class="small-text" style="color:#b91c1c;">⚠️ ${rec.syncError}</div>` : ''}
-                </div>
-            `;
-        });
-        container.innerHTML = html;
-    }
-
-    // ========== 員工按鈕組 ==========
-    function renderStaffGroup(containerId, selectedCode = null) {
-        const container = document.getElementById(containerId);
-        if(!container) return;
-        container.innerHTML = "";
-        staffList.forEach(staff => {
-            const btn = document.createElement("button");
-            btn.className = `staff-btn`;
-            if(selectedCode === staff.code) btn.classList.add("active");
-            btn.innerText = `${staff.name} (${staff.code})`;
-            btn.dataset.code = staff.code;
-            btn.dataset.name = staff.name;
-            btn.addEventListener("click", () => {
-                container.querySelectorAll(".staff-btn").forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                if(containerId === "salesStaffGroup") window.selectedSalesStaff = { code: staff.code, name: staff.name };
-                else if(containerId === "consumeStaffGroup") window.selectedConsumeStaff = { code: staff.code, name: staff.name };
-            });
-            container.appendChild(btn);
-        });
-        if(staffList.length && !selectedCode){
-            const first = container.querySelector(".staff-btn");
-            if(first) first.click();
-        }
-    }
-
-    // 支付方式按鈕組
-    function renderPaymentGroup(containerId, selected = "現金") {
-        const container = document.getElementById(containerId);
-        container.innerHTML = "";
-        PAYMENTS.forEach(pay => {
-            const btn = document.createElement("button");
-            btn.className = `payment-btn ${selected === pay ? "active" : ""}`;
-            btn.innerText = pay;
-            btn.addEventListener("click", () => {
-                container.querySelectorAll(".payment-btn").forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                if(containerId === "salesPaymentGroup") window.selectedSalesPayment = pay;
-                else window.selectedConsumePayment = pay;
-            });
-            container.appendChild(btn);
-        });
-    }
-
-    // 產品銷售列表
-    function renderProductList() {
-        const container = document.getElementById("productListContainer");
-        if(!container) return;
-        let html = "";
-        productList.forEach(prod => {
-            const qty = salesQuantities[prod.name] || 0;
-            html += `
-                <div class="product-item" data-name="${prod.name}">
-                    <div class="product-info"><strong>${prod.name}</strong> <span class="product-price">$${prod.price}</span></div>
-                    <div class="quantity-control">
-                        <button class="qty-btn minus" data-name="${prod.name}">−</button>
-                        <span class="qty-num" data-name="${prod.name}" data-price="${prod.price}">${qty}</span>
-                        <button class="qty-btn plus" data-name="${prod.name}">+</button>
-                    </div>
-                </div>
-            `;
-        });
-        container.innerHTML = html;
-        document.querySelectorAll(".qty-btn.minus").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const name = btn.dataset.name;
-                salesQuantities[name] = Math.max(0, (salesQuantities[name] || 0) - 1);
-                updateProductQtyDisplay(name);
-                calcSalesTotal();
-            });
-        });
-        document.querySelectorAll(".qty-btn.plus").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const name = btn.dataset.name;
-                salesQuantities[name] = (salesQuantities[name] || 0) + 1;
-                updateProductQtyDisplay(name);
-                calcSalesTotal();
-            });
-        });
-        document.querySelectorAll(".qty-num").forEach(span => {
-            span.addEventListener("click", () => {
-                const name = span.dataset.name;
-                const currentVal = salesQuantities[name] || 0;
-                currentEditingField = { type: "productQty", productName: name, element: span };
-                showNumpad(currentVal.toString());
-            });
-        });
-        calcSalesTotal();
-    }
-    function updateProductQtyDisplay(productName) {
-        const span = document.querySelector(`.qty-num[data-name="${productName}"]`);
-        if(span) span.innerText = salesQuantities[productName] || 0;
-    }
-    function calcSalesTotal() {
-        let total = 0;
-        productList.forEach(prod => {
-            const qty = salesQuantities[prod.name] || 0;
-            total += qty * prod.price;
-        });
-        document.getElementById("salesTotalAmount").innerText = total;
-    }
-
-    // 數字鍵盤
-    function showNumpad(initialValue) {
-        const overlay = document.getElementById("numpadOverlay");
-        const inputEl = currentEditingField?.element;
-        overlay.style.display = "block";
-        let tempValue = initialValue === "0" ? "" : initialValue;
-        if(tempValue === "") tempValue = "0";
-        const updateTemp = (val) => {
-            tempValue = val;
-            if(inputEl && currentEditingField.type === "productQty") inputEl.innerText = tempValue;
-            else if(inputEl && currentEditingField.type === "amount") inputEl.value = tempValue;
+    document.getElementById('authBtn').addEventListener('click', () => {
+        tokenClient.callback = async (resp) => {
+            if (resp.error !== undefined) throw resp;
+            document.getElementById('status').innerHTML = '✅ 已登入，正在寫入測試資料...';
+            await appendTestData();
         };
-        const closeNumpad = () => {
-            overlay.style.display = "none";
-            if(currentEditingField?.type === "productQty" && currentEditingField.productName) {
-                let newQty = parseInt(tempValue, 10);
-                if(isNaN(newQty)) newQty = 0;
-                salesQuantities[currentEditingField.productName] = newQty;
-                updateProductQtyDisplay(currentEditingField.productName);
-                calcSalesTotal();
-            } else if(currentEditingField?.type === "amount") {
-                let newAmount = parseFloat(tempValue);
-                if(isNaN(newAmount)) newAmount = 0;
-                document.getElementById("consumeAmount").value = newAmount.toFixed(2);
-            }
-            currentEditingField = null;
-        };
-        const newGrid = overlay.querySelector(".numpad-grid").cloneNode(true);
-        overlay.querySelector(".numpad-grid").replaceWith(newGrid);
-        newGrid.querySelectorAll(".numpad-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const val = btn.dataset.val;
-                const func = btn.dataset.func;
-                if(val !== undefined) {
-                    let newVal = tempValue === "0" ? val : tempValue + val;
-                    tempValue = newVal;
-                    updateTemp(tempValue);
-                } else if(func === "del") {
-                    tempValue = tempValue.slice(0, -1);
-                    if(tempValue === "") tempValue = "0";
-                    updateTemp(tempValue);
-                } else if(func === "clear") {
-                    tempValue = "0";
-                    updateTemp(tempValue);
-                } else if(func === "close") {
-                    closeNumpad();
-                }
-            });
-        });
-    }
-
-    // 綁定客人消費金額鍵盤
-    function bindConsumeAmount() {
-        const amountInput = document.getElementById("consumeAmount");
-        amountInput.addEventListener("click", () => {
-            const currentVal = amountInput.value === "" ? "0" : amountInput.value;
-            currentEditingField = { type: "amount", element: amountInput };
-            showNumpad(currentVal);
-        });
-    }
-
-    // 提交銷售
-    async function submitSales() {
-        const date = document.getElementById("salesDate").value;
-        if(!date) { alert("請選擇日期"); return; }
-        const staff = window.selectedSalesStaff;
-        if(!staff) { alert("請選擇員工"); return; }
-        const payment = window.selectedSalesPayment;
-        let items = [], total = 0;
-        productList.forEach(prod => {
-            const qty = salesQuantities[prod.name] || 0;
-            if(qty > 0) {
-                items.push(`${prod.name} x${qty}`);
-                total += qty * prod.price;
-            }
-        });
-        if(items.length === 0) { alert("請至少選擇一件產品"); return; }
-        const record = {
-            type: "sales",
-            date: date,
-            staffCode: staff.code,
-            staffName: staff.name,
-            amount: total,
-            payment: payment,
-            details: items.join("、"),
-            createdAt: new Date().toISOString()
-        };
-        const success = await addRecord(record);
-        alert(success ? "銷售記錄已儲存並同步成功！" : "記錄已儲存但同步失敗，稍後可手動同步");
-        salesQuantities = {};
-        renderProductList();
-        showPage("home");
-    }
-
-    // 提交消費
-    async function submitConsumption() {
-        const date = document.getElementById("consumeDate").value;
-        if(!date) { alert("請選擇日期"); return; }
-        const staff = window.selectedConsumeStaff;
-        if(!staff) { alert("請選擇員工"); return; }
-        const amount = parseFloat(document.getElementById("consumeAmount").value);
-        if(isNaN(amount) || amount <= 0) { alert("請輸入正確金額"); return; }
-        const payment = window.selectedConsumePayment;
-        const record = {
-            type: "consumption",
-            date: date,
-            staffCode: staff.code,
-            staffName: staff.name,
-            amount: amount,
-            payment: payment,
-            details: `消費金額 $${amount}`,
-            createdAt: new Date().toISOString()
-        };
-        const success = await addRecord(record);
-        alert(success ? "消費記錄已儲存並同步成功！" : "記錄已儲存但同步失敗，稍後可手動同步");
-        document.getElementById("consumeAmount").value = "";
-        showPage("home");
-    }
-
-    // ========== 設定頁管理 ==========
-    function renderSettingsStaff() {
-        const container = document.getElementById("staffManageList");
-        if(!container) return;
-        container.innerHTML = "";
-        staffList.forEach((staff, idx) => {
-            const div = document.createElement("div");
-            div.className = "setting-row";
-            div.innerHTML = `<span style="flex:2;"><strong>${staff.name}</strong> (${staff.code})</span><button class="small-btn danger-btn" data-idx="${idx}">刪除</button>`;
-            div.querySelector("button").addEventListener("click", () => {
-                staffList.splice(idx, 1);
-                saveStaff();
-                renderSettingsStaff();
-                renderStaffGroup("salesStaffGroup", window.selectedSalesStaff?.code);
-                renderStaffGroup("consumeStaffGroup", window.selectedConsumeStaff?.code);
-            });
-            container.appendChild(div);
-        });
-    }
-    function renderSettingsProduct() {
-        const container = document.getElementById("productManageList");
-        if(!container) return;
-        container.innerHTML = "";
-        productList.forEach((prod, idx) => {
-            const div = document.createElement("div");
-            div.className = "setting-row";
-            div.innerHTML = `<span style="flex:2;">${prod.name} - $${prod.price}</span><button class="small-btn danger-btn" data-idx="${idx}">刪除</button>`;
-            div.querySelector("button").addEventListener("click", () => {
-                productList.splice(idx, 1);
-                saveProducts();
-                renderSettingsProduct();
-                renderProductList();
-            });
-            container.appendChild(div);
-        });
-    }
-
-    // ========== 頁面切換 ==========
-    function showPage(pageId) {
-        document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-        document.getElementById(pageId + "Page").classList.add("active");
-        if(pageId === "sales") {
-            document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
-            renderStaffGroup("salesStaffGroup", window.selectedSalesStaff?.code);
-            renderPaymentGroup("salesPaymentGroup", window.selectedSalesPayment);
-            renderProductList();
-        }
-        if(pageId === "consumption") {
-            document.getElementById("consumeDate").value = new Date().toISOString().slice(0,10);
-            renderStaffGroup("consumeStaffGroup", window.selectedConsumeStaff?.code);
-            renderPaymentGroup("consumePaymentGroup", window.selectedConsumePayment);
-            bindConsumeAmount();
-        }
-        if(pageId === "records") renderRecordsList();
-        if(pageId === "settings") {
-            renderSettingsStaff();
-            renderSettingsProduct();
-        }
-    }
-
-    // ========== 事件綁定 ==========
-    document.querySelectorAll(".home-btn").forEach(btn => btn.addEventListener("click", () => showPage(btn.dataset.page)));
-    document.getElementById("backHomeFromSales").addEventListener("click", () => showPage("home"));
-    document.getElementById("backHomeFromConsumption").addEventListener("click", () => showPage("home"));
-    document.getElementById("backHomeFromRecords").addEventListener("click", () => showPage("home"));
-    document.getElementById("backHomeFromSettings").addEventListener("click", () => showPage("home"));
-    document.getElementById("submitSalesBtn").addEventListener("click", submitSales);
-    document.getElementById("submitConsumeBtn").addEventListener("click", submitConsumption);
-    document.getElementById("manualSyncBtn").addEventListener("click", manualSyncAll);
-    document.getElementById("addStaffBtn").addEventListener("click", () => {
-        const name = document.getElementById("newStaffName").value.trim();
-        const code = document.getElementById("newStaffCode").value.trim();
-        if(!name || !code) { alert("請填寫員工姓名與工號"); return; }
-        staffList.push({ code, name });
-        saveStaff();
-        renderSettingsStaff();
-        renderStaffGroup("salesStaffGroup", window.selectedSalesStaff?.code);
-        renderStaffGroup("consumeStaffGroup", window.selectedConsumeStaff?.code);
-        document.getElementById("newStaffName").value = "";
-        document.getElementById("newStaffCode").value = "";
-    });
-    document.getElementById("addProductBtn").addEventListener("click", () => {
-        const name = document.getElementById("newProductName").value.trim();
-        const price = parseFloat(document.getElementById("newProductPrice").value);
-        if(!name || isNaN(price) || price<=0) { alert("請填寫產品名稱與正確價格"); return; }
-        productList.push({ name, price });
-        saveProducts();
-        renderSettingsProduct();
-        renderProductList();
-        document.getElementById("newProductName").value = "";
-        document.getElementById("newProductPrice").value = "";
-    });
-    document.getElementById("clearLocalDataBtn").addEventListener("click", () => {
-        if(confirm("⚠️ 確定清空所有本地記錄？此操作無法復原！")) {
-            records = [];
-            saveRecords();
-            renderRecordsList();
-            alert("已清空所有記錄");
-        }
+        tokenClient.requestAccessToken();
     });
 
-    // ========== 初始化 ==========
-    loadLocalData();
-    window.selectedSalesStaff = staffList[0] ? { code: staffList[0].code, name: staffList[0].name } : null;
-    window.selectedConsumeStaff = staffList[0] ? { code: staffList[0].code, name: staffList[0].name } : null;
-    showPage("home");
-})();
+    // 載入 Google API
+    gapiLoaded();
+    gisLoaded();
 </script>
 </body>
 </html>
