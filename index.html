@@ -10,8 +10,8 @@
         .app { max-width: 800px; width: 100%; margin: 0 auto; }
         .card { background: white; border-radius: 32px; box-shadow: 0 12px 28px rgba(0,0,0,0.08); padding: 24px 20px; margin-bottom: 24px; }
         .home-grid { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; margin-top: 20px; }
-        .home-btn { flex: 1; min-width: 160px; background: linear-gradient(135deg, #ff9f4a, #ff7e2e); border: none; border-radius: 60px; padding: 20px 12px; font-size: 1.6rem; font-weight: 700; color: white; box-shadow: 0 8px 0 #b45309; cursor: pointer; text-align: center; }
-        .home-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #b45309; }
+        .home-btn, .home-link { flex: 1; min-width: 140px; background: linear-gradient(135deg, #ff9f4a, #ff7e2e); border: none; border-radius: 60px; padding: 18px 12px; font-size: 1.3rem; font-weight: 700; color: white; box-shadow: 0 8px 0 #b45309; cursor: pointer; text-align: center; text-decoration: none; display: inline-block; transition: 0.08s linear; }
+        .home-btn:active, .home-link:active { transform: translateY(4px); box-shadow: 0 4px 0 #b45309; }
         .page { display: none; }
         .page.active { display: block; }
         label { font-weight: 600; color: #2c3e4e; margin-bottom: 6px; display: block; font-size: 0.95rem; }
@@ -50,7 +50,7 @@
         .danger-btn { background: #fee2e2; color: #b91c1c; }
         hr { margin: 20px 0; border-color: #ffe0c0; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        @media (max-width: 550px) { .product-item { flex-direction: column; align-items: stretch; } .quantity-control { align-self: flex-end; } }
+        @media (max-width: 550px) { .product-item { flex-direction: column; align-items: stretch; } .quantity-control { align-self: flex-end; } .home-btn, .home-link { min-width: 120px; font-size: 1.1rem; padding: 14px 8px; } }
     </style>
 </head>
 <body>
@@ -63,6 +63,7 @@
                 <button class="home-btn" data-page="consumption">👥 客人消費</button>
                 <button class="home-btn" data-page="records">📜 查看記錄</button>
                 <button class="home-btn" data-page="settings">⚙️ 系統設定</button>
+                <a href="https://roywfw2003-netizen.github.io/hairworld-booking/" target="_blank" rel="noopener noreferrer" class="home-link">👨‍🎓 學生預約</a>
             </div>
         </div>
     </div>
@@ -103,7 +104,7 @@
     <div id="settingsPage" class="page">
         <div class="card">
             <div class="flex-between"><h2 style="color:#b45309;">⚙️ 系統設定</h2><button class="small-btn" id="backHomeFromSettings">🏠 首頁</button></div>
-            <div class="mt-2"><label>🔗 Google Sheets 同步</label><input type="text" id="apiKeyDisplay" readonly value="已啟用 (API 金鑰已設定)" style="background:#f0f0f0;"></div>
+            <div class="mt-2"><label>🔗 同步伺服器</label><input type="text" id="apiKeyDisplay" readonly value="已啟用 (Apps Script 連線)" style="background:#f0f0f0;"></div>
             <hr>
             <div class="mt-2"><label>👥 員工管理</label><div id="staffManageList"></div><div class="setting-row"><input type="text" id="newStaffName" placeholder="員工姓名" style="flex:2;"><input type="text" id="newStaffCode" placeholder="工號/代碼" style="flex:1;"><button class="small-btn" id="addStaffBtn">➕ 新增</button></div></div>
             <hr>
@@ -126,12 +127,8 @@
 
 <script>
 (function() {
-    // ========== 設定區域 ==========
-    // 請確認試算表 ID 是否正確
-    const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
-    // 請將下方 API 金鑰替換為您自己的金鑰
-    const API_KEY = 'AIzaSyDUOMB7BVCsWDG30PZrC_bpMW16scSHsjo';
-    const SHEET_NAME = 'Sheet1';  // 工作表名稱（預設為 Sheet1）
+    // ========== Apps Script 網址（需替換為您的實際網址） ==========
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwZM43Ytm-nW8NkccFDIwnDEOIYzsRYL1E16Ek1JhLeOfJN_xJZDsC_rpVX2rynlxDxyg/exec';
 
     // ========== 全域資料 ==========
     let staffList = [
@@ -144,12 +141,11 @@
         { name: "猩猩粉", price: 100 },
         { name: "打底水", price: 148 }
     ];
-    let records = [];          // 所有記錄 (含同步狀態)
-    let salesQuantities = {};  // 產品銷售數量
+    let records = [];
+    let salesQuantities = {};
     let currentEditingField = null;
     const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付"];
 
-    // 全域選中變數
     window.selectedSalesStaff = null;
     window.selectedConsumeStaff = null;
     window.selectedSalesPayment = "現金";
@@ -168,40 +164,26 @@
     function saveProducts() { localStorage.setItem("productList", JSON.stringify(productList)); }
     function saveRecords() { localStorage.setItem("salesRecords", JSON.stringify(records)); }
 
-    // ========== Google Sheets API 寫入 ==========
+    // ========== 同步到 Google Sheets (經由 Apps Script) ==========
     async function syncToGoogleSheets(record) {
-        const range = `${SHEET_NAME}!A:J`;
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
-        const values = [[
-            record.id || '',
-            record.type || '',
-            record.date || '',
-            record.staffCode || '',
-            record.staffName || '',
-            record.amount || '',
-            record.payment || '',
-            record.details || '',
-            record.createdAt || '',
-            record.syncStatus || ''
-        ]];
-        const body = { values: values };
         try {
-            const response = await fetch(url, {
+            const response = await fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
+                mode: 'cors',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
+                body: JSON.stringify(record)
             });
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            const data = await response.json();
+            if (response.ok && data.result === 'success') {
+                return { success: true };
+            } else {
+                return { success: false, error: data.message || `HTTP ${response.status}` };
             }
-            return { success: true };
         } catch (err) {
             return { success: false, error: err.message };
         }
     }
 
-    // 新增記錄（先存本地，再嘗試同步）
     async function addRecord(recordData) {
         const newId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
         const newRecord = { id: newId, syncStatus: "pending", ...recordData };
@@ -220,7 +202,6 @@
         return result.success;
     }
 
-    // 手動同步所有失敗記錄
     async function manualSyncAll() {
         const failedRecords = records.filter(r => r.syncStatus === "failed");
         if(failedRecords.length === 0) {
