@@ -101,7 +101,7 @@
 
 <script>
 // ========== 請替換為您的 OAuth 用戶端編號 ==========
-const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com';   // 例如：123456789-abcdefg.apps.googleusercontent.com
+const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com';
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
@@ -164,6 +164,7 @@ function gisLoaded() {
 }
 function maybeEnableButtons() {
     if (gapiInited && gisInited) {
+        if (gapiReady) return; // 避免重複執行
         gapiReady = true;
         const statusDiv = document.getElementById('loginStatus');
         statusDiv.innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權 <button id="authBtn">登入 Google</button>';
@@ -176,6 +177,19 @@ function maybeEnableButtons() {
         };
     }
 }
+
+// 確保初始化 (使用多種方式觸發，確保穩定)
+function ensureInit() {
+    if (typeof gapi !== 'undefined' && typeof google !== 'undefined' && typeof google.accounts !== 'undefined') {
+        if (!gapiInited) gapiLoaded();
+        if (!gisInited) gisLoaded();
+    } else {
+        setTimeout(ensureInit, 200);
+    }
+}
+window.addEventListener('load', () => {
+    ensureInit();
+});
 
 // 寫入試算表
 async function appendToSheet(values) {
@@ -506,12 +520,8 @@ function initUI() {
 loadLocalData();
 initUI();
 showPage("sales");
-
-// 確保 Google API 載入後自動呼叫回調
-window.gapiLoaded = gapiLoaded;
-window.gisLoaded = gisLoaded;
 </script>
-<script src="https://apis.google.com/js/api.js?onload=gapiLoaded"></script>
-<script src="https://accounts.google.com/gsi/client?onload=gisLoaded"></script>
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client"></script>
 </body>
 </html>
