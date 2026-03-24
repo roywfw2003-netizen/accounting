@@ -2,78 +2,116 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
     <title>賣貨管理系統 | Hair World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* CSS 变量 - 白天模式 */
+        :root {
+            --bg-body: #cfe7ff;
+            --bg-card: white;
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --border-color: #e2e8f0;
+            --btn-primary-bg: #3b82f6;
+            --btn-primary-shadow: #1e3a8a;
+            --btn-success-bg: #22c55e;
+            --btn-success-shadow: #15803d;
+            --btn-gray-bg: #f1f5f9;
+            --btn-gray-shadow: #94a3b8;
+            --accent-orange: #f97316;
+            --accent-orange-shadow: #b45309;
+        }
+        body.dark {
+            --bg-body: #1f2937;
+            --bg-card: #2d3748;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --border-color: #4b5563;
+            --btn-primary-bg: #3b82f6;
+            --btn-primary-shadow: #1e3a8a;
+            --btn-success-bg: #22c55e;
+            --btn-success-shadow: #15803d;
+            --btn-gray-bg: #4b5563;
+            --btn-gray-shadow: #1f2937;
+            --accent-orange: #f97316;
+            --accent-orange-shadow: #b45309;
+        }
         * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
-        body { background: #cfe7ff; padding: 20px; margin: 0; }
-        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 32px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative; }
+        body { background: var(--bg-body); padding: 0; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .app-container { width: 100%; max-width: 800px; margin: 0 auto; background: var(--bg-card); border-radius: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; padding: 20px; transition: all 0.2s; }
+        /* 内容紧凑，确保所有内容在常见手机上一屏内可见 */
         .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-        .nav-btn { background: #3b82f6; border: none; border-radius: 32px; color: white; font-weight: bold; cursor: pointer; flex: 1; min-width: 100px; padding: 16px 8px; text-align: center; transition: 0.05s linear; box-shadow: 0 5px 0 #1e3a8a; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .nav-btn { background: var(--btn-primary-bg); border: none; border-radius: 32px; color: white; font-weight: bold; cursor: pointer; flex: 1; min-width: 100px; padding: 16px 8px; text-align: center; transition: 0.05s linear; box-shadow: 0 5px 0 var(--btn-primary-shadow); display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .nav-btn i { font-size: 2rem; }
         .nav-btn span { font-size: 0.9rem; }
-        .nav-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #1e3a8a; }
-        .settings-row { display: flex; justify-content: flex-end; margin-bottom: 20px; }
-        .settings-icon { background: none; border: none; font-size: 2rem; color: #3b82f6; cursor: pointer; padding: 8px; transition: 0.1s; }
+        .nav-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-primary-shadow); }
+        .settings-row { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+        .settings-icon { background: none; border: none; font-size: 2rem; color: var(--btn-primary-bg); cursor: pointer; padding: 8px; transition: 0.1s; }
         .settings-icon:active { transform: scale(0.95); }
         .page { display: none; }
         .active { display: block; }
-        .form-group { margin-bottom: 16px; }
-        label { display: block; margin-bottom: 6px; font-weight: 600; }
-        select, input { width: 100%; padding: 12px; border-radius: 40px; border: 1px solid #ccc; }
-        .staff-group, .payment-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
-        .staff-btn, .payment-btn, .preset-btn, .product-btn { background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 0 #94a3b8; transition: 0.05s linear; text-align: center; }
-        .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #94a3b8; }
-        .staff-btn.active, .product-btn.selected { background: #f97316; color: white; box-shadow: 0 4px 0 #b45309; }
-        .payment-btn.active { background: #f97316; color: white; box-shadow: 0 4px 0 #b45309; }
-        .preset-btn { background: #f1f5f9; color: #1f2937; display: flex; align-items: center; justify-content: center; }
-        .product-grid, .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0; }
-        .product-btn { background: #f1f5f9; text-align: center; padding: 10px; font-weight: 600; color: #1f2937; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .product-btn .product-price { font-weight: bold; font-size: 0.9rem; color: inherit; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-primary); }
+        select, input { width: 100%; padding: 10px 12px; border-radius: 40px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); }
+        .staff-group, .payment-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+        .staff-btn, .payment-btn, .preset-btn, .product-btn { background: var(--btn-gray-bg); border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-weight: bold; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; text-align: center; color: var(--text-primary); }
+        .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
+        .staff-btn.active, .product-btn.selected { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
+        .payment-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
+        .preset-btn { background: var(--btn-gray-bg); color: var(--text-primary); }
+        .product-grid, .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
+        .product-btn { background: var(--btn-gray-bg); text-align: center; padding: 8px; font-weight: 600; color: var(--text-primary); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .product-btn .product-price { font-weight: bold; font-size: 0.85rem; color: inherit; }
         .product-btn.selected .product-price { color: white; }
-        .total { font-size: 1.5rem; font-weight: bold; text-align: right; margin-top: 12px; border-top: 1px solid #ddd; padding-top: 12px; }
-        .record-item { background: #fef9f0; border-radius: 20px; padding: 12px; margin-bottom: 12px; }
-        .sync-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
+        .total { font-size: 1.3rem; font-weight: bold; text-align: right; margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; color: var(--accent-orange); }
+        .record-item { background: var(--btn-gray-bg); border-radius: 20px; padding: 10px; margin-bottom: 8px; color: var(--text-primary); }
+        .sync-badge { display: inline-block; padding: 2px 6px; border-radius: 20px; font-size: 0.7rem; }
         .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
         .sync-pending { background: #fef9c3; color: #854d0e; }
-        .login-status { background: #e2e8f0; border-radius: 40px; padding: 8px 16px; margin-bottom: 20px; text-align: center; font-size: 0.9rem; }
-        .setting-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-        .small-btn { background: #e2e8f0; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-size: 0.9rem; box-shadow: 0 3px 0 #94a3b8; transition: 0.05s linear; text-align: center; }
-        .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #94a3b8; }
+        .login-status { background: var(--btn-gray-bg); border-radius: 40px; padding: 8px 12px; margin-bottom: 16px; text-align: center; font-size: 0.9rem; color: var(--text-primary); }
+        .setting-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+        .small-btn { background: var(--btn-gray-bg); border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; color: var(--text-primary); }
+        .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
         .danger-btn { background: #fee2e2; color: #b91c1c; }
-        .edit-btn { background: #e2e8f0; color: #1f2937; margin-left: 8px; }
-        hr { margin: 20px 0; border-color: #ffe0c0; }
-        .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #f97316; color: white; padding: 12px 24px; border-radius: 60px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; transition: opacity 0.3s; opacity: 1; pointer-events: none; white-space: pre-line; text-align: center; }
+        .edit-btn { background: var(--btn-gray-bg); color: var(--text-primary); margin-left: 6px; }
+        hr { margin: 16px 0; border-color: var(--border-color); }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--accent-orange); color: white; padding: 10px 20px; border-radius: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; transition: opacity 0.3s; opacity: 1; pointer-events: none; white-space: pre-line; text-align: center; font-size: 0.9rem; }
         .iframe-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; }
         .iframe-container iframe { width: 90%; height: 90%; margin: 5% auto; display: block; background: white; border-radius: 20px; }
-        .close-iframe { position: absolute; top: 20px; right: 30px; background: #f97316; color: white; border: none; border-radius: 40px; padding: 8px 16px; cursor: pointer; box-shadow: 0 3px 0 #b45309; }
-        .close-iframe:active { transform: translateY(2px); box-shadow: 0 1px 0 #b45309; }
-        .recent-record { background: #f1f5f9; border-radius: 20px; padding: 12px; margin-top: 20px; text-align: center; font-size: 0.9rem; border-left: 4px solid #f97316; }
-        .settings-section { margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 24px; padding: 12px; }
+        .close-iframe { position: absolute; top: 20px; right: 30px; background: var(--accent-orange); color: white; border: none; border-radius: 40px; padding: 6px 12px; cursor: pointer; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
+        .close-iframe:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
+        .recent-record { background: var(--btn-gray-bg); border-radius: 20px; padding: 8px; margin-top: 12px; text-align: center; font-size: 0.8rem; border-left: 4px solid var(--accent-orange); color: var(--text-primary); }
+        .settings-section { margin-bottom: 16px; border: 1px solid var(--border-color); border-radius: 24px; padding: 10px; }
         .settings-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .settings-content { margin-top: 12px; }
+        .settings-content { margin-top: 10px; }
         .toggle-switch { width: 44px; height: 24px; background: #ccc; border-radius: 24px; position: relative; cursor: pointer; transition: 0.2s; }
-        .toggle-switch.active { background: #f97316; }
+        .toggle-switch.active { background: var(--accent-orange); }
         .toggle-switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
         .toggle-switch.active::after { left: 22px; }
         .hidden-content { display: none; }
+        .submit-btn { background: var(--btn-success-bg); color: white; width: 100%; padding: 14px; border: none; border-radius: 40px; font-size: 1.2rem; font-weight: bold; margin-top: 12px; cursor: pointer; box-shadow: 0 5px 0 var(--btn-success-shadow); transition: 0.05s linear; text-align: center; }
+        .submit-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-success-shadow); }
+        /* 确保提交消费按钮样式一致 */
+        #submitConsume { background: var(--btn-success-bg); color: white; width: 100%; padding: 14px; border: none; border-radius: 40px; font-size: 1.2rem; font-weight: bold; margin-top: 12px; cursor: pointer; box-shadow: 0 5px 0 var(--btn-success-shadow); transition: 0.05s linear; text-align: center; }
+        #submitConsume:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-success-shadow); }
+        /* 调整间距使内容更紧凑，减少滚动 */
+        .app-container { padding: 16px; }
+        h3 { margin: 0 0 12px 0; font-size: 1.3rem; color: var(--text-primary); }
     </style>
 </head>
 <body>
-<div class="container">
+<div class="app-container">
     <div id="loginStatus" class="login-status">載入中...</div>
 
-    <!-- 三個主按鈕 -->
     <div class="btn-group">
         <button class="nav-btn" data-page="sales"><i class="fa-solid fa-cube"></i><span>產品銷售</span></button>
         <button class="nav-btn" data-page="consumption"><i class="fa-solid fa-user-group"></i><span>客人消費</span></button>
         <button class="nav-btn" id="studentBookingBtn"><i class="fa-solid fa-school"></i><span>學生預約</span></button>
     </div>
 
-    <!-- 系統設定齒輪行（靠右） -->
     <div class="settings-row">
         <button id="settingsIconBtn" class="settings-icon"><i class="fa-solid fa-gear"></i></button>
     </div>
@@ -85,7 +123,7 @@
         <div class="form-group"><label>👤 員工</label><div class="staff-group" id="salesStaff"></div></div>
         <div class="form-group"><label>📦 產品</label><div id="productList" class="product-grid"></div><div class="total">總金額: <span id="totalAmount">0</span> 元</div></div>
         <div class="form-group"><label>💳 支付方式</label><div class="payment-group" id="salesPayment"></div></div>
-        <button id="submitSales">提交銷售</button>
+        <button id="submitSales" class="submit-btn">提交銷售</button>
         <div id="salesRecent" class="recent-record" style="display:none;"></div>
     </div>
 
@@ -104,7 +142,12 @@
     <div id="settingsPage" class="page">
         <h3>⚙️ 系統設定</h3>
         <hr>
-        <!-- 員工管理區塊 -->
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>🌙 夜間模式</h4>
+                <div class="toggle-switch" id="toggleDarkMode"></div>
+            </div>
+        </div>
         <div class="settings-section">
             <div class="settings-header">
                 <h4>👥 員工管理</h4>
@@ -119,7 +162,6 @@
                 </div>
             </div>
         </div>
-        <!-- 產品管理區塊 -->
         <div class="settings-section">
             <div class="settings-header">
                 <h4>📦 產品管理</h4>
@@ -134,7 +176,6 @@
                 </div>
             </div>
         </div>
-        <!-- 預設金額管理區塊 -->
         <div class="settings-section">
             <div class="settings-header">
                 <h4>💰 預設金額管理</h4>
@@ -148,7 +189,6 @@
                 </div>
             </div>
         </div>
-        <!-- 交易記錄區塊（新增開關） -->
         <div class="settings-section">
             <div class="settings-header">
                 <h4>📜 交易記錄</h4>
@@ -186,7 +226,8 @@ let gapiInited = false;
 let gisInited = false;
 let gapiReady = false;
 let syncInProgress = false;
-let settingsPassword = 'admin123';   // 預設密碼，會從試算表載入
+let settingsPassword = 'admin123';
+let darkMode = localStorage.getItem('darkMode') === 'true';
 
 // 全域資料
 let staffList = [
@@ -210,13 +251,8 @@ let lastSalesRecord = null;
 let lastConsumeRecord = null;
 const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付"];
 
-// 設定區塊開關狀態 (預設關閉)
-let toggleStaff = false;
-let toggleProduct = false;
-let togglePreset = false;
-let toggleRecords = false;   // 交易記錄開關
+let toggleStaff = false, toggleProduct = false, togglePreset = false, toggleRecords = false;
 
-// 本地儲存
 function loadLocalData() {
     const storedStaff = localStorage.getItem("staffList");
     if (storedStaff) staffList = JSON.parse(storedStaff);
@@ -241,16 +277,17 @@ function savePresets() { localStorage.setItem("presetAmounts", JSON.stringify(pr
 function saveRecords() { localStorage.setItem("salesRecords", JSON.stringify(records)); }
 function saveToggles() {
     localStorage.setItem("settingsToggles", JSON.stringify({
-        staff: toggleStaff,
-        product: toggleProduct,
-        preset: togglePreset,
-        records: toggleRecords
+        staff: toggleStaff, product: toggleProduct, preset: togglePreset, records: toggleRecords
     }));
 }
+function setDarkMode(enabled) {
+    darkMode = enabled;
+    if (enabled) document.body.classList.add('dark');
+    else document.body.classList.remove('dark');
+    localStorage.setItem('darkMode', enabled);
+}
 
-// ========== Google Sheets 設定同步 (統一寫入 staff 工作表) ==========
-const CONFIG_SHEET = 'staff'; // 統一設定工作表
-
+const CONFIG_SHEET = 'staff';
 async function syncConfigToSheet() {
     if (!gapiReady) return;
     try {
@@ -261,39 +298,26 @@ async function syncConfigToSheet() {
         await appendToSheet(CONFIG_SHEET, ['password', 'admin', settingsPassword]);
     } catch (err) { console.error("同步設定失敗", err); }
 }
-
 async function clearSheet(sheetName) {
     const range = `${sheetName}!A:Z`;
     await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId: SPREADSHEET_ID, range: range });
 }
-
 async function appendToSheet(sheetName, values) {
     const range = `${sheetName}!A:Z`;
     await gapi.client.sheets.spreadsheets.values.append({
-        spreadsheetId: SPREADSHEET_ID,
-        range: range,
-        valueInputOption: 'USER_ENTERED',
-        resource: { values: [values] }
+        spreadsheetId: SPREADSHEET_ID, range: range, valueInputOption: 'USER_ENTERED', resource: { values: [values] }
     });
 }
-
 async function loadConfigFromSheet() {
     if (!gapiReady) return;
     try {
-        const resp = await gapi.client.sheets.spreadsheets.values.get({
-            spreadsheetId: SPREADSHEET_ID,
-            range: `${CONFIG_SHEET}!A:C`
-        });
+        const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${CONFIG_SHEET}!A:C` });
         if (resp.result.values && resp.result.values.length > 0) {
             const rows = resp.result.values;
-            const newStaff = [];
-            const newProducts = [];
-            const newPresets = [];
+            const newStaff = [], newProducts = [], newPresets = [];
             let newPassword = null;
             for (let row of rows) {
-                const type = row[0];
-                const key = row[1];
-                const val = row[2];
+                const type = row[0], key = row[1], val = row[2];
                 if (type === 'employee') newStaff.push({ code: key, name: val });
                 else if (type === 'product') newProducts.push({ name: key, price: parseFloat(val) });
                 else if (type === 'preset') newPresets.push(parseFloat(val));
@@ -309,37 +333,22 @@ async function loadConfigFromSheet() {
     } catch (err) { console.error("讀取設定失敗", err); }
 }
 
-// ========== 交易記錄同步 ==========
 async function syncToSheet(record) {
     const sheetName = record.type === 'sales' ? '產品' : '客人';
-    const row = [
-        record.id || '', record.type || '', record.date || '',
-        record.staffCode || '', record.staffName || '',
-        record.amount || '', record.payment || '',
-        record.details || '', record.createdAt || '',
-        record.syncStatus || ''
-    ];
+    const row = [ record.id || '', record.type || '', record.date || '', record.staffCode || '', record.staffName || '', record.amount || '', record.payment || '', record.details || '', record.createdAt || '', record.syncStatus || '' ];
     await appendToSheet(sheetName, row);
 }
-
 async function addRecord(recordData) {
     const newId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
     const newRecord = { id: newId, syncStatus: "pending", ...recordData };
     records.unshift(newRecord);
     saveRecords();
     renderRecords();
-
     if (gapiReady) await syncRecord(newRecord);
-    if (recordData.type === 'sales') {
-        lastSalesRecord = { ...newRecord };
-        updateRecentRecord('sales');
-    } else {
-        lastConsumeRecord = { ...newRecord };
-        updateRecentRecord('consumption');
-    }
+    if (recordData.type === 'sales') { lastSalesRecord = { ...newRecord }; updateRecentRecord('sales'); }
+    else { lastConsumeRecord = { ...newRecord }; updateRecentRecord('consumption'); }
     return true;
 }
-
 async function syncRecord(record) {
     try {
         await syncToSheet(record);
@@ -362,40 +371,29 @@ async function syncRecord(record) {
         return false;
     }
 }
-
 async function syncAllPending() {
     if (syncInProgress || !gapiReady) return;
     syncInProgress = true;
-    const pending = records.filter(r => r.syncStatus === "pending");
-    for (let rec of pending) await syncRecord(rec);
+    for (let rec of records.filter(r => r.syncStatus === "pending")) await syncRecord(rec);
     syncInProgress = false;
 }
-
-function showToast(message) {
+function showToast(msg) {
     const toast = document.createElement('div');
     toast.className = 'toast';
-    toast.innerText = message;
+    toast.innerText = msg;
     document.body.appendChild(toast);
     setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
 }
-
 function updateRecentRecord(type) {
-    if (type === 'sales') {
-        const div = document.getElementById('salesRecent');
-        if (lastSalesRecord) {
-            div.style.display = 'block';
-            div.innerHTML = `📌 最近一筆銷售：${lastSalesRecord.date} ${lastSalesRecord.staffName} | 金額 $${lastSalesRecord.amount} | ${lastSalesRecord.payment}<br>明細：${lastSalesRecord.details}`;
-        } else div.style.display = 'none';
-    } else {
-        const div = document.getElementById('consumeRecent');
-        if (lastConsumeRecord) {
-            div.style.display = 'block';
-            div.innerHTML = `📌 最近一筆消費：${lastConsumeRecord.date} ${lastConsumeRecord.staffName} | 金額 $${lastConsumeRecord.amount} | ${lastConsumeRecord.payment}`;
-        } else div.style.display = 'none';
-    }
+    const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
+    if (type === 'sales' && lastSalesRecord) {
+        div.style.display = 'block';
+        div.innerHTML = `📌 最近一筆銷售：${lastSalesRecord.date} ${lastSalesRecord.staffName} | 金額 $${lastSalesRecord.amount} | ${lastSalesRecord.payment}<br>明細：${lastSalesRecord.details}`;
+    } else if (type === 'consumption' && lastConsumeRecord) {
+        div.style.display = 'block';
+        div.innerHTML = `📌 最近一筆消費：${lastConsumeRecord.date} ${lastConsumeRecord.staffName} | 金額 $${lastConsumeRecord.amount} | ${lastConsumeRecord.payment}`;
+    } else div.style.display = 'none';
 }
-
-// ========== UI 渲染 ==========
 function renderStaff(containerId, selectedCode, onChange) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
@@ -411,7 +409,6 @@ function renderStaff(containerId, selectedCode, onChange) {
         container.appendChild(btn);
     });
 }
-
 function renderPayment(containerId, selected, onChange) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
@@ -427,7 +424,6 @@ function renderPayment(containerId, selected, onChange) {
         container.appendChild(btn);
     });
 }
-
 function renderProducts() {
     const container = document.getElementById("productList");
     if (!container) return;
@@ -445,14 +441,12 @@ function renderProducts() {
         container.appendChild(btn);
     });
 }
-
 function calcTotal() {
     let total = 0;
     productList.forEach(p => { if (selectedProducts.has(p.name)) total += p.price; });
     document.getElementById("totalAmount").innerText = total;
     return total;
 }
-
 function renderPresetButtons() {
     const container = document.getElementById("presetAmounts");
     if (!container) return;
@@ -465,7 +459,6 @@ function renderPresetButtons() {
         container.appendChild(btn);
     });
 }
-
 function renderRecords() {
     const container = document.getElementById("recordsList");
     if (!container) return;
@@ -490,7 +483,6 @@ function renderRecords() {
     });
     container.innerHTML = html;
 }
-
 function renderStaffManageList() {
     const container = document.getElementById("staffManageList");
     if (!container) return;
@@ -498,20 +490,16 @@ function renderStaffManageList() {
     staffList.forEach((staff, idx) => {
         const div = document.createElement("div");
         div.className = "setting-row";
-        div.innerHTML = `
-            <span style="flex:2;"><strong>${staff.name}</strong> (${staff.code})</span>
+        div.innerHTML = `<span style="flex:2;"><strong>${staff.name}</strong> (${staff.code})</span>
             <button class="small-btn edit-btn" data-idx="${idx}" data-type="staff">✏️ 編輯</button>
-            <button class="small-btn danger-btn" data-idx="${idx}" data-type="staff">🗑️ 刪除</button>
-        `;
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="staff">🗑️ 刪除</button>`;
         div.querySelector(".edit-btn").onclick = async () => {
             if (!gapiReady) { alert("請先登入才能編輯員工"); return; }
             const newName = prompt("輸入新姓名", staff.name);
             const newCode = prompt("輸入新工號", staff.code);
             if (newName && newCode) {
-                staff.name = newName.trim();
-                staff.code = newCode.trim();
-                saveStaff();
-                renderStaffManageList();
+                staff.name = newName.trim(); staff.code = newCode.trim();
+                saveStaff(); renderStaffManageList();
                 renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
                 renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
                 await syncConfigToSheet();
@@ -519,9 +507,7 @@ function renderStaffManageList() {
         };
         div.querySelector(".danger-btn").onclick = async () => {
             if (!gapiReady) { alert("請先登入才能刪除員工"); return; }
-            staffList.splice(idx, 1);
-            saveStaff();
-            renderStaffManageList();
+            staffList.splice(idx, 1); saveStaff(); renderStaffManageList();
             renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
             renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
             await syncConfigToSheet();
@@ -529,7 +515,6 @@ function renderStaffManageList() {
         container.appendChild(div);
     });
 }
-
 function renderProductManageList() {
     const container = document.getElementById("productManageList");
     if (!container) return;
@@ -537,36 +522,27 @@ function renderProductManageList() {
     productList.forEach((prod, idx) => {
         const div = document.createElement("div");
         div.className = "setting-row";
-        div.innerHTML = `
-            <span style="flex:2;">${prod.name} - $${prod.price}</span>
+        div.innerHTML = `<span style="flex:2;">${prod.name} - $${prod.price}</span>
             <button class="small-btn edit-btn" data-idx="${idx}" data-type="product">✏️ 編輯</button>
-            <button class="small-btn danger-btn" data-idx="${idx}" data-type="product">🗑️ 刪除</button>
-        `;
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="product">🗑️ 刪除</button>`;
         div.querySelector(".edit-btn").onclick = async () => {
             if (!gapiReady) { alert("請先登入才能編輯產品"); return; }
             const newName = prompt("輸入新產品名稱", prod.name);
             const newPrice = prompt("輸入新價格", prod.price);
             if (newName && newPrice && !isNaN(parseFloat(newPrice))) {
-                prod.name = newName.trim();
-                prod.price = parseFloat(newPrice);
-                saveProducts();
-                renderProductManageList();
-                renderProducts();
+                prod.name = newName.trim(); prod.price = parseFloat(newPrice);
+                saveProducts(); renderProductManageList(); renderProducts();
                 await syncConfigToSheet();
             }
         };
         div.querySelector(".danger-btn").onclick = async () => {
             if (!gapiReady) { alert("請先登入才能刪除產品"); return; }
-            productList.splice(idx, 1);
-            saveProducts();
-            renderProductManageList();
-            renderProducts();
+            productList.splice(idx, 1); saveProducts(); renderProductManageList(); renderProducts();
             await syncConfigToSheet();
         };
         container.appendChild(div);
     });
 }
-
 function renderPresetManageList() {
     const container = document.getElementById("presetManageList");
     if (!container) return;
@@ -574,34 +550,26 @@ function renderPresetManageList() {
     presetAmounts.forEach((amt, idx) => {
         const div = document.createElement("div");
         div.className = "setting-row";
-        div.innerHTML = `
-            <span style="flex:2;">$${amt}</span>
+        div.innerHTML = `<span style="flex:2;">$${amt}</span>
             <button class="small-btn edit-btn" data-idx="${idx}" data-type="preset">✏️ 編輯</button>
-            <button class="small-btn danger-btn" data-idx="${idx}" data-type="preset">🗑️ 刪除</button>
-        `;
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="preset">🗑️ 刪除</button>`;
         div.querySelector(".edit-btn").onclick = async () => {
             if (!gapiReady) { alert("請先登入才能編輯預設金額"); return; }
             const newAmt = prompt("輸入新金額", amt);
             if (newAmt && !isNaN(parseFloat(newAmt))) {
                 presetAmounts[idx] = parseFloat(newAmt);
-                savePresets();
-                renderPresetManageList();
-                renderPresetButtons();
+                savePresets(); renderPresetManageList(); renderPresetButtons();
                 await syncConfigToSheet();
             }
         };
         div.querySelector(".danger-btn").onclick = async () => {
             if (!gapiReady) { alert("請先登入才能刪除預設金額"); return; }
-            presetAmounts.splice(idx, 1);
-            savePresets();
-            renderPresetManageList();
-            renderPresetButtons();
+            presetAmounts.splice(idx, 1); savePresets(); renderPresetManageList(); renderPresetButtons();
             await syncConfigToSheet();
         };
         container.appendChild(div);
     });
 }
-
 async function submitSales() {
     if (!gapiReady) alert("尚未登入，記錄將先儲存於本地，登入後自動同步");
     const date = document.getElementById("salesDate").value;
@@ -609,21 +577,13 @@ async function submitSales() {
     if (!selectedSalesStaff) { alert("請選擇員工"); return; }
     const payment = selectedSalesPayment;
     let selected = [], total = 0;
-    productList.forEach(p => {
-        if (selectedProducts.has(p.name)) {
-            selected.push(`${p.name} x1`);
-            total += p.price;
-        }
-    });
+    productList.forEach(p => { if (selectedProducts.has(p.name)) { selected.push(`${p.name} x1`); total += p.price; } });
     if (selected.length === 0) { alert("請至少選擇一件產品"); return; }
     const record = { type: "sales", date, staffCode: selectedSalesStaff.code, staffName: selectedSalesStaff.name, amount: total, payment, details: selected.join("、"), createdAt: new Date().toISOString() };
     await addRecord(record);
     showToast(`✅ 訂單已完成！\n${record.details}\n金額: $${record.amount}`);
-    selectedProducts.clear();
-    renderProducts();
-    document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
+    selectedProducts.clear(); renderProducts(); document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
 }
-
 async function submitConsumption() {
     if (!gapiReady) alert("尚未登入，記錄將先儲存於本地，登入後自動同步");
     const date = document.getElementById("consumeDate").value;
@@ -637,25 +597,13 @@ async function submitConsumption() {
     showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
     document.getElementById("consumeAmount").value = "";
 }
-
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     document.getElementById(pageId + "Page").classList.add("active");
-    if (pageId === "sales") {
-        document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
-        renderProducts();
-        updateRecentRecord('sales');
-    }
-    if (pageId === "consumption") {
-        document.getElementById("consumeDate").value = new Date().toISOString().slice(0,10);
-        renderPresetButtons();
-        updateRecentRecord('consumption');
-    }
+    if (pageId === "sales") { document.getElementById("salesDate").value = new Date().toISOString().slice(0,10); renderProducts(); updateRecentRecord('sales'); }
+    if (pageId === "consumption") { document.getElementById("consumeDate").value = new Date().toISOString().slice(0,10); renderPresetButtons(); updateRecentRecord('consumption'); }
     if (pageId === "settings") {
-        renderStaffManageList();
-        renderProductManageList();
-        renderPresetManageList();
-        renderRecords();
+        renderStaffManageList(); renderProductManageList(); renderPresetManageList(); renderRecords();
         document.getElementById("toggleStaff").classList.toggle("active", toggleStaff);
         document.getElementById("toggleProduct").classList.toggle("active", toggleProduct);
         document.getElementById("togglePreset").classList.toggle("active", togglePreset);
@@ -664,123 +612,82 @@ function showPage(pageId) {
         document.getElementById("productContent").classList.toggle("hidden-content", !toggleProduct);
         document.getElementById("presetContent").classList.toggle("hidden-content", !togglePreset);
         document.getElementById("recordsContent").classList.toggle("hidden-content", !toggleRecords);
+        document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
     }
 }
-
 function initToggles() {
-    const toggleStaffEl = document.getElementById("toggleStaff");
-    const toggleProductEl = document.getElementById("toggleProduct");
-    const togglePresetEl = document.getElementById("togglePreset");
-    const toggleRecordsEl = document.getElementById("toggleRecords");
-    toggleStaffEl.addEventListener("click", () => {
-        toggleStaff = !toggleStaff;
-        toggleStaffEl.classList.toggle("active", toggleStaff);
-        document.getElementById("staffContent").classList.toggle("hidden-content", !toggleStaff);
-        saveToggles();
+    document.getElementById("toggleStaff").addEventListener("click", () => {
+        toggleStaff = !toggleStaff; document.getElementById("toggleStaff").classList.toggle("active", toggleStaff);
+        document.getElementById("staffContent").classList.toggle("hidden-content", !toggleStaff); saveToggles();
     });
-    toggleProductEl.addEventListener("click", () => {
-        toggleProduct = !toggleProduct;
-        toggleProductEl.classList.toggle("active", toggleProduct);
-        document.getElementById("productContent").classList.toggle("hidden-content", !toggleProduct);
-        saveToggles();
+    document.getElementById("toggleProduct").addEventListener("click", () => {
+        toggleProduct = !toggleProduct; document.getElementById("toggleProduct").classList.toggle("active", toggleProduct);
+        document.getElementById("productContent").classList.toggle("hidden-content", !toggleProduct); saveToggles();
     });
-    togglePresetEl.addEventListener("click", () => {
-        togglePreset = !togglePreset;
-        togglePresetEl.classList.toggle("active", togglePreset);
-        document.getElementById("presetContent").classList.toggle("hidden-content", !togglePreset);
-        saveToggles();
+    document.getElementById("togglePreset").addEventListener("click", () => {
+        togglePreset = !togglePreset; document.getElementById("togglePreset").classList.toggle("active", togglePreset);
+        document.getElementById("presetContent").classList.toggle("hidden-content", !togglePreset); saveToggles();
     });
-    toggleRecordsEl.addEventListener("click", () => {
-        toggleRecords = !toggleRecords;
-        toggleRecordsEl.classList.toggle("active", toggleRecords);
-        document.getElementById("recordsContent").classList.toggle("hidden-content", !toggleRecords);
-        saveToggles();
+    document.getElementById("toggleRecords").addEventListener("click", () => {
+        toggleRecords = !toggleRecords; document.getElementById("toggleRecords").classList.toggle("active", toggleRecords);
+        document.getElementById("recordsContent").classList.toggle("hidden-content", !toggleRecords); saveToggles();
+    });
+    document.getElementById("toggleDarkMode").addEventListener("click", () => {
+        setDarkMode(!darkMode);
+        document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
     });
 }
-
 document.getElementById("settingsIconBtn").addEventListener("click", () => {
     const pwd = prompt("請輸入管理密碼");
     if (pwd === settingsPassword) showPage("settings");
     else if (pwd !== null) alert("密碼錯誤");
 });
-
 document.getElementById("changePasswordBtn").addEventListener("click", async () => {
-    const newPwd = document.getElementById("newPassword").value;
-    const confirmPwd = document.getElementById("confirmPassword").value;
+    const newPwd = document.getElementById("newPassword").value, confirmPwd = document.getElementById("confirmPassword").value;
     if (!newPwd) { alert("請輸入新密碼"); return; }
     if (newPwd !== confirmPwd) { alert("兩次密碼不一致"); return; }
     settingsPassword = newPwd;
     if (gapiReady) await syncConfigToSheet();
     alert("密碼已更新");
-    document.getElementById("newPassword").value = "";
-    document.getElementById("confirmPassword").value = "";
+    document.getElementById("newPassword").value = ""; document.getElementById("confirmPassword").value = "";
 });
-
-const iframeModal = document.getElementById("iframeModal");
-const bookingIframe = document.getElementById("bookingIframe");
-document.getElementById("studentBookingBtn").onclick = () => {
-    bookingIframe.src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html";
-    iframeModal.style.display = "block";
-};
-document.getElementById("closeIframeBtn").onclick = () => {
-    iframeModal.style.display = "none";
-    bookingIframe.src = "";
-};
-
-document.querySelectorAll("[data-page]").forEach(btn => {
-    btn.onclick = () => showPage(btn.dataset.page);
-});
+const iframeModal = document.getElementById("iframeModal"), bookingIframe = document.getElementById("bookingIframe");
+document.getElementById("studentBookingBtn").onclick = () => { bookingIframe.src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html"; iframeModal.style.display = "block"; };
+document.getElementById("closeIframeBtn").onclick = () => { iframeModal.style.display = "none"; bookingIframe.src = ""; };
+document.querySelectorAll("[data-page]").forEach(btn => btn.onclick = () => showPage(btn.dataset.page));
 document.getElementById("submitSales").onclick = submitSales;
 document.getElementById("submitConsume").onclick = submitConsumption;
-
 document.getElementById("addStaffBtn").onclick = async () => {
     if (!gapiReady) { alert("請先登入才能新增員工"); return; }
-    const name = document.getElementById("newStaffName").value.trim();
-    const code = document.getElementById("newStaffCode").value.trim();
+    const name = document.getElementById("newStaffName").value.trim(), code = document.getElementById("newStaffCode").value.trim();
     if (!name || !code) { alert("請填寫員工姓名與工號"); return; }
-    staffList.push({ code, name });
-    saveStaff();
-    renderStaffManageList();
+    staffList.push({ code, name }); saveStaff(); renderStaffManageList();
     renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
     renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
     await syncConfigToSheet();
-    document.getElementById("newStaffName").value = "";
-    document.getElementById("newStaffCode").value = "";
+    document.getElementById("newStaffName").value = ""; document.getElementById("newStaffCode").value = "";
 };
 document.getElementById("addProductBtn").onclick = async () => {
     if (!gapiReady) { alert("請先登入才能新增產品"); return; }
-    const name = document.getElementById("newProductName").value.trim();
-    const price = parseFloat(document.getElementById("newProductPrice").value);
+    const name = document.getElementById("newProductName").value.trim(), price = parseFloat(document.getElementById("newProductPrice").value);
     if (!name || isNaN(price) || price <= 0) { alert("請填寫產品名稱與正確價格"); return; }
-    productList.push({ name, price });
-    saveProducts();
-    renderProductManageList();
-    renderProducts();
+    productList.push({ name, price }); saveProducts(); renderProductManageList(); renderProducts();
     await syncConfigToSheet();
-    document.getElementById("newProductName").value = "";
-    document.getElementById("newProductPrice").value = "";
+    document.getElementById("newProductName").value = ""; document.getElementById("newProductPrice").value = "";
 };
 document.getElementById("addPresetBtn").onclick = async () => {
     if (!gapiReady) { alert("請先登入才能新增預設金額"); return; }
     const amt = parseFloat(document.getElementById("newPresetAmount").value);
     if (isNaN(amt) || amt <= 0) { alert("請輸入正確金額"); return; }
-    presetAmounts.push(amt);
-    savePresets();
-    renderPresetManageList();
-    renderPresetButtons();
+    presetAmounts.push(amt); savePresets(); renderPresetManageList(); renderPresetButtons();
     await syncConfigToSheet();
     document.getElementById("newPresetAmount").value = "";
 };
 document.getElementById("clearLocalDataBtn").onclick = () => {
     if (confirm("⚠️ 確定清空所有本地記錄？此操作無法復原！")) {
-        records = [];
-        saveRecords();
-        renderRecords();
-        alert("已清空所有記錄");
+        records = []; saveRecords(); renderRecords(); alert("已清空所有記錄");
     }
 };
-
-// ========== Google API 初始化 ==========
 function gapiLoaded() { gapi.load('client', initGapiClient); }
 async function initGapiClient() {
     await gapi.client.init({ discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] });
@@ -793,48 +700,34 @@ function gisLoaded() {
 function maybeEnableButtons() {
     if (gapiInited && gisInited && !gapiReady) {
         gapiReady = true;
-        const statusDiv = document.getElementById('loginStatus');
-        statusDiv.innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權 <button id="authBtn">登入 Google</button>';
+        document.getElementById('loginStatus').innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權 <button id="authBtn">登入 Google</button>';
         document.getElementById('authBtn').onclick = () => {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) throw resp;
-                statusDiv.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
-                await loadConfigFromSheet();
-                await syncAllPending();
-                renderUI();
+                document.getElementById('loginStatus').innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
+                await loadConfigFromSheet(); await syncAllPending(); renderUI();
             };
             tokenClient.requestAccessToken();
         };
     }
 }
-
 function renderUI() {
     renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
     renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
     renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p);
     renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p);
-    renderProducts();
-    renderPresetButtons();
-    renderRecords();
-    renderStaffManageList();
-    renderProductManageList();
-    renderPresetManageList();
-    updateRecentRecord('sales');
-    updateRecentRecord('consumption');
-    initToggles();
+    renderProducts(); renderPresetButtons(); renderRecords();
+    renderStaffManageList(); renderProductManageList(); renderPresetManageList();
+    updateRecentRecord('sales'); updateRecentRecord('consumption');
+    initToggles(); setDarkMode(darkMode);
 }
-
 function ensureInit() {
     if (typeof gapi !== 'undefined' && typeof google !== 'undefined' && typeof google.accounts !== 'undefined') {
         if (!gapiInited) gapiLoaded();
         if (!gisInited) gisLoaded();
     } else setTimeout(ensureInit, 200);
 }
-window.addEventListener('load', () => {
-    loadLocalData();
-    renderUI();
-    ensureInit();
-});
+window.addEventListener('load', () => { loadLocalData(); renderUI(); ensureInit(); });
 </script>
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
