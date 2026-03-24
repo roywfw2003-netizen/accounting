@@ -23,8 +23,9 @@
         .payment-btn.active { background: #3b82f6; color: white; box-shadow: 0 4px 0 #1e3a8a; }
         .preset-btn { background: #22c55e; color: white; box-shadow: 0 4px 0 #15803d; }
         .product-grid, .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0; }
-        .product-btn { background: #f1f5f9; text-align: center; padding: 10px; font-weight: 600; }
-        .product-price { font-weight: bold; margin-top: 4px; font-size: 0.9rem; color: #f97316; }
+        .product-btn { background: #f1f5f9; text-align: center; padding: 10px; font-weight: 600; color: #1f2937; }
+        .product-btn .product-price { font-weight: bold; margin-top: 4px; font-size: 0.9rem; color: inherit; }
+        .product-btn.selected .product-price { color: white; }
         .total { font-size: 1.5rem; font-weight: bold; text-align: right; margin-top: 12px; border-top: 1px solid #ddd; padding-top: 12px; }
         .record-item { background: #fef9f0; border-radius: 20px; padding: 12px; margin-bottom: 12px; }
         .sync-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
@@ -477,7 +478,7 @@ async function submitSales() {
     selectedProducts.clear();
     renderProducts();
     document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
-    showPage("records");
+    // 不跳轉頁面，保持當前頁面
 }
 
 // 提交消費
@@ -507,7 +508,7 @@ async function submitConsumption() {
     await addRecord(record);
     showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
     document.getElementById("consumeAmount").value = "";
-    showPage("records");
+    // 不跳轉頁面，保持當前頁面
 }
 
 // 頁面切換
