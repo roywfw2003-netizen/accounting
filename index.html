@@ -8,7 +8,7 @@
     <style>
         /* CSS 变量 - 白天模式 */
         :root {
-            --bg-body: white;              /* 背景與卡片同色，實現全屏卡片 */
+            --bg-body: #cfe7ff;
             --bg-card: white;
             --text-primary: #1f2937;
             --text-secondary: #4b5563;
@@ -23,7 +23,7 @@
             --accent-orange-shadow: #b45309;
         }
         body.dark {
-            --bg-body: #2d3748;
+            --bg-body: #1f2937;
             --bg-card: #2d3748;
             --text-primary: #f3f4f6;
             --text-secondary: #9ca3af;
@@ -39,7 +39,7 @@
         }
         * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
         body { background: var(--bg-body); padding: 0; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .app-container { width: 100%; max-width: 100%; margin: 0; background: var(--bg-card); padding: 16px; transition: all 0.2s; }
+        .app-container { width: 100%; max-width: 800px; margin: 0 auto; background: var(--bg-card); border-radius: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; padding: 20px; transition: all 0.2s; }
         /* 内容紧凑，确保所有内容在常见手机上一屏内可见 */
         .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
         .nav-btn { background: var(--btn-primary-bg); border: none; border-radius: 32px; color: white; font-weight: bold; cursor: pointer; flex: 1; min-width: 100px; padding: 16px 8px; text-align: center; transition: 0.05s linear; box-shadow: 0 5px 0 var(--btn-primary-shadow); display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -57,7 +57,7 @@
         .staff-group, .payment-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
         .staff-btn, .payment-btn, .preset-btn, .product-btn { background: var(--btn-gray-bg); border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-weight: bold; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; text-align: center; color: var(--text-primary); }
         .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
-        .staff-btn.active, .product-btn.selected, .preset-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
+        .staff-btn.active, .product-btn.selected { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
         .payment-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
         .preset-btn { background: var(--btn-gray-bg); color: var(--text-primary); }
         .product-grid, .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
@@ -70,10 +70,7 @@
         .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
         .sync-pending { background: #fef9c3; color: #854d0e; }
-        .login-status { background: var(--btn-gray-bg); border-radius: 40px; padding: 8px 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 0.9rem; color: var(--text-primary); }
-        .login-status button { background: var(--accent-orange); color: white; border: none; padding: 4px 12px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 2px 0 var(--accent-orange-shadow); transition: 0.05s linear; }
-        .login-status button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
-        .login-status button:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; opacity: 0.6; }
+        .login-status { background: var(--btn-gray-bg); border-radius: 40px; padding: 8px 12px; margin-bottom: 16px; text-align: center; font-size: 0.9rem; color: var(--text-primary); }
         .setting-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
         .small-btn { background: var(--btn-gray-bg); border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; color: var(--text-primary); }
         .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
@@ -97,19 +94,17 @@
         .hidden-content { display: none; }
         .submit-btn { background: var(--btn-success-bg); color: white; width: 100%; padding: 14px; border: none; border-radius: 40px; font-size: 1.2rem; font-weight: bold; margin-top: 12px; cursor: pointer; box-shadow: 0 5px 0 var(--btn-success-shadow); transition: 0.05s linear; text-align: center; }
         .submit-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-success-shadow); }
+        /* 确保提交消费按钮样式一致 */
         #submitConsume { background: var(--btn-success-bg); color: white; width: 100%; padding: 14px; border: none; border-radius: 40px; font-size: 1.2rem; font-weight: bold; margin-top: 12px; cursor: pointer; box-shadow: 0 5px 0 var(--btn-success-shadow); transition: 0.05s linear; text-align: center; }
         #submitConsume:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-success-shadow); }
+        /* 调整间距使内容更紧凑，减少滚动 */
+        .app-container { padding: 16px; }
         h3 { margin: 0 0 12px 0; font-size: 1.3rem; color: var(--text-primary); }
-        .retry-btn { background: var(--accent-orange); color: white; border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; margin-left: 8px; box-shadow: 0 2px 0 var(--accent-orange-shadow); }
-        .retry-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
     </style>
 </head>
 <body>
 <div class="app-container">
-    <div id="loginStatus" class="login-status">
-        <span id="loginText">載入中...</span>
-        <button id="authBtn" disabled>登入 Google</button>
-    </div>
+    <div id="loginStatus" class="login-status">載入中...</div>
 
     <div class="btn-group">
         <button class="nav-btn" data-page="sales"><i class="fa-solid fa-cube"></i><span>產品銷售</span></button>
@@ -201,10 +196,7 @@
             </div>
             <div id="recordsContent" class="settings-content hidden-content">
                 <div id="recordsList"></div>
-                <div class="setting-row" style="justify-content: flex-end;">
-                    <button class="small-btn retry-btn" id="retryFailedBtn">🔄 重試失敗記錄</button>
-                    <button class="small-btn danger-btn" id="clearLocalDataBtn">🗑️ 清空所有本地記錄</button>
-                </div>
+                <button class="small-btn danger-btn" id="clearLocalDataBtn" style="margin-top:12px;">🗑️ 清空所有本地記錄</button>
             </div>
         </div>
         <hr>
@@ -232,12 +224,12 @@ const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 let tokenClient;
 let gapiInited = false;
 let gisInited = false;
-let authorized = false;        // 是否已獲得授權 token
+let gapiReady = false;
 let syncInProgress = false;
 let settingsPassword = 'admin123';
 let darkMode = localStorage.getItem('darkMode') === 'true';
 
-// 全域資料（與原版本相同）
+// 全域資料
 let staffList = [
     { code: "1", name: "Roy" },
     { code: "2", name: "Ken" },
@@ -297,7 +289,7 @@ function setDarkMode(enabled) {
 
 const CONFIG_SHEET = 'staff';
 async function syncConfigToSheet() {
-    if (!authorized) return;
+    if (!gapiReady) return;
     try {
         await clearSheet(CONFIG_SHEET);
         for (let s of staffList) await appendToSheet(CONFIG_SHEET, ['employee', s.code, s.name]);
@@ -317,7 +309,7 @@ async function appendToSheet(sheetName, values) {
     });
 }
 async function loadConfigFromSheet() {
-    if (!authorized) return;
+    if (!gapiReady) return;
     try {
         const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${CONFIG_SHEET}!A:C` });
         if (resp.result.values && resp.result.values.length > 0) {
@@ -352,7 +344,7 @@ async function addRecord(recordData) {
     records.unshift(newRecord);
     saveRecords();
     renderRecords();
-    if (authorized) await syncRecord(newRecord);
+    if (gapiReady) await syncRecord(newRecord);
     if (recordData.type === 'sales') { lastSalesRecord = { ...newRecord }; updateRecentRecord('sales'); }
     else { lastConsumeRecord = { ...newRecord }; updateRecentRecord('consumption'); }
     return true;
@@ -380,22 +372,10 @@ async function syncRecord(record) {
     }
 }
 async function syncAllPending() {
-    if (syncInProgress || !authorized) return;
+    if (syncInProgress || !gapiReady) return;
     syncInProgress = true;
     for (let rec of records.filter(r => r.syncStatus === "pending")) await syncRecord(rec);
     syncInProgress = false;
-}
-async function retryFailed() {
-    if (!authorized) { alert("尚未登入，無法同步"); return; }
-    const failed = records.filter(r => r.syncStatus === "failed");
-    if (failed.length === 0) { alert("沒有失敗的記錄"); return; }
-    let successCount = 0;
-    for (let rec of failed) {
-        const result = await syncRecord(rec);
-        if (result) successCount++;
-    }
-    alert(`重試完成：成功 ${successCount} 筆，失敗 ${failed.length - successCount} 筆`);
-    renderRecords();
 }
 function showToast(msg) {
     const toast = document.createElement('div');
@@ -475,11 +455,7 @@ function renderPresetButtons() {
         const btn = document.createElement("div");
         btn.className = "preset-btn";
         btn.textContent = `$${amt}`;
-        btn.onclick = () => {
-            container.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            document.getElementById("consumeAmount").value = amt;
-        };
+        btn.onclick = () => { document.getElementById("consumeAmount").value = amt; };
         container.appendChild(btn);
     });
 }
@@ -518,7 +494,7 @@ function renderStaffManageList() {
             <button class="small-btn edit-btn" data-idx="${idx}" data-type="staff">✏️ 編輯</button>
             <button class="small-btn danger-btn" data-idx="${idx}" data-type="staff">🗑️ 刪除</button>`;
         div.querySelector(".edit-btn").onclick = async () => {
-            if (!authorized) { alert("請先登入才能編輯員工"); return; }
+            if (!gapiReady) { alert("請先登入才能編輯員工"); return; }
             const newName = prompt("輸入新姓名", staff.name);
             const newCode = prompt("輸入新工號", staff.code);
             if (newName && newCode) {
@@ -530,7 +506,7 @@ function renderStaffManageList() {
             }
         };
         div.querySelector(".danger-btn").onclick = async () => {
-            if (!authorized) { alert("請先登入才能刪除員工"); return; }
+            if (!gapiReady) { alert("請先登入才能刪除員工"); return; }
             staffList.splice(idx, 1); saveStaff(); renderStaffManageList();
             renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
             renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
@@ -550,7 +526,7 @@ function renderProductManageList() {
             <button class="small-btn edit-btn" data-idx="${idx}" data-type="product">✏️ 編輯</button>
             <button class="small-btn danger-btn" data-idx="${idx}" data-type="product">🗑️ 刪除</button>`;
         div.querySelector(".edit-btn").onclick = async () => {
-            if (!authorized) { alert("請先登入才能編輯產品"); return; }
+            if (!gapiReady) { alert("請先登入才能編輯產品"); return; }
             const newName = prompt("輸入新產品名稱", prod.name);
             const newPrice = prompt("輸入新價格", prod.price);
             if (newName && newPrice && !isNaN(parseFloat(newPrice))) {
@@ -560,7 +536,7 @@ function renderProductManageList() {
             }
         };
         div.querySelector(".danger-btn").onclick = async () => {
-            if (!authorized) { alert("請先登入才能刪除產品"); return; }
+            if (!gapiReady) { alert("請先登入才能刪除產品"); return; }
             productList.splice(idx, 1); saveProducts(); renderProductManageList(); renderProducts();
             await syncConfigToSheet();
         };
@@ -578,7 +554,7 @@ function renderPresetManageList() {
             <button class="small-btn edit-btn" data-idx="${idx}" data-type="preset">✏️ 編輯</button>
             <button class="small-btn danger-btn" data-idx="${idx}" data-type="preset">🗑️ 刪除</button>`;
         div.querySelector(".edit-btn").onclick = async () => {
-            if (!authorized) { alert("請先登入才能編輯預設金額"); return; }
+            if (!gapiReady) { alert("請先登入才能編輯預設金額"); return; }
             const newAmt = prompt("輸入新金額", amt);
             if (newAmt && !isNaN(parseFloat(newAmt))) {
                 presetAmounts[idx] = parseFloat(newAmt);
@@ -587,7 +563,7 @@ function renderPresetManageList() {
             }
         };
         div.querySelector(".danger-btn").onclick = async () => {
-            if (!authorized) { alert("請先登入才能刪除預設金額"); return; }
+            if (!gapiReady) { alert("請先登入才能刪除預設金額"); return; }
             presetAmounts.splice(idx, 1); savePresets(); renderPresetManageList(); renderPresetButtons();
             await syncConfigToSheet();
         };
@@ -595,7 +571,7 @@ function renderPresetManageList() {
     });
 }
 async function submitSales() {
-    if (!authorized) alert("尚未登入，記錄將先儲存於本地，登入後自動同步");
+    if (!gapiReady) alert("尚未登入，記錄將先儲存於本地，登入後自動同步");
     const date = document.getElementById("salesDate").value;
     if (!date) { alert("請選擇日期"); return; }
     if (!selectedSalesStaff) { alert("請選擇員工"); return; }
@@ -609,7 +585,7 @@ async function submitSales() {
     selectedProducts.clear(); renderProducts(); document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
 }
 async function submitConsumption() {
-    if (!authorized) alert("尚未登入，記錄將先儲存於本地，登入後自動同步");
+    if (!gapiReady) alert("尚未登入，記錄將先儲存於本地，登入後自動同步");
     const date = document.getElementById("consumeDate").value;
     if (!date) { alert("請選擇日期"); return; }
     if (!selectedConsumeStaff) { alert("請選擇員工"); return; }
@@ -620,7 +596,6 @@ async function submitConsumption() {
     await addRecord(record);
     showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
     document.getElementById("consumeAmount").value = "";
-    document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
 }
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
@@ -672,20 +647,18 @@ document.getElementById("changePasswordBtn").addEventListener("click", async () 
     if (!newPwd) { alert("請輸入新密碼"); return; }
     if (newPwd !== confirmPwd) { alert("兩次密碼不一致"); return; }
     settingsPassword = newPwd;
-    if (authorized) await syncConfigToSheet();
+    if (gapiReady) await syncConfigToSheet();
     alert("密碼已更新");
     document.getElementById("newPassword").value = ""; document.getElementById("confirmPassword").value = "";
 });
-document.getElementById("retryFailedBtn").addEventListener("click", retryFailed);
 const iframeModal = document.getElementById("iframeModal"), bookingIframe = document.getElementById("bookingIframe");
-document.getElementById("studentBookingBtn").onclick = () => { bookingIframe.src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html
-"; iframeModal.style.display = "block"; };
+document.getElementById("studentBookingBtn").onclick = () => { bookingIframe.src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html"; iframeModal.style.display = "block"; };
 document.getElementById("closeIframeBtn").onclick = () => { iframeModal.style.display = "none"; bookingIframe.src = ""; };
 document.querySelectorAll("[data-page]").forEach(btn => btn.onclick = () => showPage(btn.dataset.page));
 document.getElementById("submitSales").onclick = submitSales;
 document.getElementById("submitConsume").onclick = submitConsumption;
 document.getElementById("addStaffBtn").onclick = async () => {
-    if (!authorized) { alert("請先登入才能新增員工"); return; }
+    if (!gapiReady) { alert("請先登入才能新增員工"); return; }
     const name = document.getElementById("newStaffName").value.trim(), code = document.getElementById("newStaffCode").value.trim();
     if (!name || !code) { alert("請填寫員工姓名與工號"); return; }
     staffList.push({ code, name }); saveStaff(); renderStaffManageList();
@@ -695,7 +668,7 @@ document.getElementById("addStaffBtn").onclick = async () => {
     document.getElementById("newStaffName").value = ""; document.getElementById("newStaffCode").value = "";
 };
 document.getElementById("addProductBtn").onclick = async () => {
-    if (!authorized) { alert("請先登入才能新增產品"); return; }
+    if (!gapiReady) { alert("請先登入才能新增產品"); return; }
     const name = document.getElementById("newProductName").value.trim(), price = parseFloat(document.getElementById("newProductPrice").value);
     if (!name || isNaN(price) || price <= 0) { alert("請填寫產品名稱與正確價格"); return; }
     productList.push({ name, price }); saveProducts(); renderProductManageList(); renderProducts();
@@ -703,7 +676,7 @@ document.getElementById("addProductBtn").onclick = async () => {
     document.getElementById("newProductName").value = ""; document.getElementById("newProductPrice").value = "";
 };
 document.getElementById("addPresetBtn").onclick = async () => {
-    if (!authorized) { alert("請先登入才能新增預設金額"); return; }
+    if (!gapiReady) { alert("請先登入才能新增預設金額"); return; }
     const amt = parseFloat(document.getElementById("newPresetAmount").value);
     if (isNaN(amt) || amt <= 0) { alert("請輸入正確金額"); return; }
     presetAmounts.push(amt); savePresets(); renderPresetManageList(); renderPresetButtons();
@@ -715,49 +688,27 @@ document.getElementById("clearLocalDataBtn").onclick = () => {
         records = []; saveRecords(); renderRecords(); alert("已清空所有記錄");
     }
 };
-
-// ========== 簡化且可靠的初始化邏輯 ==========
-function gapiLoaded() {
-    gapi.load('client', initGapiClient);
-}
+function gapiLoaded() { gapi.load('client', initGapiClient); }
 async function initGapiClient() {
     await gapi.client.init({ discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] });
-    gapiInited = true;
-    checkReady();
+    gapiInited = true; maybeEnableButtons();
 }
 function gisLoaded() {
     tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '' });
-    gisInited = true;
-    checkReady();
+    gisInited = true; maybeEnableButtons();
 }
-function checkReady() {
-    const loginText = document.getElementById('loginText');
-    const authBtn = document.getElementById('authBtn');
-    if (gapiInited && gisInited && !authorized) {
-        // API 已就緒，但尚未授權 → 啟用按鈕，顯示「請登入」
-        loginText.innerHTML = '⚠️ 尚未登入，請點擊下方按鈕登入授權';
-        authBtn.disabled = false;
-        authBtn.onclick = () => {
+function maybeEnableButtons() {
+    if (gapiInited && gisInited && !gapiReady) {
+        gapiReady = true;
+        document.getElementById('loginStatus').innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權 <button id="authBtn">登入 Google</button>';
+        document.getElementById('authBtn').onclick = () => {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) throw resp;
-                // 授權成功
-                authorized = true;
-                loginText.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
-                authBtn.disabled = true;
-                // 登入後載入設定並同步待處理記錄
-                await loadConfigFromSheet();
-                await syncAllPending();
-                renderUI();
+                document.getElementById('loginStatus').innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
+                await loadConfigFromSheet(); await syncAllPending(); renderUI();
             };
             tokenClient.requestAccessToken();
         };
-    } else if (!gapiInited || !gisInited) {
-        loginText.innerHTML = '⚠️ 載入中，請稍候...';
-        authBtn.disabled = true;
-        setTimeout(checkReady, 500);
-    } else if (authorized) {
-        loginText.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
-        authBtn.disabled = true;
     }
 }
 function renderUI() {
@@ -774,15 +725,9 @@ function ensureInit() {
     if (typeof gapi !== 'undefined' && typeof google !== 'undefined' && typeof google.accounts !== 'undefined') {
         if (!gapiInited) gapiLoaded();
         if (!gisInited) gisLoaded();
-    } else {
-        setTimeout(ensureInit, 200);
-    }
+    } else setTimeout(ensureInit, 200);
 }
-window.addEventListener('load', () => {
-    loadLocalData();
-    renderUI();
-    ensureInit();
-});
+window.addEventListener('load', () => { loadLocalData(); renderUI(); ensureInit(); });
 </script>
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
