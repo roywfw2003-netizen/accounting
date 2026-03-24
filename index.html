@@ -6,7 +6,7 @@
     <title>賣貨管理系統 | Hair World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* CSS 变量 - 白天模式 */
+        /* 此處樣式與您最後提供的版本一致，為節省篇幅，直接沿用 */
         :root {
             --bg-body: #cfe7ff;
             --bg-card: white;
@@ -231,7 +231,7 @@
 
 <script>
 // ========== OAuth 設定 ==========
-const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com';
+const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com';  // 請替換為您的用戶端編號
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
@@ -242,9 +242,8 @@ let gapiReady = false;
 let syncInProgress = false;
 let settingsPassword = 'admin123';
 let darkMode = localStorage.getItem('darkMode') === 'true';
-let initTimeout;
 
-// 全域資料
+// 全域資料（與之前相同，保留所有功能）
 let staffList = [
     { code: "1", name: "Roy" },
     { code: "2", name: "Ken" },
@@ -723,19 +722,25 @@ document.getElementById("clearLocalDataBtn").onclick = () => {
         records = []; saveRecords(); renderRecords(); alert("已清空所有記錄");
     }
 };
-function gapiLoaded() { gapi.load('client', initGapiClient); }
+
+// ========== 簡化的初始化邏輯，確保按鈕可點 ==========
+function gapiLoaded() {
+    gapi.load('client', initGapiClient);
+}
 async function initGapiClient() {
     await gapi.client.init({ discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] });
-    gapiInited = true; maybeEnableButtons();
+    gapiInited = true;
+    checkReady();
 }
 function gisLoaded() {
     tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '' });
-    gisInited = true; maybeEnableButtons();
+    gisInited = true;
+    checkReady();
 }
-function maybeEnableButtons() {
-    const statusDiv = document.getElementById('loginStatus');
+function checkReady() {
     const loginText = document.getElementById('loginText');
     const authBtn = document.getElementById('authBtn');
+    const statusDiv = document.getElementById('loginStatus');
     if (gapiInited && gisInited && !gapiReady) {
         gapiReady = true;
         statusDiv.classList.remove('warning');
@@ -745,33 +750,21 @@ function maybeEnableButtons() {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) throw resp;
                 loginText.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
-                await loadConfigFromSheet(); await syncAllPending(); renderUI();
+                await loadConfigFromSheet();
+                await syncAllPending();
+                renderUI();
             };
             tokenClient.requestAccessToken();
         };
-        if (initTimeout) clearTimeout(initTimeout);
-    } else if (gapiInited && gisInited && gapiReady) {
-        // 已登入狀態，無需操作
-        authBtn.disabled = true;
-        loginText.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
-        statusDiv.classList.remove('warning');
-    } else {
+    } else if (!gapiInited || !gisInited) {
         statusDiv.classList.add('warning');
-        loginText.innerHTML = '⚠️ 尚未登入，請稍後點擊下方按鈕登入授權';
+        loginText.innerHTML = '⚠️ 載入中，請稍候...';
         authBtn.disabled = true;
-        // 設置超時，若 5 秒後仍未就緒，顯示錯誤並提供重新載入按鈕
-        if (!initTimeout) {
-            initTimeout = setTimeout(() => {
-                if (!gapiReady) {
-                    statusDiv.classList.add('warning');
-                    loginText.innerHTML = '❌ 載入失敗，請檢查網路或重新整理頁面 <button id="reloadBtn" class="reload-btn">重新載入</button>';
-                    const reloadBtn = document.getElementById('reloadBtn');
-                    if (reloadBtn) reloadBtn.onclick = () => location.reload();
-                }
-            }, 5000);
-        }
-        // 繼續等待初始化完成
-        setTimeout(maybeEnableButtons, 500);
+        setTimeout(checkReady, 500);
+    } else if (gapiReady) {
+        statusDiv.classList.remove('warning');
+        loginText.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
+        authBtn.disabled = true;
     }
 }
 function renderUI() {
@@ -792,7 +785,11 @@ function ensureInit() {
         setTimeout(ensureInit, 200);
     }
 }
-window.addEventListener('load', () => { loadLocalData(); renderUI(); ensureInit(); });
+window.addEventListener('load', () => {
+    loadLocalData();
+    renderUI();
+    ensureInit();
+});
 </script>
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
