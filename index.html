@@ -21,7 +21,6 @@
             --btn-gray-shadow: #94a3b8;
             --accent-orange: #f97316;
             --accent-orange-shadow: #b45309;
-            --login-bg: #e2e8f0;
             --login-warning-bg: #fee2e2;
             --login-warning-text: #b91c1c;
         }
@@ -39,7 +38,6 @@
             --btn-gray-shadow: #1f2937;
             --accent-orange: #f97316;
             --accent-orange-shadow: #b45309;
-            --login-bg: #4b5563;
             --login-warning-bg: #7f1a1a;
             --login-warning-text: #fecaca;
         }
@@ -75,11 +73,10 @@
         .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
         .sync-pending { background: #fef9c3; color: #854d0e; }
-        .login-status { background: var(--login-bg); border-radius: 40px; padding: 8px 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 0.9rem; color: var(--text-primary); transition: background 0.2s; }
+        .login-status { background: var(--btn-gray-bg); border-radius: 40px; padding: 8px 12px; margin-bottom: 16px; text-align: center; font-size: 0.9rem; color: var(--text-primary); transition: background 0.2s; }
         .login-status.warning { background: var(--login-warning-bg); color: var(--login-warning-text); }
-        .login-status button { background: var(--accent-orange); color: white; border: none; padding: 4px 12px; border-radius: 40px; cursor: pointer; font-size: 0.9rem; box-shadow: 0 2px 0 var(--accent-orange-shadow); transition: 0.05s linear; }
+        .login-status button { background: var(--accent-orange); color: white; border: none; padding: 4px 12px; border-radius: 40px; cursor: pointer; margin-left: 8px; font-size: 0.85rem; box-shadow: 0 2px 0 var(--accent-orange-shadow); }
         .login-status button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
-        .login-status button:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; opacity: 0.6; }
         .setting-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
         .small-btn { background: var(--btn-gray-bg); border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; color: var(--text-primary); }
         .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
@@ -113,10 +110,7 @@
 </head>
 <body>
 <div class="app-container">
-    <div id="loginStatus" class="login-status">
-        <span id="loginText">載入中...</span>
-        <button id="authBtn" disabled>登入 Google</button>
-    </div>
+    <div id="loginStatus" class="login-status">載入中...</div>
 
     <div class="btn-group">
         <button class="nav-btn" data-page="sales"><i class="fa-solid fa-cube"></i><span>產品銷售</span></button>
@@ -232,7 +226,8 @@
 
 <script>
 // ========== OAuth 設定 ==========
-const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com';
+const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com
+';
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
@@ -482,6 +477,7 @@ function renderPresetButtons() {
         btn.className = "preset-btn";
         btn.textContent = `$${amt}`;
         btn.onclick = () => {
+            // 清除所有 preset-btn 的 active 類
             container.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             document.getElementById("consumeAmount").value = amt;
@@ -629,6 +625,7 @@ async function submitConsumption() {
     await addRecord(record);
     showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
     document.getElementById("consumeAmount").value = "";
+    // 清除金額按鈕的選中狀態
     document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
 }
 function showPage(pageId) {
@@ -734,31 +731,26 @@ function gisLoaded() {
 }
 function maybeEnableButtons() {
     const statusDiv = document.getElementById('loginStatus');
-    const loginText = document.getElementById('loginText');
-    const authBtn = document.getElementById('authBtn');
     if (gapiInited && gisInited && !gapiReady) {
         gapiReady = true;
         statusDiv.classList.remove('warning');
-        loginText.innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權';
-        authBtn.disabled = false;
-        authBtn.onclick = () => {
+        statusDiv.innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權 <button id="authBtn">登入 Google</button>';
+        document.getElementById('authBtn').onclick = () => {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) throw resp;
-                loginText.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
+                statusDiv.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
                 await loadConfigFromSheet(); await syncAllPending(); renderUI();
             };
             tokenClient.requestAccessToken();
         };
-    } else if (gapiInited && gisInited && gapiReady) {
-        // 已經登入，無需操作
-        authBtn.disabled = true;
-        loginText.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
-    } else {
+    } else if (!gapiReady) {
         statusDiv.classList.add('warning');
-        loginText.innerHTML = '⚠️ 尚未登入，請稍後點擊下方按鈕登入授權';
-        authBtn.disabled = true;
+        statusDiv.innerHTML = '⚠️ 尚未登入，請稍後點擊下方按鈕登入授權 <button id="authBtn" disabled>登入 Google</button>';
         // 尚未初始化完成，等待自動觸發
         setTimeout(maybeEnableButtons, 500);
+    } else if (gapiReady) {
+        statusDiv.classList.remove('warning');
+        statusDiv.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
     }
 }
 function renderUI() {
