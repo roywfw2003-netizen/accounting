@@ -19,9 +19,9 @@
         .staff-group, .payment-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
         .staff-btn, .payment-btn, .preset-btn, .product-btn { background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 0 #94a3b8; transition: 0.05s linear; }
         .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #94a3b8; }
-        .staff-btn.active, .payment-btn.active, .product-btn.selected { background: #f97316; color: white; box-shadow: 0 4px 0 #b45309; }
-        .payment-btn.active { background: #3b82f6; color: white; box-shadow: 0 4px 0 #1e3a8a; }
-        .preset-btn { background: #22c55e; color: white; box-shadow: 0 4px 0 #15803d; }
+        .staff-btn.active, .product-btn.selected { background: #f97316; color: white; box-shadow: 0 4px 0 #b45309; }
+        .payment-btn.active { background: #f97316; color: white; box-shadow: 0 4px 0 #b45309; }
+        .preset-btn { background: #f1f5f9; color: #1f2937; }
         .product-grid, .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0; }
         .product-btn { background: #f1f5f9; text-align: center; padding: 10px; font-weight: 600; color: #1f2937; }
         .product-btn .product-price { font-weight: bold; margin-top: 4px; font-size: 0.9rem; color: inherit; }
@@ -37,6 +37,7 @@
         .small-btn { background: #e2e8f0; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-size: 0.9rem; box-shadow: 0 3px 0 #94a3b8; transition: 0.05s linear; }
         .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #94a3b8; }
         .danger-btn { background: #fee2e2; color: #b91c1c; }
+        .edit-btn { background: #e2e8f0; color: #1f2937; margin-left: 8px; }
         hr { margin: 20px 0; border-color: #ffe0c0; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #f97316; color: white; padding: 12px 24px; border-radius: 60px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; transition: opacity 0.3s; opacity: 1; pointer-events: none; white-space: pre-line; text-align: center; }
@@ -44,6 +45,7 @@
         .iframe-container iframe { width: 90%; height: 90%; margin: 5% auto; display: block; background: white; border-radius: 20px; }
         .close-iframe { position: absolute; top: 20px; right: 30px; background: #f97316; color: white; border: none; border-radius: 40px; padding: 8px 16px; cursor: pointer; box-shadow: 0 3px 0 #b45309; }
         .close-iframe:active { transform: translateY(2px); box-shadow: 0 1px 0 #b45309; }
+        .recent-record { background: #f1f5f9; border-radius: 20px; padding: 12px; margin-top: 20px; text-align: center; font-size: 0.9rem; border-left: 4px solid #f97316; }
     </style>
 </head>
 <body>
@@ -53,7 +55,6 @@
     <div class="btn-group">
         <button data-page="sales">🛍️ 產品銷售</button>
         <button data-page="consumption">👥 客人消費</button>
-        <button data-page="records">📜 查看記錄</button>
         <button data-page="settings">⚙️ 系統設定</button>
         <button id="studentBookingBtn">👨‍🎓 學生預約</button>
     </div>
@@ -66,6 +67,7 @@
         <div class="form-group"><label>📦 產品</label><div id="productList" class="product-grid"></div><div class="total">總金額: <span id="totalAmount">0</span> 元</div></div>
         <div class="form-group"><label>💳 支付方式</label><div class="payment-group" id="salesPayment"></div></div>
         <button id="submitSales">提交銷售</button>
+        <div id="salesRecent" class="recent-record" style="display:none;"></div>
     </div>
 
     <!-- 客人消費頁 -->
@@ -76,15 +78,10 @@
         <div class="form-group"><label>💰 金額</label><div id="presetAmounts" class="preset-grid"></div><input type="number" id="consumeAmount" placeholder="或手動輸入" step="1"></div>
         <div class="form-group"><label>💳 支付方式</label><div class="payment-group" id="consumePayment"></div></div>
         <button id="submitConsume">提交消費</button>
+        <div id="consumeRecent" class="recent-record" style="display:none;"></div>
     </div>
 
-    <!-- 記錄頁 -->
-    <div id="recordsPage" class="page">
-        <h3>📜 交易記錄</h3>
-        <div id="recordsList"></div>
-    </div>
-
-    <!-- 設定頁 -->
+    <!-- 系統設定頁（包含記錄列表） -->
     <div id="settingsPage" class="page">
         <h3>⚙️ 系統設定</h3>
         <hr>
@@ -111,7 +108,9 @@
             <button class="small-btn" id="addPresetBtn">➕ 新增</button>
         </div>
         <hr>
-        <button class="small-btn danger-btn" id="clearLocalDataBtn">🗑️ 清空所有本地記錄</button>
+        <h4>📜 交易記錄</h4>
+        <div id="recordsList"></div>
+        <button class="small-btn danger-btn" id="clearLocalDataBtn" style="margin-top:12px;">🗑️ 清空所有本地記錄</button>
     </div>
 </div>
 
@@ -151,6 +150,8 @@ let selectedSalesStaff = null;
 let selectedConsumeStaff = null;
 let selectedSalesPayment = "現金";
 let selectedConsumePayment = "現金";
+let lastSalesRecord = null;   // 最新銷售記錄
+let lastConsumeRecord = null;  // 最新消費記錄
 const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付", "公司"];
 
 // 本地儲存
@@ -242,6 +243,14 @@ async function addRecord(recordData) {
     if (gapiReady) {
         await syncRecord(newRecord);
     }
+    // 更新該類型的最新記錄
+    if (recordData.type === 'sales') {
+        lastSalesRecord = { ...newRecord };
+        updateRecentRecord('sales');
+    } else {
+        lastConsumeRecord = { ...newRecord };
+        updateRecentRecord('consumption');
+    }
     return true;
 }
 
@@ -285,6 +294,27 @@ function showToast(message) {
     toast.innerText = message;
     document.body.appendChild(toast);
     setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
+}
+
+// 更新頁面底部最近記錄
+function updateRecentRecord(type) {
+    if (type === 'sales') {
+        const div = document.getElementById('salesRecent');
+        if (lastSalesRecord) {
+            div.style.display = 'block';
+            div.innerHTML = `📌 最近一筆銷售：${lastSalesRecord.date} ${lastSalesRecord.staffName} | 金額 $${lastSalesRecord.amount} | ${lastSalesRecord.payment}<br>明細：${lastSalesRecord.details}`;
+        } else {
+            div.style.display = 'none';
+        }
+    } else if (type === 'consumption') {
+        const div = document.getElementById('consumeRecent');
+        if (lastConsumeRecord) {
+            div.style.display = 'block';
+            div.innerHTML = `📌 最近一筆消費：${lastConsumeRecord.date} ${lastConsumeRecord.staffName} | 金額 $${lastConsumeRecord.amount} | ${lastConsumeRecord.payment}`;
+        } else {
+            div.style.display = 'none';
+        }
+    }
 }
 
 // ========== UI 渲染 ==========
@@ -386,6 +416,7 @@ function renderRecords() {
     container.innerHTML = html;
 }
 
+// 管理列表渲染（含編輯按鈕）
 function renderStaffManageList() {
     const container = document.getElementById("staffManageList");
     if (!container) return;
@@ -393,9 +424,27 @@ function renderStaffManageList() {
     staffList.forEach((staff, idx) => {
         const div = document.createElement("div");
         div.className = "setting-row";
-        div.innerHTML = `<span style="flex:2;"><strong>${staff.name}</strong> (${staff.code})</span><button class="small-btn danger-btn" data-idx="${idx}">刪除</button>`;
-        div.querySelector("button").onclick = async () => {
-            if (!gapiReady) { alert("請先登入才能修改員工"); return; }
+        div.innerHTML = `
+            <span style="flex:2;"><strong>${staff.name}</strong> (${staff.code})</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="staff">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="staff">🗑️ 刪除</button>
+        `;
+        div.querySelector(".edit-btn").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能編輯員工"); return; }
+            const newName = prompt("輸入新姓名", staff.name);
+            const newCode = prompt("輸入新工號", staff.code);
+            if (newName && newCode) {
+                staff.name = newName.trim();
+                staff.code = newCode.trim();
+                saveStaff();
+                renderStaffManageList();
+                renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+                renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+                await syncConfigToSheet();
+            }
+        };
+        div.querySelector(".danger-btn").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能刪除員工"); return; }
             staffList.splice(idx, 1);
             saveStaff();
             renderStaffManageList();
@@ -414,9 +463,26 @@ function renderProductManageList() {
     productList.forEach((prod, idx) => {
         const div = document.createElement("div");
         div.className = "setting-row";
-        div.innerHTML = `<span style="flex:2;">${prod.name} - $${prod.price}</span><button class="small-btn danger-btn" data-idx="${idx}">刪除</button>`;
-        div.querySelector("button").onclick = async () => {
-            if (!gapiReady) { alert("請先登入才能修改產品"); return; }
+        div.innerHTML = `
+            <span style="flex:2;">${prod.name} - $${prod.price}</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="product">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="product">🗑️ 刪除</button>
+        `;
+        div.querySelector(".edit-btn").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能編輯產品"); return; }
+            const newName = prompt("輸入新產品名稱", prod.name);
+            const newPrice = prompt("輸入新價格", prod.price);
+            if (newName && newPrice && !isNaN(parseFloat(newPrice))) {
+                prod.name = newName.trim();
+                prod.price = parseFloat(newPrice);
+                saveProducts();
+                renderProductManageList();
+                renderProducts();
+                await syncConfigToSheet();
+            }
+        };
+        div.querySelector(".danger-btn").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能刪除產品"); return; }
             productList.splice(idx, 1);
             saveProducts();
             renderProductManageList();
@@ -434,9 +500,24 @@ function renderPresetManageList() {
     presetAmounts.forEach((amt, idx) => {
         const div = document.createElement("div");
         div.className = "setting-row";
-        div.innerHTML = `<span style="flex:2;">$${amt}</span><button class="small-btn danger-btn" data-idx="${idx}">刪除</button>`;
-        div.querySelector("button").onclick = async () => {
-            if (!gapiReady) { alert("請先登入才能修改預設金額"); return; }
+        div.innerHTML = `
+            <span style="flex:2;">$${amt}</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="preset">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="preset">🗑️ 刪除</button>
+        `;
+        div.querySelector(".edit-btn").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能編輯預設金額"); return; }
+            const newAmt = prompt("輸入新金額", amt);
+            if (newAmt && !isNaN(parseFloat(newAmt))) {
+                presetAmounts[idx] = parseFloat(newAmt);
+                savePresets();
+                renderPresetManageList();
+                renderPresetButtons();
+                await syncConfigToSheet();
+            }
+        };
+        div.querySelector(".danger-btn").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能刪除預設金額"); return; }
             presetAmounts.splice(idx, 1);
             savePresets();
             renderPresetManageList();
@@ -478,7 +559,6 @@ async function submitSales() {
     selectedProducts.clear();
     renderProducts();
     document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
-    // 不跳轉頁面，保持當前頁面
 }
 
 // 提交消費
@@ -508,7 +588,6 @@ async function submitConsumption() {
     await addRecord(record);
     showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
     document.getElementById("consumeAmount").value = "";
-    // 不跳轉頁面，保持當前頁面
 }
 
 // 頁面切換
@@ -518,16 +597,18 @@ function showPage(pageId) {
     if (pageId === "sales") {
         document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
         renderProducts();
+        updateRecentRecord('sales');
     }
     if (pageId === "consumption") {
         document.getElementById("consumeDate").value = new Date().toISOString().slice(0,10);
         renderPresetButtons();
+        updateRecentRecord('consumption');
     }
-    if (pageId === "records") renderRecords();
     if (pageId === "settings") {
         renderStaffManageList();
         renderProductManageList();
         renderPresetManageList();
+        renderRecords();
     }
 }
 
@@ -638,6 +719,8 @@ function renderUI() {
     renderStaffManageList();
     renderProductManageList();
     renderPresetManageList();
+    updateRecentRecord('sales');
+    updateRecentRecord('consumption');
 }
 
 function ensureInit() {
