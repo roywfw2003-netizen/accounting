@@ -21,6 +21,8 @@
             --btn-gray-shadow: #94a3b8;
             --accent-orange: #f97316;
             --accent-orange-shadow: #b45309;
+            --login-warning-bg: #fee2e2;
+            --login-warning-text: #b91c1c;
         }
         body.dark {
             --bg-body: #1f2937;
@@ -36,6 +38,8 @@
             --btn-gray-shadow: #1f2937;
             --accent-orange: #f97316;
             --accent-orange-shadow: #b45309;
+            --login-warning-bg: #7f1a1a;
+            --login-warning-text: #fecaca;
         }
         * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
         body { background: var(--bg-body); padding: 0; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
@@ -69,7 +73,11 @@
         .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
         .sync-pending { background: #fef9c3; color: #854d0e; }
-        .login-status { background: var(--btn-gray-bg); border-radius: 40px; padding: 8px 12px; margin-bottom: 16px; text-align: center; font-size: 0.9rem; color: var(--text-primary); }
+        .login-status { background: var(--btn-gray-bg); border-radius: 40px; padding: 8px 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 0.9rem; color: var(--text-primary); transition: background 0.2s; }
+        .login-status.warning { background: var(--login-warning-bg); color: var(--login-warning-text); }
+        .login-status button { background: var(--accent-orange); color: white; border: none; padding: 4px 12px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 2px 0 var(--accent-orange-shadow); transition: 0.05s linear; }
+        .login-status button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
+        .login-status button:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; opacity: 0.6; }
         .setting-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
         .small-btn { background: var(--btn-gray-bg); border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; color: var(--text-primary); }
         .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
@@ -99,11 +107,15 @@
         h3 { margin: 0 0 12px 0; font-size: 1.3rem; color: var(--text-primary); }
         .retry-btn { background: var(--accent-orange); color: white; border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; margin-left: 8px; box-shadow: 0 2px 0 var(--accent-orange-shadow); }
         .retry-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
+        .reload-btn { background: var(--btn-primary-bg); color: white; border: none; padding: 4px 12px; border-radius: 40px; cursor: pointer; font-size: 0.8rem; margin-left: 8px; box-shadow: 0 2px 0 var(--btn-primary-shadow); }
     </style>
 </head>
 <body>
 <div class="app-container">
-    <div id="loginStatus" class="login-status">載入中...</div>
+    <div id="loginStatus" class="login-status">
+        <span id="loginText">載入中...</span>
+        <button id="authBtn" disabled>登入 Google</button>
+    </div>
 
     <div class="btn-group">
         <button class="nav-btn" data-page="sales"><i class="fa-solid fa-cube"></i><span>產品銷售</span></button>
@@ -219,8 +231,7 @@
 
 <script>
 // ========== OAuth 設定 ==========
-const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com
-';
+const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com';
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
@@ -231,6 +242,7 @@ let gapiReady = false;
 let syncInProgress = false;
 let settingsPassword = 'admin123';
 let darkMode = localStorage.getItem('darkMode') === 'true';
+let initTimeout;
 
 // 全域資料
 let staffList = [
@@ -380,7 +392,6 @@ async function syncAllPending() {
     for (let rec of records.filter(r => r.syncStatus === "pending")) await syncRecord(rec);
     syncInProgress = false;
 }
-// 重試失敗記錄
 async function retryFailed() {
     const failed = records.filter(r => r.syncStatus === "failed");
     if (failed.length === 0) { alert("沒有失敗的記錄"); return; }
@@ -471,7 +482,6 @@ function renderPresetButtons() {
         btn.className = "preset-btn";
         btn.textContent = `$${amt}`;
         btn.onclick = () => {
-            // 清除所有金額按鈕的 active 類
             container.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             document.getElementById("consumeAmount").value = amt;
@@ -619,7 +629,6 @@ async function submitConsumption() {
     await addRecord(record);
     showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
     document.getElementById("consumeAmount").value = "";
-    // 清除金額按鈕的選中狀態
     document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
 }
 function showPage(pageId) {
@@ -676,7 +685,6 @@ document.getElementById("changePasswordBtn").addEventListener("click", async () 
     alert("密碼已更新");
     document.getElementById("newPassword").value = ""; document.getElementById("confirmPassword").value = "";
 });
-// 綁定重試失敗記錄按鈕
 document.getElementById("retryFailedBtn").addEventListener("click", retryFailed);
 const iframeModal = document.getElementById("iframeModal"), bookingIframe = document.getElementById("bookingIframe");
 document.getElementById("studentBookingBtn").onclick = () => { bookingIframe.src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html"; iframeModal.style.display = "block"; };
@@ -725,17 +733,45 @@ function gisLoaded() {
     gisInited = true; maybeEnableButtons();
 }
 function maybeEnableButtons() {
+    const statusDiv = document.getElementById('loginStatus');
+    const loginText = document.getElementById('loginText');
+    const authBtn = document.getElementById('authBtn');
     if (gapiInited && gisInited && !gapiReady) {
         gapiReady = true;
-        document.getElementById('loginStatus').innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權 <button id="authBtn">登入 Google</button>';
-        document.getElementById('authBtn').onclick = () => {
+        statusDiv.classList.remove('warning');
+        loginText.innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權';
+        authBtn.disabled = false;
+        authBtn.onclick = () => {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) throw resp;
-                document.getElementById('loginStatus').innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
+                loginText.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
                 await loadConfigFromSheet(); await syncAllPending(); renderUI();
             };
             tokenClient.requestAccessToken();
         };
+        if (initTimeout) clearTimeout(initTimeout);
+    } else if (gapiInited && gisInited && gapiReady) {
+        // 已登入狀態，無需操作
+        authBtn.disabled = true;
+        loginText.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
+        statusDiv.classList.remove('warning');
+    } else {
+        statusDiv.classList.add('warning');
+        loginText.innerHTML = '⚠️ 尚未登入，請稍後點擊下方按鈕登入授權';
+        authBtn.disabled = true;
+        // 設置超時，若 5 秒後仍未就緒，顯示錯誤並提供重新載入按鈕
+        if (!initTimeout) {
+            initTimeout = setTimeout(() => {
+                if (!gapiReady) {
+                    statusDiv.classList.add('warning');
+                    loginText.innerHTML = '❌ 載入失敗，請檢查網路或重新整理頁面 <button id="reloadBtn" class="reload-btn">重新載入</button>';
+                    const reloadBtn = document.getElementById('reloadBtn');
+                    if (reloadBtn) reloadBtn.onclick = () => location.reload();
+                }
+            }, 5000);
+        }
+        // 繼續等待初始化完成
+        setTimeout(maybeEnableButtons, 500);
     }
 }
 function renderUI() {
@@ -752,7 +788,9 @@ function ensureInit() {
     if (typeof gapi !== 'undefined' && typeof google !== 'undefined' && typeof google.accounts !== 'undefined') {
         if (!gapiInited) gapiLoaded();
         if (!gisInited) gisLoaded();
-    } else setTimeout(ensureInit, 200);
+    } else {
+        setTimeout(ensureInit, 200);
+    }
 }
 window.addEventListener('load', () => { loadLocalData(); renderUI(); ensureInit(); });
 </script>
