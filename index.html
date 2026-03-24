@@ -6,7 +6,7 @@
     <title>賣貨管理系統 | Hair World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* 保持原有樣式，僅為節省篇幅不重複，實際使用時會完整保留 */
+        /* CSS 变量 - 白天模式 */
         :root {
             --bg-body: #cfe7ff;
             --bg-card: white;
@@ -21,8 +21,6 @@
             --btn-gray-shadow: #94a3b8;
             --accent-orange: #f97316;
             --accent-orange-shadow: #b45309;
-            --login-warning-bg: #fee2e2;
-            --login-warning-text: #b91c1c;
         }
         body.dark {
             --bg-body: #1f2937;
@@ -38,12 +36,11 @@
             --btn-gray-shadow: #1f2937;
             --accent-orange: #f97316;
             --accent-orange-shadow: #b45309;
-            --login-warning-bg: #7f1a1a;
-            --login-warning-text: #fecaca;
         }
         * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
         body { background: var(--bg-body); padding: 0; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
         .app-container { width: 100%; max-width: 800px; margin: 0 auto; background: var(--bg-card); border-radius: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; padding: 20px; transition: all 0.2s; }
+        /* 内容紧凑，确保所有内容在常见手机上一屏内可见 */
         .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
         .nav-btn { background: var(--btn-primary-bg); border: none; border-radius: 32px; color: white; font-weight: bold; cursor: pointer; flex: 1; min-width: 100px; padding: 16px 8px; text-align: center; transition: 0.05s linear; box-shadow: 0 5px 0 var(--btn-primary-shadow); display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .nav-btn i { font-size: 2rem; }
@@ -60,7 +57,7 @@
         .staff-group, .payment-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
         .staff-btn, .payment-btn, .preset-btn, .product-btn { background: var(--btn-gray-bg); border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-weight: bold; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; text-align: center; color: var(--text-primary); }
         .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
-        .staff-btn.active, .product-btn.selected, .preset-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
+        .staff-btn.active, .product-btn.selected { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
         .payment-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
         .preset-btn { background: var(--btn-gray-bg); color: var(--text-primary); }
         .product-grid, .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
@@ -73,11 +70,7 @@
         .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
         .sync-pending { background: #fef9c3; color: #854d0e; }
-        .login-status { background: var(--btn-gray-bg); border-radius: 40px; padding: 8px 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 0.9rem; color: var(--text-primary); transition: background 0.2s; }
-        .login-status.warning { background: var(--login-warning-bg); color: var(--login-warning-text); }
-        .login-status button { background: var(--accent-orange); color: white; border: none; padding: 4px 12px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 2px 0 var(--accent-orange-shadow); transition: 0.05s linear; }
-        .login-status button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
-        .login-status button:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; opacity: 0.6; }
+        .login-status { background: var(--btn-gray-bg); border-radius: 40px; padding: 8px 12px; margin-bottom: 16px; text-align: center; font-size: 0.9rem; color: var(--text-primary); }
         .setting-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
         .small-btn { background: var(--btn-gray-bg); border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; color: var(--text-primary); }
         .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
@@ -101,20 +94,17 @@
         .hidden-content { display: none; }
         .submit-btn { background: var(--btn-success-bg); color: white; width: 100%; padding: 14px; border: none; border-radius: 40px; font-size: 1.2rem; font-weight: bold; margin-top: 12px; cursor: pointer; box-shadow: 0 5px 0 var(--btn-success-shadow); transition: 0.05s linear; text-align: center; }
         .submit-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-success-shadow); }
+        /* 确保提交消费按钮样式一致 */
         #submitConsume { background: var(--btn-success-bg); color: white; width: 100%; padding: 14px; border: none; border-radius: 40px; font-size: 1.2rem; font-weight: bold; margin-top: 12px; cursor: pointer; box-shadow: 0 5px 0 var(--btn-success-shadow); transition: 0.05s linear; text-align: center; }
         #submitConsume:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-success-shadow); }
+        /* 调整间距使内容更紧凑，减少滚动 */
         .app-container { padding: 16px; }
         h3 { margin: 0 0 12px 0; font-size: 1.3rem; color: var(--text-primary); }
-        .retry-btn { background: var(--accent-orange); color: white; border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; margin-left: 8px; box-shadow: 0 2px 0 var(--accent-orange-shadow); }
-        .retry-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
     </style>
 </head>
 <body>
 <div class="app-container">
-    <div id="loginStatus" class="login-status">
-        <span id="loginText">載入中...</span>
-        <button id="authBtn" disabled>登入 Google</button>
-    </div>
+    <div id="loginStatus" class="login-status">載入中...</div>
 
     <div class="btn-group">
         <button class="nav-btn" data-page="sales"><i class="fa-solid fa-cube"></i><span>產品銷售</span></button>
@@ -206,10 +196,7 @@
             </div>
             <div id="recordsContent" class="settings-content hidden-content">
                 <div id="recordsList"></div>
-                <div class="setting-row" style="justify-content: flex-end;">
-                    <button class="small-btn retry-btn" id="retryFailedBtn">🔄 重試失敗記錄</button>
-                    <button class="small-btn danger-btn" id="clearLocalDataBtn">🗑️ 清空所有本地記錄</button>
-                </div>
+                <button class="small-btn danger-btn" id="clearLocalDataBtn" style="margin-top:12px;">🗑️ 清空所有本地記錄</button>
             </div>
         </div>
         <hr>
@@ -230,21 +217,19 @@
 
 <script>
 // ========== OAuth 設定 ==========
-const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com
-
-';
+const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com';
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
 let tokenClient;
 let gapiInited = false;
 let gisInited = false;
-let gapiReady = false;   // 是否已獲得授權 token
+let gapiReady = false;
 let syncInProgress = false;
 let settingsPassword = 'admin123';
 let darkMode = localStorage.getItem('darkMode') === 'true';
 
-// 全域資料（與之前相同，保留所有功能）
+// 全域資料
 let staffList = [
     { code: "1", name: "Roy" },
     { code: "2", name: "Ken" },
@@ -392,18 +377,6 @@ async function syncAllPending() {
     for (let rec of records.filter(r => r.syncStatus === "pending")) await syncRecord(rec);
     syncInProgress = false;
 }
-async function retryFailed() {
-    if (!gapiReady) { alert("尚未登入，無法同步"); return; }
-    const failed = records.filter(r => r.syncStatus === "failed");
-    if (failed.length === 0) { alert("沒有失敗的記錄"); return; }
-    let successCount = 0;
-    for (let rec of failed) {
-        const result = await syncRecord(rec);
-        if (result) successCount++;
-    }
-    alert(`重試完成：成功 ${successCount} 筆，失敗 ${failed.length - successCount} 筆`);
-    renderRecords();
-}
 function showToast(msg) {
     const toast = document.createElement('div');
     toast.className = 'toast';
@@ -482,11 +455,7 @@ function renderPresetButtons() {
         const btn = document.createElement("div");
         btn.className = "preset-btn";
         btn.textContent = `$${amt}`;
-        btn.onclick = () => {
-            container.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            document.getElementById("consumeAmount").value = amt;
-        };
+        btn.onclick = () => { document.getElementById("consumeAmount").value = amt; };
         container.appendChild(btn);
     });
 }
@@ -621,16 +590,12 @@ async function submitConsumption() {
     if (!date) { alert("請選擇日期"); return; }
     if (!selectedConsumeStaff) { alert("請選擇員工"); return; }
     let amount = parseFloat(document.getElementById("consumeAmount").value);
-    if (isNaN(amount) || amount <= 0) {
-        alert("請輸入正確金額或點選預設金額按鈕");
-        return;
-    }
+    if (isNaN(amount) || amount <= 0) { alert("請輸入正確金額或點選預設金額按鈕"); return; }
     const payment = selectedConsumePayment;
     const record = { type: "consumption", date, staffCode: selectedConsumeStaff.code, staffName: selectedConsumeStaff.name, amount, payment, details: `消費金額 $${amount}`, createdAt: new Date().toISOString() };
     await addRecord(record);
     showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
     document.getElementById("consumeAmount").value = "";
-    document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
 }
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
@@ -686,7 +651,6 @@ document.getElementById("changePasswordBtn").addEventListener("click", async () 
     alert("密碼已更新");
     document.getElementById("newPassword").value = ""; document.getElementById("confirmPassword").value = "";
 });
-document.getElementById("retryFailedBtn").addEventListener("click", retryFailed);
 const iframeModal = document.getElementById("iframeModal"), bookingIframe = document.getElementById("bookingIframe");
 document.getElementById("studentBookingBtn").onclick = () => { bookingIframe.src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html"; iframeModal.style.display = "block"; };
 document.getElementById("closeIframeBtn").onclick = () => { iframeModal.style.display = "none"; bookingIframe.src = ""; };
@@ -724,54 +688,27 @@ document.getElementById("clearLocalDataBtn").onclick = () => {
         records = []; saveRecords(); renderRecords(); alert("已清空所有記錄");
     }
 };
-
-// ========== 正確的初始化邏輯（參考成功案例）==========
-function gapiLoaded() {
-    gapi.load('client', initGapiClient);
-}
+function gapiLoaded() { gapi.load('client', initGapiClient); }
 async function initGapiClient() {
     await gapi.client.init({ discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] });
-    gapiInited = true;
-    checkReady();
+    gapiInited = true; maybeEnableButtons();
 }
 function gisLoaded() {
     tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '' });
-    gisInited = true;
-    checkReady();
+    gisInited = true; maybeEnableButtons();
 }
-function checkReady() {
-    const statusDiv = document.getElementById('loginStatus');
-    const loginText = document.getElementById('loginText');
-    const authBtn = document.getElementById('authBtn');
+function maybeEnableButtons() {
     if (gapiInited && gisInited && !gapiReady) {
-        // API 已載入，但尚未授權 -> 啟用登入按鈕，顯示「請登入」
-        statusDiv.classList.remove('warning');
-        loginText.innerHTML = '⚠️ 尚未登入，請點擊下方按鈕登入授權';
-        authBtn.disabled = false;
-        authBtn.onclick = () => {
+        gapiReady = true;
+        document.getElementById('loginStatus').innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權 <button id="authBtn">登入 Google</button>';
+        document.getElementById('authBtn').onclick = () => {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) throw resp;
-                // 授權成功
-                gapiReady = true;
-                statusDiv.classList.remove('warning');
-                loginText.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
-                authBtn.disabled = true;
-                // 登入後立即載入設定並同步待處理記錄
-                await loadConfigFromSheet();
-                await syncAllPending();
-                renderUI();
+                document.getElementById('loginStatus').innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
+                await loadConfigFromSheet(); await syncAllPending(); renderUI();
             };
             tokenClient.requestAccessToken();
         };
-    } else if (!gapiInited || !gisInited) {
-        statusDiv.classList.add('warning');
-        loginText.innerHTML = '⚠️ 載入中，請稍候...';
-        authBtn.disabled = true;
-        setTimeout(checkReady, 500);
-    } else if (gapiReady) {
-        statusDiv.classList.remove('warning');
-        loginText.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
-        authBtn.disabled = true;
     }
 }
 function renderUI() {
@@ -788,15 +725,9 @@ function ensureInit() {
     if (typeof gapi !== 'undefined' && typeof google !== 'undefined' && typeof google.accounts !== 'undefined') {
         if (!gapiInited) gapiLoaded();
         if (!gisInited) gisLoaded();
-    } else {
-        setTimeout(ensureInit, 200);
-    }
+    } else setTimeout(ensureInit, 200);
 }
-window.addEventListener('load', () => {
-    loadLocalData();
-    renderUI();
-    ensureInit();
-});
+window.addEventListener('load', () => { loadLocalData(); renderUI(); ensureInit(); });
 </script>
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
