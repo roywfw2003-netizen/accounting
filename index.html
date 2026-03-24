@@ -21,8 +21,6 @@
             --btn-gray-shadow: #94a3b8;
             --accent-orange: #f97316;
             --accent-orange-shadow: #b45309;
-            --login-warning-bg: #fee2e2;
-            --login-warning-text: #b91c1c;
         }
         body.dark {
             --bg-body: #1f2937;
@@ -38,8 +36,6 @@
             --btn-gray-shadow: #1f2937;
             --accent-orange: #f97316;
             --accent-orange-shadow: #b45309;
-            --login-warning-bg: #7f1a1a;
-            --login-warning-text: #fecaca;
         }
         * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
         body { background: var(--bg-body); padding: 0; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
@@ -73,10 +69,7 @@
         .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
         .sync-pending { background: #fef9c3; color: #854d0e; }
-        .login-status { background: var(--btn-gray-bg); border-radius: 40px; padding: 8px 12px; margin-bottom: 16px; text-align: center; font-size: 0.9rem; color: var(--text-primary); transition: background 0.2s; }
-        .login-status.warning { background: var(--login-warning-bg); color: var(--login-warning-text); }
-        .login-status button { background: var(--accent-orange); color: white; border: none; padding: 4px 12px; border-radius: 40px; cursor: pointer; margin-left: 8px; font-size: 0.85rem; box-shadow: 0 2px 0 var(--accent-orange-shadow); }
-        .login-status button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
+        .login-status { background: var(--btn-gray-bg); border-radius: 40px; padding: 8px 12px; margin-bottom: 16px; text-align: center; font-size: 0.9rem; color: var(--text-primary); }
         .setting-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
         .small-btn { background: var(--btn-gray-bg); border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; color: var(--text-primary); }
         .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
@@ -387,6 +380,7 @@ async function syncAllPending() {
     for (let rec of records.filter(r => r.syncStatus === "pending")) await syncRecord(rec);
     syncInProgress = false;
 }
+// 重試失敗記錄
 async function retryFailed() {
     const failed = records.filter(r => r.syncStatus === "failed");
     if (failed.length === 0) { alert("沒有失敗的記錄"); return; }
@@ -477,7 +471,7 @@ function renderPresetButtons() {
         btn.className = "preset-btn";
         btn.textContent = `$${amt}`;
         btn.onclick = () => {
-            // 清除所有 preset-btn 的 active 類
+            // 清除所有金額按鈕的 active 類
             container.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             document.getElementById("consumeAmount").value = amt;
@@ -682,6 +676,7 @@ document.getElementById("changePasswordBtn").addEventListener("click", async () 
     alert("密碼已更新");
     document.getElementById("newPassword").value = ""; document.getElementById("confirmPassword").value = "";
 });
+// 綁定重試失敗記錄按鈕
 document.getElementById("retryFailedBtn").addEventListener("click", retryFailed);
 const iframeModal = document.getElementById("iframeModal"), bookingIframe = document.getElementById("bookingIframe");
 document.getElementById("studentBookingBtn").onclick = () => { bookingIframe.src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html"; iframeModal.style.display = "block"; };
@@ -730,27 +725,17 @@ function gisLoaded() {
     gisInited = true; maybeEnableButtons();
 }
 function maybeEnableButtons() {
-    const statusDiv = document.getElementById('loginStatus');
     if (gapiInited && gisInited && !gapiReady) {
         gapiReady = true;
-        statusDiv.classList.remove('warning');
-        statusDiv.innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權 <button id="authBtn">登入 Google</button>';
+        document.getElementById('loginStatus').innerHTML = '✏️✏️ 已準備就緒，請按下方按鈕登入授權✏️✏️ <button id="authBtn">登入 Google</button>';
         document.getElementById('authBtn').onclick = () => {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) throw resp;
-                statusDiv.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
+                document.getElementById('loginStatus').innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
                 await loadConfigFromSheet(); await syncAllPending(); renderUI();
             };
             tokenClient.requestAccessToken();
         };
-    } else if (!gapiReady) {
-        statusDiv.classList.add('warning');
-        statusDiv.innerHTML = '⚠️ 尚未登入，請稍後點擊下方按鈕登入授權 <button id="authBtn" disabled>登入 Google</button>';
-        // 尚未初始化完成，等待自動觸發
-        setTimeout(maybeEnableButtons, 500);
-    } else if (gapiReady) {
-        statusDiv.classList.remove('warning');
-        statusDiv.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
     }
 }
 function renderUI() {
