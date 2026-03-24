@@ -4,13 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
     <title>賣貨管理系統 | Hair World</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
         body { background: #cfe7ff; padding: 20px; margin: 0; }
         .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 32px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-        button, .home-link { background: #3b82f6; border: none; padding: 12px 20px; border-radius: 40px; color: white; font-weight: bold; cursor: pointer; flex: 1; text-align: center; text-decoration: none; display: inline-block; box-shadow: 0 5px 0 #1e3a8a; transition: 0.05s linear; }
-        button:active, .home-link:active { transform: translateY(3px); box-shadow: 0 2px 0 #1e3a8a; }
+        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; justify-content: center; }
+        .nav-btn { background: #3b82f6; border: none; border-radius: 32px; color: white; font-weight: bold; cursor: pointer; flex: 1; min-width: 100px; padding: 16px 8px; text-align: center; transition: 0.05s linear; box-shadow: 0 5px 0 #1e3a8a; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .nav-btn i { font-size: 2rem; }
+        .nav-btn span { font-size: 0.9rem; }
+        .nav-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #1e3a8a; }
         .page { display: none; }
         .active { display: block; }
         .form-group { margin-bottom: 16px; }
@@ -23,8 +26,8 @@
         .payment-btn.active { background: #f97316; color: white; box-shadow: 0 4px 0 #b45309; }
         .preset-btn { background: #f1f5f9; color: #1f2937; }
         .product-grid, .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0; }
-        .product-btn { background: #f1f5f9; text-align: center; padding: 10px; font-weight: 600; color: #1f2937; }
-        .product-btn .product-price { font-weight: bold; margin-top: 4px; font-size: 0.9rem; color: inherit; }
+        .product-btn { background: #f1f5f9; text-align: center; padding: 10px; font-weight: 600; color: #1f2937; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .product-btn .product-price { font-weight: bold; font-size: 0.9rem; color: inherit; }
         .product-btn.selected .product-price { color: white; }
         .total { font-size: 1.5rem; font-weight: bold; text-align: right; margin-top: 12px; border-top: 1px solid #ddd; padding-top: 12px; }
         .record-item { background: #fef9f0; border-radius: 20px; padding: 12px; margin-bottom: 12px; }
@@ -53,10 +56,10 @@
     <div id="loginStatus" class="login-status">載入中...</div>
 
     <div class="btn-group">
-        <button data-page="sales">🛍️ 產品銷售</button>
-        <button data-page="consumption">👥 客人消費</button>
-        <button data-page="settings">⚙️ 系統設定</button>
-        <button id="studentBookingBtn">👨‍🎓 學生預約</button>
+        <button class="nav-btn" data-page="sales"><i class="fa-solid fa-cube"></i><span>產品銷售</span></button>
+        <button class="nav-btn" data-page="consumption"><i class="fa-solid fa-user-group"></i><span>客人消費</span></button>
+        <button class="nav-btn" id="studentBookingBtn"><i class="fa-solid fa-school"></i><span>學生預約</span></button>
+        <button class="nav-btn" data-page="settings"><i class="fa-solid fa-gear"></i><span>系統設定</span></button>
     </div>
 
     <!-- 產品銷售頁 -->
@@ -150,9 +153,9 @@ let selectedSalesStaff = null;
 let selectedConsumeStaff = null;
 let selectedSalesPayment = "現金";
 let selectedConsumePayment = "現金";
-let lastSalesRecord = null;   // 最新銷售記錄
-let lastConsumeRecord = null;  // 最新消費記錄
-const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付", "公司"];
+let lastSalesRecord = null;
+let lastConsumeRecord = null;
+const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付"]; // 已移除「公司」
 
 // 本地儲存
 function loadLocalData() {
@@ -170,16 +173,26 @@ function saveProducts() { localStorage.setItem("productList", JSON.stringify(pro
 function savePresets() { localStorage.setItem("presetAmounts", JSON.stringify(presetAmounts)); }
 function saveRecords() { localStorage.setItem("salesRecords", JSON.stringify(records)); }
 
-// ========== Google Sheets 設定同步 ==========
+// ========== Google Sheets 設定同步 (統一寫入 staff 工作表) ==========
+const CONFIG_SHEET = 'staff'; // 統一設定工作表
+
 async function syncConfigToSheet() {
     if (!gapiReady) return;
     try {
-        await clearSheet('Staff');
-        for (let s of staffList) await appendToSheet('Staff', [[s.code, s.name]]);
-        await clearSheet('Product');
-        for (let p of productList) await appendToSheet('Product', [[p.name, p.price]]);
-        await clearSheet('Preset');
-        for (let amt of presetAmounts) await appendToSheet('Preset', [[amt]]);
+        // 清除該工作表所有資料 (保留表頭)
+        await clearSheet(CONFIG_SHEET);
+        // 寫入員工
+        for (let s of staffList) {
+            await appendToSheet(CONFIG_SHEET, ['employee', s.code, s.name]);
+        }
+        // 寫入產品
+        for (let p of productList) {
+            await appendToSheet(CONFIG_SHEET, ['product', p.name, p.price.toString()]);
+        }
+        // 寫入預設金額
+        for (let amt of presetAmounts) {
+            await appendToSheet(CONFIG_SHEET, ['preset', amt.toString(), amt.toString()]);
+        }
     } catch (err) { console.error("同步設定失敗", err); }
 }
 
@@ -201,26 +214,37 @@ async function appendToSheet(sheetName, values) {
 async function loadConfigFromSheet() {
     if (!gapiReady) return;
     try {
-        const staffResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: 'Staff!A:B' });
-        if (staffResp.result.values?.length) {
-            staffList = staffResp.result.values.map(row => ({ code: row[0], name: row[1] }));
-            saveStaff();
-        }
-        const prodResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: 'Product!A:B' });
-        if (prodResp.result.values?.length) {
-            productList = prodResp.result.values.map(row => ({ name: row[0], price: parseFloat(row[1]) }));
-            saveProducts();
-        }
-        const presetResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: 'Preset!A:A' });
-        if (presetResp.result.values?.length) {
-            presetAmounts = presetResp.result.values.map(row => parseFloat(row[0])).filter(v => !isNaN(v));
-            savePresets();
+        const resp = await gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: SPREADSHEET_ID,
+            range: `${CONFIG_SHEET}!A:C`
+        });
+        if (resp.result.values && resp.result.values.length > 0) {
+            const rows = resp.result.values;
+            const newStaff = [];
+            const newProducts = [];
+            const newPresets = [];
+            for (let row of rows) {
+                const type = row[0];
+                const key = row[1];
+                const val = row[2];
+                if (type === 'employee') {
+                    newStaff.push({ code: key, name: val });
+                } else if (type === 'product') {
+                    newProducts.push({ name: key, price: parseFloat(val) });
+                } else if (type === 'preset') {
+                    newPresets.push(parseFloat(val));
+                }
+            }
+            if (newStaff.length) staffList = newStaff;
+            if (newProducts.length) productList = newProducts;
+            if (newPresets.length) presetAmounts = newPresets;
+            saveStaff(); saveProducts(); savePresets();
         }
         renderUI();
     } catch (err) { console.error("讀取設定失敗", err); }
 }
 
-// ========== 交易記錄同步 (分工作表) ==========
+// ========== 交易記錄同步 ==========
 async function syncToSheet(record) {
     const sheetName = record.type === 'sales' ? '產品' : '客人';
     const row = [
@@ -243,7 +267,6 @@ async function addRecord(recordData) {
     if (gapiReady) {
         await syncRecord(newRecord);
     }
-    // 更新該類型的最新記錄
     if (recordData.type === 'sales') {
         lastSalesRecord = { ...newRecord };
         updateRecentRecord('sales');
@@ -568,9 +591,7 @@ async function submitConsumption() {
     if (!date) { alert("請選擇日期"); return; }
     if (!selectedConsumeStaff) { alert("請選擇員工"); return; }
     let amount = parseFloat(document.getElementById("consumeAmount").value);
-    if (selectedConsumePayment === "公司") {
-        amount = 0;
-    } else if (isNaN(amount) || amount <= 0) {
+    if (isNaN(amount) || amount <= 0) {
         alert("請輸入正確金額或點選預設金額按鈕");
         return;
     }
