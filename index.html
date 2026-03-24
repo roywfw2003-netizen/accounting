@@ -9,20 +9,22 @@
         body { background: #cfe7ff; padding: 20px; margin: 0; }
         .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 32px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-        button, .home-link { background: #3b82f6; border: none; padding: 12px 20px; border-radius: 40px; color: white; font-weight: bold; cursor: pointer; flex: 1; text-align: center; text-decoration: none; display: inline-block; }
+        button, .home-link { background: #3b82f6; border: none; padding: 12px 20px; border-radius: 40px; color: white; font-weight: bold; cursor: pointer; flex: 1; text-align: center; text-decoration: none; display: inline-block; box-shadow: 0 5px 0 #1e3a8a; transition: 0.05s linear; }
+        button:active, .home-link:active { transform: translateY(3px); box-shadow: 0 2px 0 #1e3a8a; }
         .page { display: none; }
         .active { display: block; }
         .form-group { margin-bottom: 16px; }
         label { display: block; margin-bottom: 6px; font-weight: 600; }
         select, input { width: 100%; padding: 12px; border-radius: 40px; border: 1px solid #ccc; }
-        .staff-group, .payment-group, .preset-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
-        .staff-btn, .payment-btn, .preset-btn { background: #f1f5f9; color: #1f2937; padding: 8px 16px; border-radius: 40px; cursor: pointer; }
-        .staff-btn.active, .payment-btn.active, .preset-btn.active { background: #3b82f6; color: white; }
-        .product-list { display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0; justify-content: center; }
-        .product-card { background: #fef9f0; border-radius: 24px; padding: 12px; text-align: center; width: 120px; cursor: pointer; transition: 0.1s; border: 2px solid transparent; }
-        .product-card.selected { border-color: #3b82f6; background: #e6f0ff; }
-        .product-card img { display: block; margin: 0 auto 8px; object-fit: contain; }
-        .product-price { font-weight: bold; color: #f97316; margin-top: 6px; }
+        .staff-group, .payment-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+        .staff-btn, .payment-btn, .preset-btn, .product-btn { background: #f1f5f9; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 0 #94a3b8; transition: 0.05s linear; }
+        .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #94a3b8; }
+        .staff-btn.active, .payment-btn.active, .product-btn.selected { background: #f97316; color: white; box-shadow: 0 4px 0 #b45309; }
+        .payment-btn.active { background: #3b82f6; color: white; box-shadow: 0 4px 0 #1e3a8a; }
+        .preset-btn { background: #22c55e; color: white; box-shadow: 0 4px 0 #15803d; }
+        .product-grid, .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0; }
+        .product-btn { background: #f1f5f9; text-align: center; padding: 10px; font-weight: 600; }
+        .product-price { font-weight: bold; margin-top: 4px; font-size: 0.9rem; color: #f97316; }
         .total { font-size: 1.5rem; font-weight: bold; text-align: right; margin-top: 12px; border-top: 1px solid #ddd; padding-top: 12px; }
         .record-item { background: #fef9f0; border-radius: 20px; padding: 12px; margin-bottom: 12px; }
         .sync-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
@@ -31,13 +33,16 @@
         .sync-pending { background: #fef9c3; color: #854d0e; }
         .login-status { background: #e2e8f0; border-radius: 40px; padding: 8px 16px; margin-bottom: 20px; text-align: center; font-size: 0.9rem; }
         .setting-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-        .small-btn { background: #e2e8f0; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-size: 0.9rem; }
+        .small-btn { background: #e2e8f0; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-size: 0.9rem; box-shadow: 0 3px 0 #94a3b8; transition: 0.05s linear; }
+        .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #94a3b8; }
         .danger-btn { background: #fee2e2; color: #b91c1c; }
         hr { margin: 20px 0; border-color: #ffe0c0; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #f97316; color: white; padding: 12px 24px; border-radius: 60px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; transition: opacity 0.3s; opacity: 1; pointer-events: none; white-space: pre-line; text-align: center; }
         .iframe-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; }
         .iframe-container iframe { width: 90%; height: 90%; margin: 5% auto; display: block; background: white; border-radius: 20px; }
-        .close-iframe { position: absolute; top: 20px; right: 30px; background: #f97316; color: white; border: none; border-radius: 40px; padding: 8px 16px; cursor: pointer; }
+        .close-iframe { position: absolute; top: 20px; right: 30px; background: #f97316; color: white; border: none; border-radius: 40px; padding: 8px 16px; cursor: pointer; box-shadow: 0 3px 0 #b45309; }
+        .close-iframe:active { transform: translateY(2px); box-shadow: 0 1px 0 #b45309; }
     </style>
 </head>
 <body>
@@ -57,7 +62,7 @@
         <h3>🛍️ 產品銷售</h3>
         <div class="form-group"><label>📅 日期</label><input type="date" id="salesDate"></div>
         <div class="form-group"><label>👤 員工</label><div class="staff-group" id="salesStaff"></div></div>
-        <div class="form-group"><label>📦 產品</label><div id="productList" class="product-list"></div><div class="total">總金額: <span id="totalAmount">0</span> 元</div></div>
+        <div class="form-group"><label>📦 產品</label><div id="productList" class="product-grid"></div><div class="total">總金額: <span id="totalAmount">0</span> 元</div></div>
         <div class="form-group"><label>💳 支付方式</label><div class="payment-group" id="salesPayment"></div></div>
         <button id="submitSales">提交銷售</button>
     </div>
@@ -67,7 +72,7 @@
         <h3>👥 客人消費</h3>
         <div class="form-group"><label>📅 日期</label><input type="date" id="consumeDate"></div>
         <div class="form-group"><label>👤 員工</label><div class="staff-group" id="consumeStaff"></div></div>
-        <div class="form-group"><label>💰 金額</label><div class="preset-group" id="presetAmounts"></div><input type="number" id="consumeAmount" placeholder="或手動輸入" step="1"></div>
+        <div class="form-group"><label>💰 金額</label><div id="presetAmounts" class="preset-grid"></div><input type="number" id="consumeAmount" placeholder="或手動輸入" step="1"></div>
         <div class="form-group"><label>💳 支付方式</label><div class="payment-group" id="consumePayment"></div></div>
         <button id="submitConsume">提交消費</button>
     </div>
@@ -75,7 +80,6 @@
     <!-- 記錄頁 -->
     <div id="recordsPage" class="page">
         <h3>📜 交易記錄</h3>
-        <button id="manualSyncBtn" style="margin-bottom:12px;">🔄 手動同步</button>
         <div id="recordsList"></div>
     </div>
 
@@ -96,9 +100,6 @@
         <div class="setting-row">
             <input type="text" id="newProductName" placeholder="產品名稱" style="flex:2;">
             <input type="number" id="newProductPrice" placeholder="價格" style="flex:1;">
-            <input type="text" id="newProductImage" placeholder="圖片網址" style="flex:2;">
-            <input type="number" id="newProductWidth" placeholder="寬度(px)" value="80" style="width:80px;">
-            <input type="number" id="newProductHeight" placeholder="高度(px)" value="80" style="width:80px;">
             <button class="small-btn" id="addProductBtn">➕ 新增</button>
         </div>
         <hr>
@@ -129,6 +130,7 @@ let tokenClient;
 let gapiInited = false;
 let gisInited = false;
 let gapiReady = false;
+let syncInProgress = false;
 
 // 全域資料
 let staffList = [
@@ -137,20 +139,20 @@ let staffList = [
     { code: "3", name: "Kin" }
 ];
 let productList = [
-    { name: "紅罐", price: 178, imageUrl: "", width: 80, height: 80 },
-    { name: "猩猩粉", price: 100, imageUrl: "", width: 80, height: 80 },
-    { name: "打底水", price: 148, imageUrl: "", width: 80, height: 80 }
+    { name: "紅罐", price: 178 },
+    { name: "猩猩粉", price: 100 },
+    { name: "打底水", price: 148 }
 ];
 let presetAmounts = [50, 100, 150, 200];
 let records = [];
-let selectedProducts = new Set(); // 存選中的產品名稱
+let selectedProducts = new Set();
 let selectedSalesStaff = null;
 let selectedConsumeStaff = null;
 let selectedSalesPayment = "現金";
 let selectedConsumePayment = "現金";
 const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付", "公司"];
 
-// 本地儲存函數
+// 本地儲存
 function loadLocalData() {
     const storedStaff = localStorage.getItem("staffList");
     if (storedStaff) staffList = JSON.parse(storedStaff);
@@ -166,105 +168,67 @@ function saveProducts() { localStorage.setItem("productList", JSON.stringify(pro
 function savePresets() { localStorage.setItem("presetAmounts", JSON.stringify(presetAmounts)); }
 function saveRecords() { localStorage.setItem("salesRecords", JSON.stringify(records)); }
 
-// ========== Google Sheets 同步設定 ==========
+// ========== Google Sheets 設定同步 ==========
 async function syncConfigToSheet() {
     if (!gapiReady) return;
     try {
-        // 清空並重寫 Staff 工作表
         await clearSheet('Staff');
-        for (let s of staffList) {
-            await appendToSheet('Staff', [[s.code, s.name]]);
-        }
-        // 清空並重寫 Product 工作表
+        for (let s of staffList) await appendToSheet('Staff', [[s.code, s.name]]);
         await clearSheet('Product');
-        for (let p of productList) {
-            await appendToSheet('Product', [[p.name, p.price, p.imageUrl || '', p.width || 80, p.height || 80]]);
-        }
-        // 清空並重寫 Preset 工作表
+        for (let p of productList) await appendToSheet('Product', [[p.name, p.price]]);
         await clearSheet('Preset');
-        for (let amt of presetAmounts) {
-            await appendToSheet('Preset', [[amt]]);
-        }
+        for (let amt of presetAmounts) await appendToSheet('Preset', [[amt]]);
     } catch (err) { console.error("同步設定失敗", err); }
 }
 
 async function clearSheet(sheetName) {
     const range = `${sheetName}!A:Z`;
-    const params = {
-        spreadsheetId: SPREADSHEET_ID,
-        range: range,
-        valueInputOption: 'USER_ENTERED',
-        resource: { values: [] }
-    };
-    await gapi.client.sheets.spreadsheets.values.clear(params);
+    await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId: SPREADSHEET_ID, range: range });
 }
 
 async function appendToSheet(sheetName, values) {
     const range = `${sheetName}!A:Z`;
-    const params = {
+    await gapi.client.sheets.spreadsheets.values.append({
         spreadsheetId: SPREADSHEET_ID,
         range: range,
         valueInputOption: 'USER_ENTERED',
         resource: { values: [values] }
-    };
-    await gapi.client.sheets.spreadsheets.values.append(params);
+    });
 }
 
 async function loadConfigFromSheet() {
     if (!gapiReady) return;
     try {
-        // 讀取 Staff
-        const staffResp = await gapi.client.sheets.spreadsheets.values.get({
-            spreadsheetId: SPREADSHEET_ID,
-            range: 'Staff!A:B'
-        });
-        if (staffResp.result.values && staffResp.result.values.length > 0) {
+        const staffResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: 'Staff!A:B' });
+        if (staffResp.result.values?.length) {
             staffList = staffResp.result.values.map(row => ({ code: row[0], name: row[1] }));
             saveStaff();
         }
-        // 讀取 Product
-        const prodResp = await gapi.client.sheets.spreadsheets.values.get({
-            spreadsheetId: SPREADSHEET_ID,
-            range: 'Product!A:E'
-        });
-        if (prodResp.result.values && prodResp.result.values.length > 0) {
-            productList = prodResp.result.values.map(row => ({
-                name: row[0],
-                price: parseFloat(row[1]),
-                imageUrl: row[2] || '',
-                width: row[3] ? parseInt(row[3]) : 80,
-                height: row[4] ? parseInt(row[4]) : 80
-            }));
+        const prodResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: 'Product!A:B' });
+        if (prodResp.result.values?.length) {
+            productList = prodResp.result.values.map(row => ({ name: row[0], price: parseFloat(row[1]) }));
             saveProducts();
         }
-        // 讀取 Preset
-        const presetResp = await gapi.client.sheets.spreadsheets.values.get({
-            spreadsheetId: SPREADSHEET_ID,
-            range: 'Preset!A:A'
-        });
-        if (presetResp.result.values && presetResp.result.values.length > 0) {
+        const presetResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: 'Preset!A:A' });
+        if (presetResp.result.values?.length) {
             presetAmounts = presetResp.result.values.map(row => parseFloat(row[0])).filter(v => !isNaN(v));
             savePresets();
         }
-        renderUI(); // 重新整理所有 UI
+        renderUI();
     } catch (err) { console.error("讀取設定失敗", err); }
 }
 
-// ========== 交易記錄同步 ==========
+// ========== 交易記錄同步 (分工作表) ==========
 async function syncToSheet(record) {
+    const sheetName = record.type === 'sales' ? '產品' : '客人';
     const row = [
-        record.id || '',
-        record.type || '',
-        record.date || '',
-        record.staffCode || '',
-        record.staffName || '',
-        record.amount || '',
-        record.payment || '',
-        record.details || '',
-        record.createdAt || '',
+        record.id || '', record.type || '', record.date || '',
+        record.staffCode || '', record.staffName || '',
+        record.amount || '', record.payment || '',
+        record.details || '', record.createdAt || '',
         record.syncStatus || ''
     ];
-    return await appendToSheet('Sheet1', row);
+    await appendToSheet(sheetName, row);
 }
 
 async function addRecord(recordData) {
@@ -274,32 +238,52 @@ async function addRecord(recordData) {
     saveRecords();
     renderRecords();
 
-    const result = await syncToSheet(newRecord);
-    const idx = records.findIndex(r => r.id === newId);
-    if (idx !== -1) {
-        records[idx].syncStatus = result.success ? "success" : "failed";
-        if (!result.success) records[idx].syncError = result.error;
-        saveRecords();
-        renderRecords();
+    if (gapiReady) {
+        await syncRecord(newRecord);
     }
-    return result.success;
+    return true;
 }
 
-async function manualSyncAll() {
-    const failed = records.filter(r => r.syncStatus === "failed");
-    if (failed.length === 0) { alert("沒有需要同步的記錄"); return; }
-    let count = 0;
-    for (let rec of failed) {
-        const ok = await syncToSheet(rec);
-        if (ok) {
-            rec.syncStatus = "success";
-            delete rec.syncError;
-            count++;
+async function syncRecord(record) {
+    try {
+        await syncToSheet(record);
+        const idx = records.findIndex(r => r.id === record.id);
+        if (idx !== -1) {
+            records[idx].syncStatus = "success";
+            delete records[idx].syncError;
+            saveRecords();
+            renderRecords();
         }
+        return true;
+    } catch (err) {
+        const idx = records.findIndex(r => r.id === record.id);
+        if (idx !== -1) {
+            records[idx].syncStatus = "failed";
+            records[idx].syncError = err.message;
+            saveRecords();
+            renderRecords();
+        }
+        return false;
     }
-    saveRecords();
-    renderRecords();
-    alert(`手動同步完成：成功 ${count} 筆，失敗 ${failed.length - count} 筆`);
+}
+
+async function syncAllPending() {
+    if (syncInProgress || !gapiReady) return;
+    syncInProgress = true;
+    const pending = records.filter(r => r.syncStatus === "pending");
+    for (let rec of pending) {
+        await syncRecord(rec);
+    }
+    syncInProgress = false;
+}
+
+// 彈出提示
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = message;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
 }
 
 // ========== UI 渲染 ==========
@@ -340,22 +324,10 @@ function renderProducts() {
     if (!container) return;
     container.innerHTML = "";
     productList.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "product-card" + (selectedProducts.has(p.name) ? " selected" : "");
-        const img = document.createElement("img");
-        img.src = p.imageUrl || "https://placehold.co/80x80?text=No+Image";
-        img.width = p.width || 80;
-        img.height = p.height || 80;
-        img.style.objectFit = "contain";
-        card.appendChild(img);
-        const nameSpan = document.createElement("div");
-        nameSpan.textContent = p.name;
-        card.appendChild(nameSpan);
-        const priceSpan = document.createElement("div");
-        priceSpan.className = "product-price";
-        priceSpan.textContent = `$${p.price}`;
-        card.appendChild(priceSpan);
-        card.onclick = () => {
+        const btn = document.createElement("div");
+        btn.className = "product-btn" + (selectedProducts.has(p.name) ? " selected" : "");
+        btn.innerHTML = `<div>${p.name}</div><div class="product-price">$${p.price}</div>`;
+        btn.onclick = () => {
             if (selectedProducts.has(p.name)) {
                 selectedProducts.delete(p.name);
             } else {
@@ -364,15 +336,13 @@ function renderProducts() {
             renderProducts();
             calcTotal();
         };
-        container.appendChild(card);
+        container.appendChild(btn);
     });
 }
 
 function calcTotal() {
     let total = 0;
-    productList.forEach(p => {
-        if (selectedProducts.has(p.name)) total += p.price;
-    });
+    productList.forEach(p => { if (selectedProducts.has(p.name)) total += p.price; });
     document.getElementById("totalAmount").innerText = total;
     return total;
 }
@@ -385,9 +355,7 @@ function renderPresetButtons() {
         const btn = document.createElement("div");
         btn.className = "preset-btn";
         btn.textContent = `$${amt}`;
-        btn.onclick = () => {
-            document.getElementById("consumeAmount").value = amt;
-        };
+        btn.onclick = () => { document.getElementById("consumeAmount").value = amt; };
         container.appendChild(btn);
     });
 }
@@ -425,13 +393,14 @@ function renderStaffManageList() {
         const div = document.createElement("div");
         div.className = "setting-row";
         div.innerHTML = `<span style="flex:2;"><strong>${staff.name}</strong> (${staff.code})</span><button class="small-btn danger-btn" data-idx="${idx}">刪除</button>`;
-        div.querySelector("button").onclick = () => {
+        div.querySelector("button").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能修改員工"); return; }
             staffList.splice(idx, 1);
             saveStaff();
             renderStaffManageList();
             renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
             renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
-            syncConfigToSheet();
+            await syncConfigToSheet();
         };
         container.appendChild(div);
     });
@@ -444,15 +413,14 @@ function renderProductManageList() {
     productList.forEach((prod, idx) => {
         const div = document.createElement("div");
         div.className = "setting-row";
-        div.innerHTML = `<span style="flex:2;">${prod.name} - $${prod.price}</span>
-                         <span>圖片: ${prod.imageUrl ? '已設定' : '未設定'}</span>
-                         <button class="small-btn danger-btn" data-idx="${idx}">刪除</button>`;
-        div.querySelector("button").onclick = () => {
+        div.innerHTML = `<span style="flex:2;">${prod.name} - $${prod.price}</span><button class="small-btn danger-btn" data-idx="${idx}">刪除</button>`;
+        div.querySelector("button").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能修改產品"); return; }
             productList.splice(idx, 1);
             saveProducts();
             renderProductManageList();
             renderProducts();
-            syncConfigToSheet();
+            await syncConfigToSheet();
         };
         container.appendChild(div);
     });
@@ -466,12 +434,13 @@ function renderPresetManageList() {
         const div = document.createElement("div");
         div.className = "setting-row";
         div.innerHTML = `<span style="flex:2;">$${amt}</span><button class="small-btn danger-btn" data-idx="${idx}">刪除</button>`;
-        div.querySelector("button").onclick = () => {
+        div.querySelector("button").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能修改預設金額"); return; }
             presetAmounts.splice(idx, 1);
             savePresets();
             renderPresetManageList();
             renderPresetButtons();
-            syncConfigToSheet();
+            await syncConfigToSheet();
         };
         container.appendChild(div);
     });
@@ -479,7 +448,7 @@ function renderPresetManageList() {
 
 // 提交銷售
 async function submitSales() {
-    if (!gapiReady) { alert("請先登入 Google 並授權"); return; }
+    if (!gapiReady) { alert("尚未登入，記錄將先儲存於本地，登入後自動同步"); }
     const date = document.getElementById("salesDate").value;
     if (!date) { alert("請選擇日期"); return; }
     if (!selectedSalesStaff) { alert("請選擇員工"); return; }
@@ -503,8 +472,8 @@ async function submitSales() {
         details: selected.join("、"),
         createdAt: new Date().toISOString()
     };
-    const ok = await addRecord(record);
-    alert(ok ? "銷售記錄已儲存並同步成功！" : "記錄已儲存但同步失敗，稍後可手動同步");
+    await addRecord(record);
+    showToast(`✅ 訂單已完成！\n${record.details}\n金額: $${record.amount}`);
     selectedProducts.clear();
     renderProducts();
     document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
@@ -513,13 +482,13 @@ async function submitSales() {
 
 // 提交消費
 async function submitConsumption() {
-    if (!gapiReady) { alert("請先登入 Google 並授權"); return; }
+    if (!gapiReady) { alert("尚未登入，記錄將先儲存於本地，登入後自動同步"); }
     const date = document.getElementById("consumeDate").value;
     if (!date) { alert("請選擇日期"); return; }
     if (!selectedConsumeStaff) { alert("請選擇員工"); return; }
     let amount = parseFloat(document.getElementById("consumeAmount").value);
     if (selectedConsumePayment === "公司") {
-        amount = 0; // 公司付款不要求金額
+        amount = 0;
     } else if (isNaN(amount) || amount <= 0) {
         alert("請輸入正確金額或點選預設金額按鈕");
         return;
@@ -535,11 +504,97 @@ async function submitConsumption() {
         details: `消費金額 $${amount}`,
         createdAt: new Date().toISOString()
     };
-    const ok = await addRecord(record);
-    alert(ok ? "消費記錄已儲存並同步成功！" : "記錄已儲存但同步失敗，稍後可手動同步");
+    await addRecord(record);
+    showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
     document.getElementById("consumeAmount").value = "";
     showPage("records");
 }
+
+// 頁面切換
+function showPage(pageId) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(pageId + "Page").classList.add("active");
+    if (pageId === "sales") {
+        document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
+        renderProducts();
+    }
+    if (pageId === "consumption") {
+        document.getElementById("consumeDate").value = new Date().toISOString().slice(0,10);
+        renderPresetButtons();
+    }
+    if (pageId === "records") renderRecords();
+    if (pageId === "settings") {
+        renderStaffManageList();
+        renderProductManageList();
+        renderPresetManageList();
+    }
+}
+
+// 學生預約 iframe
+const iframeModal = document.getElementById("iframeModal");
+const bookingIframe = document.getElementById("bookingIframe");
+document.getElementById("studentBookingBtn").onclick = () => {
+    bookingIframe.src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html";
+    iframeModal.style.display = "block";
+};
+document.getElementById("closeIframeBtn").onclick = () => {
+    iframeModal.style.display = "none";
+    bookingIframe.src = "";
+};
+
+// 事件綁定
+document.querySelectorAll("[data-page]").forEach(btn => {
+    btn.onclick = () => showPage(btn.dataset.page);
+});
+document.getElementById("submitSales").onclick = submitSales;
+document.getElementById("submitConsume").onclick = submitConsumption;
+
+document.getElementById("addStaffBtn").onclick = async () => {
+    if (!gapiReady) { alert("請先登入才能新增員工"); return; }
+    const name = document.getElementById("newStaffName").value.trim();
+    const code = document.getElementById("newStaffCode").value.trim();
+    if (!name || !code) { alert("請填寫員工姓名與工號"); return; }
+    staffList.push({ code, name });
+    saveStaff();
+    renderStaffManageList();
+    renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+    renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+    await syncConfigToSheet();
+    document.getElementById("newStaffName").value = "";
+    document.getElementById("newStaffCode").value = "";
+};
+document.getElementById("addProductBtn").onclick = async () => {
+    if (!gapiReady) { alert("請先登入才能新增產品"); return; }
+    const name = document.getElementById("newProductName").value.trim();
+    const price = parseFloat(document.getElementById("newProductPrice").value);
+    if (!name || isNaN(price) || price <= 0) { alert("請填寫產品名稱與正確價格"); return; }
+    productList.push({ name, price });
+    saveProducts();
+    renderProductManageList();
+    renderProducts();
+    await syncConfigToSheet();
+    document.getElementById("newProductName").value = "";
+    document.getElementById("newProductPrice").value = "";
+};
+document.getElementById("addPresetBtn").onclick = async () => {
+    if (!gapiReady) { alert("請先登入才能新增預設金額"); return; }
+    const amt = parseFloat(document.getElementById("newPresetAmount").value);
+    if (isNaN(amt) || amt <= 0) { alert("請輸入正確金額"); return; }
+    presetAmounts.push(amt);
+    savePresets();
+    renderPresetManageList();
+    renderPresetButtons();
+    await syncConfigToSheet();
+    document.getElementById("newPresetAmount").value = "";
+};
+document.getElementById("clearLocalDataBtn").onclick = () => {
+    if (confirm("⚠️ 確定清空所有本地記錄？此操作無法復原！")) {
+        records = [];
+        saveRecords();
+        renderRecords();
+        alert("已清空所有記錄");
+    }
+};
 
 // ========== Google API 初始化 ==========
 function gapiLoaded() { gapi.load('client', initGapiClient); }
@@ -563,6 +618,7 @@ function maybeEnableButtons() {
                 if (resp.error !== undefined) throw resp;
                 statusDiv.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
                 await loadConfigFromSheet();
+                await syncAllPending();
                 renderUI();
             };
             tokenClient.requestAccessToken();
@@ -582,95 +638,6 @@ function renderUI() {
     renderProductManageList();
     renderPresetManageList();
 }
-
-function showPage(pageId) {
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    document.getElementById(pageId + "Page").classList.add("active");
-    if (pageId === "sales") {
-        document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
-        renderProducts();
-    }
-    if (pageId === "consumption") {
-        document.getElementById("consumeDate").value = new Date().toISOString().slice(0,10);
-        renderPresetButtons();
-    }
-    if (pageId === "records") renderRecords();
-    if (pageId === "settings") {
-        renderStaffManageList();
-        renderProductManageList();
-        renderPresetManageList();
-    }
-}
-
-// 學生預約 iframe 控制
-const iframeModal = document.getElementById("iframeModal");
-const bookingIframe = document.getElementById("bookingIframe");
-document.getElementById("studentBookingBtn").onclick = () => {
-    bookingIframe.src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html";
-    iframeModal.style.display = "block";
-};
-document.getElementById("closeIframeBtn").onclick = () => {
-    iframeModal.style.display = "none";
-    bookingIframe.src = "";
-};
-
-// 事件綁定
-document.querySelectorAll("[data-page]").forEach(btn => {
-    btn.onclick = () => showPage(btn.dataset.page);
-});
-document.getElementById("submitSales").onclick = submitSales;
-document.getElementById("submitConsume").onclick = submitConsumption;
-document.getElementById("manualSyncBtn").onclick = manualSyncAll;
-
-document.getElementById("addStaffBtn").onclick = () => {
-    const name = document.getElementById("newStaffName").value.trim();
-    const code = document.getElementById("newStaffCode").value.trim();
-    if (!name || !code) { alert("請填寫員工姓名與工號"); return; }
-    staffList.push({ code, name });
-    saveStaff();
-    renderStaffManageList();
-    renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
-    renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
-    syncConfigToSheet();
-    document.getElementById("newStaffName").value = "";
-    document.getElementById("newStaffCode").value = "";
-};
-document.getElementById("addProductBtn").onclick = () => {
-    const name = document.getElementById("newProductName").value.trim();
-    const price = parseFloat(document.getElementById("newProductPrice").value);
-    const imageUrl = document.getElementById("newProductImage").value.trim();
-    const width = parseInt(document.getElementById("newProductWidth").value) || 80;
-    const height = parseInt(document.getElementById("newProductHeight").value) || 80;
-    if (!name || isNaN(price) || price <= 0) { alert("請填寫產品名稱與正確價格"); return; }
-    productList.push({ name, price, imageUrl, width, height });
-    saveProducts();
-    renderProductManageList();
-    renderProducts();
-    syncConfigToSheet();
-    document.getElementById("newProductName").value = "";
-    document.getElementById("newProductPrice").value = "";
-    document.getElementById("newProductImage").value = "";
-    document.getElementById("newProductWidth").value = "80";
-    document.getElementById("newProductHeight").value = "80";
-};
-document.getElementById("addPresetBtn").onclick = () => {
-    const amt = parseFloat(document.getElementById("newPresetAmount").value);
-    if (isNaN(amt) || amt <= 0) { alert("請輸入正確金額"); return; }
-    presetAmounts.push(amt);
-    savePresets();
-    renderPresetManageList();
-    renderPresetButtons();
-    syncConfigToSheet();
-    document.getElementById("newPresetAmount").value = "";
-};
-document.getElementById("clearLocalDataBtn").onclick = () => {
-    if (confirm("⚠️ 確定清空所有本地記錄？此操作無法復原！")) {
-        records = [];
-        saveRecords();
-        renderRecords();
-        alert("已清空所有記錄");
-    }
-};
 
 function ensureInit() {
     if (typeof gapi !== 'undefined' && typeof google !== 'undefined' && typeof google.accounts !== 'undefined') {
