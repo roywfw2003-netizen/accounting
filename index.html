@@ -727,7 +727,7 @@ function gisLoaded() {
 function maybeEnableButtons() {
     if (gapiInited && gisInited && !gapiReady) {
         gapiReady = true;
-        document.getElementById('loginStatus').innerHTML = '✏️✏️ 已準備就緒，請按下方按鈕登入授權✏️✏️ <button id="authBtn">登入 Google</button>';
+        document.getElementById('loginStatus').innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權 <button id="authBtn">登入 Google</button>';
         document.getElementById('authBtn').onclick = () => {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) throw resp;
