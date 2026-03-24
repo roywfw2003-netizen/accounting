@@ -6,7 +6,7 @@
     <title>賣貨管理系統 | Hair World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* 此處樣式與您最後提供的版本一致，為節省篇幅，直接沿用 */
+        /* 保持原有樣式，僅為節省篇幅不重複，實際使用時會完整保留 */
         :root {
             --bg-body: #cfe7ff;
             --bg-card: white;
@@ -107,7 +107,6 @@
         h3 { margin: 0 0 12px 0; font-size: 1.3rem; color: var(--text-primary); }
         .retry-btn { background: var(--accent-orange); color: white; border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; margin-left: 8px; box-shadow: 0 2px 0 var(--accent-orange-shadow); }
         .retry-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
-        .reload-btn { background: var(--btn-primary-bg); color: white; border: none; padding: 4px 12px; border-radius: 40px; cursor: pointer; font-size: 0.8rem; margin-left: 8px; box-shadow: 0 2px 0 var(--btn-primary-shadow); }
     </style>
 </head>
 <body>
@@ -231,14 +230,16 @@
 
 <script>
 // ========== OAuth 設定 ==========
-const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com';  // 請替換為您的用戶端編號
+const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleusercontent.com
+
+';
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
 let tokenClient;
 let gapiInited = false;
 let gisInited = false;
-let gapiReady = false;
+let gapiReady = false;   // 是否已獲得授權 token
 let syncInProgress = false;
 let settingsPassword = 'admin123';
 let darkMode = localStorage.getItem('darkMode') === 'true';
@@ -392,6 +393,7 @@ async function syncAllPending() {
     syncInProgress = false;
 }
 async function retryFailed() {
+    if (!gapiReady) { alert("尚未登入，無法同步"); return; }
     const failed = records.filter(r => r.syncStatus === "failed");
     if (failed.length === 0) { alert("沒有失敗的記錄"); return; }
     let successCount = 0;
@@ -723,7 +725,7 @@ document.getElementById("clearLocalDataBtn").onclick = () => {
     }
 };
 
-// ========== 簡化的初始化邏輯，確保按鈕可點 ==========
+// ========== 正確的初始化邏輯（參考成功案例）==========
 function gapiLoaded() {
     gapi.load('client', initGapiClient);
 }
@@ -738,18 +740,23 @@ function gisLoaded() {
     checkReady();
 }
 function checkReady() {
+    const statusDiv = document.getElementById('loginStatus');
     const loginText = document.getElementById('loginText');
     const authBtn = document.getElementById('authBtn');
-    const statusDiv = document.getElementById('loginStatus');
     if (gapiInited && gisInited && !gapiReady) {
-        gapiReady = true;
+        // API 已載入，但尚未授權 -> 啟用登入按鈕，顯示「請登入」
         statusDiv.classList.remove('warning');
-        loginText.innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權';
+        loginText.innerHTML = '⚠️ 尚未登入，請點擊下方按鈕登入授權';
         authBtn.disabled = false;
         authBtn.onclick = () => {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) throw resp;
+                // 授權成功
+                gapiReady = true;
+                statusDiv.classList.remove('warning');
                 loginText.innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
+                authBtn.disabled = true;
+                // 登入後立即載入設定並同步待處理記錄
                 await loadConfigFromSheet();
                 await syncAllPending();
                 renderUI();
