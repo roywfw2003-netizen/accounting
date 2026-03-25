@@ -6,7 +6,7 @@
     <title>賣貨管理系統 | Hair World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* CSS 变量 - 白天模式 */
+        /* ===== 變數與基本樣式（保留原有配色，與 iPhone 一致）===== */
         :root {
             --bg-body: #cfe7ff;
             --bg-card: white;
@@ -45,13 +45,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--text-primary); /* 全局文字顏色 */
+            color: var(--text-primary);
         }
         /* 強制所有文字使用主題色（夜間模式修復） */
         h1, h2, h3, h4, h5, h6, p, span, div, label, button, input, select, .setting-row span, .small-btn, .record-item {
             color: var(--text-primary);
         }
-        /* 按鈕文字顏色保持正確 */
         .nav-btn, .submit-btn, .settings-icon-small, .small-btn, .danger-btn {
             color: white;
         }
@@ -64,10 +63,11 @@
         body.dark .danger-btn {
             color: #ff7b72 !important;
         }
+        /* 主容器：全螢幕，並考慮安全區域 */
         .app-container {
             width: 100%;
             max-width: 100%;
-            margin: 0 auto;
+            margin: 0;
             background: var(--bg-card);
             border-radius: 0;
             box-shadow: none;
@@ -75,379 +75,166 @@
             padding: 12px;
             transition: all 0.2s;
             height: 100vh;
+            height: -webkit-fill-available;
             display: flex;
             flex-direction: column;
+            padding-bottom: env(safe-area-inset-bottom, 0);
         }
-        /* 橫向模式專用壓縮，確保內容一屏可見 */
+        /* 橫向模式專用壓縮（確保 Samsung Galaxy S6 Lite 橫向一屏全見） */
         @media (orientation: landscape) {
             .app-container {
-                padding: 8px 12px;
+                padding: 6px 12px;
+            }
+            .btn-group {
+                gap: 10px;
+                margin-bottom: 6px;
             }
             .nav-btn {
-                padding: 10px 4px;
-                font-size: 0.8rem;
+                padding: 6px 4px;
+                font-size: 0.75rem;
+                gap: 4px;
             }
             .nav-btn i {
-                font-size: 1.5rem;
+                font-size: 1.3rem;
             }
-            .product-grid, .preset-grid {
-                gap: 6px;
-            }
-            .product-btn, .preset-btn {
-                padding: 4px 8px;
-                font-size: 0.8rem;
+            .nav-btn span {
+                font-size: 0.7rem;
             }
             .form-group {
-                margin-bottom: 6px;
+                margin-bottom: 4px;
+            }
+            label {
+                font-size: 0.75rem;
+                margin-bottom: 2px;
+            }
+            select, input {
+                padding: 4px 8px;
+                font-size: 0.75rem;
+            }
+            .date-with-settings input {
+                padding: 4px 8px;
+            }
+            .settings-icon-small {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
             }
             .staff-group, .payment-group {
                 gap: 6px;
+                margin: 4px 0;
             }
-            .staff-btn, .payment-btn {
+            .staff-btn, .payment-btn, .preset-btn, .product-btn {
                 padding: 4px 8px;
-                font-size: 0.8rem;
+                font-size: 0.7rem;
             }
-            .total, .recent-record {
-                font-size: 0.9rem;
+            .product-grid, .preset-grid {
+                gap: 6px;
+                margin: 6px 0;
+            }
+            .total {
+                font-size: 1rem;
                 margin-top: 4px;
                 padding-top: 4px;
             }
             .submit-btn, #submitConsume {
-                padding: 10px;
-                font-size: 1rem;
-                margin-top: 8px;
+                padding: 8px;
+                font-size: 0.9rem;
+                margin-top: 6px;
+            }
+            .recent-record {
+                padding: 4px;
+                margin-top: 6px;
+                font-size: 0.65rem;
             }
             .settings-section {
-                margin-bottom: 8px;
+                margin-bottom: 6px;
                 padding: 6px;
+            }
+            .settings-header h4 {
+                font-size: 0.9rem;
+                margin: 0;
+            }
+            .setting-row {
+                margin-bottom: 4px;
+            }
+            .small-btn {
+                padding: 3px 8px;
+                font-size: 0.7rem;
             }
             .record-item {
                 padding: 6px;
-                font-size: 0.8rem;
+                margin-bottom: 4px;
+                font-size: 0.7rem;
             }
-            .small-btn {
-                padding: 4px 8px;
-                font-size: 0.75rem;
+            .sync-badge {
+                font-size: 0.6rem;
+                padding: 1px 4px;
+            }
+            .records-action-row {
+                margin-bottom: 6px;
+                gap: 8px;
+            }
+            hr {
+                margin: 8px 0;
+            }
+            /* 確保交易記錄列表不會過長而溢出，允許內部滾動 */
+            #recordsList {
+                max-height: 35vh;
+                overflow-y: auto;
             }
         }
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-        .nav-btn {
-            background: var(--btn-primary-bg);
-            border: none;
-            border-radius: 32px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            flex: 1;
-            min-width: 100px;
-            padding: 12px 8px;
-            text-align: center;
-            transition: 0.05s linear;
-            box-shadow: 0 5px 0 var(--btn-primary-shadow);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-        .nav-btn i { font-size: 1.8rem; }
-        .nav-btn span { font-size: 0.85rem; }
+        /* 其餘原有樣式保持不變，確保功能正常 */
+        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+        .nav-btn { background: var(--btn-primary-bg); border: none; border-radius: 32px; font-weight: bold; cursor: pointer; flex: 1; min-width: 100px; padding: 12px 8px; text-align: center; transition: 0.05s linear; box-shadow: 0 5px 0 var(--btn-primary-shadow); display: flex; flex-direction: column; align-items: center; gap: 6px; }
         .nav-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-primary-shadow); }
         .page { display: none; }
         .active { display: block; }
         .form-group { margin-bottom: 10px; }
-        label { display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-primary); }
-        select, input {
-            width: 100%;
-            padding: 8px 12px;
-            border-radius: 40px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-card);
-            color: var(--text-primary);
-        }
-        /* 日期欄位與設定按鈕同行 */
-        .date-with-settings {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .date-with-settings input {
-            flex: 1;
-        }
-        .settings-icon-small {
-            background: var(--btn-primary-bg);
-            border: none;
-            border-radius: 40px;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 3px 0 var(--btn-primary-shadow);
-            transition: 0.05s linear;
-            font-size: 1.2rem;
-            color: white;
-        }
-        .settings-icon-small:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 var(--btn-primary-shadow);
-        }
-        .staff-group, .payment-group {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin: 6px 0;
-        }
-        .staff-btn, .payment-btn, .preset-btn, .product-btn {
-            background: var(--btn-gray-bg);
-            border: none;
-            padding: 6px 12px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 3px 0 var(--btn-gray-shadow);
-            transition: 0.05s linear;
-            text-align: center;
-            color: var(--text-primary);
-        }
-        .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 var(--btn-gray-shadow);
-        }
-        .staff-btn.active, .product-btn.selected {
-            background: var(--accent-orange);
-            color: white;
-            box-shadow: 0 3px 0 var(--accent-orange-shadow);
-        }
-        .payment-btn.active {
-            background: var(--accent-orange);
-            color: white;
-            box-shadow: 0 3px 0 var(--accent-orange-shadow);
-        }
-        .preset-btn.active {
-            background: var(--accent-orange);
-            color: white;
-            box-shadow: 0 3px 0 var(--accent-orange-shadow);
-        }
-        .product-grid, .preset-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .product-btn .product-price {
-            font-weight: bold;
-            font-size: 0.85rem;
-            color: inherit;
-        }
-        .product-btn.selected .product-price {
-            color: white;
-        }
-        .total {
-            font-size: 1.2rem;
-            font-weight: bold;
-            text-align: right;
-            margin-top: 6px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 6px;
-            color: var(--accent-orange);
-        }
-        .record-item {
-            background: var(--btn-gray-bg);
-            border-radius: 20px;
-            padding: 8px;
-            margin-bottom: 6px;
-            color: var(--text-primary);
-        }
-        .sync-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-        }
+        label { display: block; margin-bottom: 4px; font-weight: 600; }
+        select, input { width: 100%; padding: 8px 12px; border-radius: 40px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); }
+        .date-with-settings { display: flex; gap: 10px; align-items: center; }
+        .date-with-settings input { flex: 1; }
+        .settings-icon-small { background: var(--btn-primary-bg); border: none; border-radius: 40px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 3px 0 var(--btn-primary-shadow); transition: 0.05s linear; font-size: 1.2rem; color: white; }
+        .settings-icon-small:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-primary-shadow); }
+        .staff-group, .payment-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+        .staff-btn, .payment-btn, .preset-btn, .product-btn { background: var(--btn-gray-bg); border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-weight: bold; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; text-align: center; color: var(--text-primary); }
+        .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
+        .staff-btn.active, .product-btn.selected { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
+        .payment-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
+        .preset-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
+        .product-grid, .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
+        .product-btn .product-price { font-weight: bold; font-size: 0.85rem; color: inherit; }
+        .product-btn.selected .product-price { color: white; }
+        .total { font-size: 1.2rem; font-weight: bold; text-align: right; margin-top: 6px; border-top: 1px solid var(--border-color); padding-top: 6px; color: var(--accent-orange); }
+        .record-item { background: var(--btn-gray-bg); border-radius: 20px; padding: 8px; margin-bottom: 6px; }
+        .sync-badge { display: inline-block; padding: 2px 6px; border-radius: 20px; font-size: 0.7rem; }
         .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
         .sync-pending { background: #fef9c3; color: #854d0e; }
-        .login-status {
-            background: var(--btn-gray-bg);
-            border-radius: 40px;
-            padding: 6px 12px;
-            margin-bottom: 12px;
-            text-align: center;
-            font-size: 0.85rem;
-            color: var(--text-primary);
-        }
-        .setting-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 8px;
-        }
-        .small-btn {
-            background: var(--btn-gray-bg);
-            border: none;
-            padding: 4px 10px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            box-shadow: 0 3px 0 var(--btn-gray-shadow);
-            transition: 0.05s linear;
-            color: var(--text-primary);
-        }
-        .small-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 var(--btn-gray-shadow);
-        }
-        .danger-btn {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-        .edit-btn {
-            background: var(--btn-gray-bg);
-            color: var(--text-primary);
-            margin-left: 6px;
-        }
-        hr {
-            margin: 12px 0;
-            border-color: var(--border-color);
-        }
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--accent-orange);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 40px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 1000;
-            transition: opacity 0.3s;
-            opacity: 1;
-            pointer-events: none;
-            white-space: pre-line;
-            text-align: center;
-            font-size: 0.85rem;
-        }
-        .iframe-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            display: none;
-        }
-        .iframe-container iframe {
-            width: 90%;
-            height: 90%;
-            margin: 5% auto;
-            display: block;
-            background: white;
-            border-radius: 20px;
-        }
-        .close-iframe {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            background: var(--accent-orange);
-            color: white;
-            border: none;
-            border-radius: 40px;
-            padding: 6px 12px;
-            cursor: pointer;
-            box-shadow: 0 3px 0 var(--accent-orange-shadow);
-        }
-        .close-iframe:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 var(--accent-orange-shadow);
-        }
-        .recent-record {
-            background: var(--btn-gray-bg);
-            border-radius: 20px;
-            padding: 6px;
-            margin-top: 10px;
-            text-align: center;
-            font-size: 0.75rem;
-            border-left: 4px solid var(--accent-orange);
-            color: var(--text-primary);
-        }
-        .settings-section {
-            margin-bottom: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 8px;
-        }
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-        .settings-content {
-            margin-top: 8px;
-        }
-        .toggle-switch {
-            width: 44px;
-            height: 24px;
-            background: #ccc;
-            border-radius: 24px;
-            position: relative;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .toggle-switch.active {
-            background: var(--accent-orange);
-        }
-        .toggle-switch::after {
-            content: '';
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            transition: 0.2s;
-        }
-        .toggle-switch.active::after {
-            left: 22px;
-        }
-        .hidden-content {
-            display: none;
-        }
-        .submit-btn, #submitConsume {
-            background: var(--btn-success-bg);
-            color: white;
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 40px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-top: 10px;
-            cursor: pointer;
-            box-shadow: 0 5px 0 var(--btn-success-shadow);
-            transition: 0.05s linear;
-            text-align: center;
-        }
-        .submit-btn:active, #submitConsume:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 var(--btn-success-shadow);
-        }
-        .records-action-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
+        .login-status { background: var(--btn-gray-bg); border-radius: 40px; padding: 6px 12px; margin-bottom: 12px; text-align: center; font-size: 0.85rem; }
+        .setting-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+        .small-btn { background: var(--btn-gray-bg); border: none; padding: 4px 10px; border-radius: 40px; cursor: pointer; font-size: 0.8rem; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; color: var(--text-primary); }
+        .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
+        .danger-btn { background: #fee2e2; color: #b91c1c; }
+        .edit-btn { background: var(--btn-gray-bg); margin-left: 6px; }
+        hr { margin: 12px 0; border-color: var(--border-color); }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--accent-orange); color: white; padding: 8px 16px; border-radius: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; transition: opacity 0.3s; opacity: 1; pointer-events: none; white-space: pre-line; text-align: center; font-size: 0.85rem; }
+        .iframe-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; }
+        .iframe-container iframe { width: 90%; height: 90%; margin: 5% auto; display: block; background: white; border-radius: 20px; }
+        .close-iframe { position: absolute; top: 20px; right: 30px; background: var(--accent-orange); color: white; border: none; border-radius: 40px; padding: 6px 12px; cursor: pointer; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
+        .close-iframe:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
+        .recent-record { background: var(--btn-gray-bg); border-radius: 20px; padding: 6px; margin-top: 10px; text-align: center; font-size: 0.75rem; border-left: 4px solid var(--accent-orange); }
+        .settings-section { margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 24px; padding: 8px; }
+        .settings-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .settings-content { margin-top: 8px; }
+        .toggle-switch { width: 44px; height: 24px; background: #ccc; border-radius: 24px; position: relative; cursor: pointer; transition: 0.2s; }
+        .toggle-switch.active { background: var(--accent-orange); }
+        .toggle-switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
+        .toggle-switch.active::after { left: 22px; }
+        .hidden-content { display: none; }
+        .submit-btn, #submitConsume { background: var(--btn-success-bg); color: white; width: 100%; padding: 12px; border: none; border-radius: 40px; font-size: 1.1rem; font-weight: bold; margin-top: 10px; cursor: pointer; box-shadow: 0 5px 0 var(--btn-success-shadow); transition: 0.05s linear; text-align: center; }
+        .submit-btn:active, #submitConsume:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-success-shadow); }
+        .records-action-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
     </style>
 </head>
 <body>
