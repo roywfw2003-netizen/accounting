@@ -38,72 +38,416 @@
             --accent-orange-shadow: #b45309;
         }
         * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
-        body { background: var(--bg-body); padding: 0; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .app-container { width: 100%; max-width: 800px; margin: 0 auto; background: var(--bg-card); border-radius: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; padding: 20px; transition: all 0.2s; }
-        /* 内容紧凑，确保所有内容在常见手机上一屏内可见 */
-        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-        .nav-btn { background: var(--btn-primary-bg); border: none; border-radius: 32px; color: white; font-weight: bold; cursor: pointer; flex: 1; min-width: 100px; padding: 16px 8px; text-align: center; transition: 0.05s linear; box-shadow: 0 5px 0 var(--btn-primary-shadow); display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .nav-btn i { font-size: 2rem; }
-        .nav-btn span { font-size: 0.9rem; }
+        body {
+            background: var(--bg-body);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary); /* 全局文字顏色 */
+        }
+        /* 強制所有文字使用主題色（夜間模式修復） */
+        h1, h2, h3, h4, h5, h6, p, span, div, label, button, input, select, .setting-row span, .small-btn, .record-item {
+            color: var(--text-primary);
+        }
+        /* 按鈕文字顏色保持正確 */
+        .nav-btn, .submit-btn, .settings-icon-small, .small-btn, .danger-btn {
+            color: white;
+        }
+        .settings-icon-small i {
+            color: white;
+        }
+        .danger-btn {
+            color: #b91c1c !important;
+        }
+        body.dark .danger-btn {
+            color: #ff7b72 !important;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: 0;
+            box-shadow: none;
+            overflow-y: auto;
+            padding: 12px;
+            transition: all 0.2s;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        /* 橫向模式專用壓縮，確保內容一屏可見 */
+        @media (orientation: landscape) {
+            .app-container {
+                padding: 8px 12px;
+            }
+            .nav-btn {
+                padding: 10px 4px;
+                font-size: 0.8rem;
+            }
+            .nav-btn i {
+                font-size: 1.5rem;
+            }
+            .product-grid, .preset-grid {
+                gap: 6px;
+            }
+            .product-btn, .preset-btn {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+            .form-group {
+                margin-bottom: 6px;
+            }
+            .staff-group, .payment-group {
+                gap: 6px;
+            }
+            .staff-btn, .payment-btn {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+            .total, .recent-record {
+                font-size: 0.9rem;
+                margin-top: 4px;
+                padding-top: 4px;
+            }
+            .submit-btn, #submitConsume {
+                padding: 10px;
+                font-size: 1rem;
+                margin-top: 8px;
+            }
+            .settings-section {
+                margin-bottom: 8px;
+                padding: 6px;
+            }
+            .record-item {
+                padding: 6px;
+                font-size: 0.8rem;
+            }
+            .small-btn {
+                padding: 4px 8px;
+                font-size: 0.75rem;
+            }
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .nav-btn {
+            background: var(--btn-primary-bg);
+            border: none;
+            border-radius: 32px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 8px;
+            text-align: center;
+            transition: 0.05s linear;
+            box-shadow: 0 5px 0 var(--btn-primary-shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-btn i { font-size: 1.8rem; }
+        .nav-btn span { font-size: 0.85rem; }
         .nav-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-primary-shadow); }
-        .settings-row { display: flex; justify-content: flex-end; margin-bottom: 16px; }
-        .settings-icon { background: none; border: none; font-size: 2rem; color: var(--btn-primary-bg); cursor: pointer; padding: 8px; transition: 0.1s; }
-        .settings-icon:active { transform: scale(0.95); }
         .page { display: none; }
         .active { display: block; }
-        .form-group { margin-bottom: 12px; }
+        .form-group { margin-bottom: 10px; }
         label { display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-primary); }
-        select, input { width: 100%; padding: 10px 12px; border-radius: 40px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); }
-        .staff-group, .payment-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
-        .staff-btn, .payment-btn, .preset-btn, .product-btn { background: var(--btn-gray-bg); border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-weight: bold; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; text-align: center; color: var(--text-primary); }
-        .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
-        .staff-btn.active, .product-btn.selected { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
-        .payment-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
-        /* 新增预设金额按钮高亮样式 */
-        .preset-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
-        .preset-btn { background: var(--btn-gray-bg); color: var(--text-primary); }
-        .product-grid, .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
-        .product-btn { background: var(--btn-gray-bg); text-align: center; padding: 8px; font-weight: 600; color: var(--text-primary); display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .product-btn .product-price { font-weight: bold; font-size: 0.85rem; color: inherit; }
-        .product-btn.selected .product-price { color: white; }
-        .total { font-size: 1.3rem; font-weight: bold; text-align: right; margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; color: var(--accent-orange); }
-        .record-item { background: var(--btn-gray-bg); border-radius: 20px; padding: 10px; margin-bottom: 8px; color: var(--text-primary); }
-        .sync-badge { display: inline-block; padding: 2px 6px; border-radius: 20px; font-size: 0.7rem; }
+        select, input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 40px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+        /* 日期欄位與設定按鈕同行 */
+        .date-with-settings {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .date-with-settings input {
+            flex: 1;
+        }
+        .settings-icon-small {
+            background: var(--btn-primary-bg);
+            border: none;
+            border-radius: 40px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--btn-primary-shadow);
+            transition: 0.05s linear;
+            font-size: 1.2rem;
+            color: white;
+        }
+        .settings-icon-small:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--btn-primary-shadow);
+        }
+        .staff-group, .payment-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 6px 0;
+        }
+        .staff-btn, .payment-btn, .preset-btn, .product-btn {
+            background: var(--btn-gray-bg);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 3px 0 var(--btn-gray-shadow);
+            transition: 0.05s linear;
+            text-align: center;
+            color: var(--text-primary);
+        }
+        .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--btn-gray-shadow);
+        }
+        .staff-btn.active, .product-btn.selected {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .payment-btn.active {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .preset-btn.active {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .product-grid, .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .product-btn .product-price {
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: inherit;
+        }
+        .product-btn.selected .product-price {
+            color: white;
+        }
+        .total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 6px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 6px;
+            color: var(--accent-orange);
+        }
+        .record-item {
+            background: var(--btn-gray-bg);
+            border-radius: 20px;
+            padding: 8px;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+        .sync-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
         .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
         .sync-pending { background: #fef9c3; color: #854d0e; }
-        .login-status { background: var(--btn-gray-bg); border-radius: 40px; padding: 8px 12px; margin-bottom: 16px; text-align: center; font-size: 0.9rem; color: var(--text-primary); }
-        .setting-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
-        .small-btn { background: var(--btn-gray-bg); border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-size: 0.85rem; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; color: var(--text-primary); }
-        .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
-        .danger-btn { background: #fee2e2; color: #b91c1c; }
-        .edit-btn { background: var(--btn-gray-bg); color: var(--text-primary); margin-left: 6px; }
-        hr { margin: 16px 0; border-color: var(--border-color); }
-        .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--accent-orange); color: white; padding: 10px 20px; border-radius: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; transition: opacity 0.3s; opacity: 1; pointer-events: none; white-space: pre-line; text-align: center; font-size: 0.9rem; }
-        .iframe-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; }
-        .iframe-container iframe { width: 90%; height: 90%; margin: 5% auto; display: block; background: white; border-radius: 20px; }
-        .close-iframe { position: absolute; top: 20px; right: 30px; background: var(--accent-orange); color: white; border: none; border-radius: 40px; padding: 6px 12px; cursor: pointer; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
-        .close-iframe:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
-        .recent-record { background: var(--btn-gray-bg); border-radius: 20px; padding: 8px; margin-top: 12px; text-align: center; font-size: 0.8rem; border-left: 4px solid var(--accent-orange); color: var(--text-primary); }
-        .settings-section { margin-bottom: 16px; border: 1px solid var(--border-color); border-radius: 24px; padding: 10px; }
-        .settings-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .settings-content { margin-top: 10px; }
-        .toggle-switch { width: 44px; height: 24px; background: #ccc; border-radius: 24px; position: relative; cursor: pointer; transition: 0.2s; }
-        .toggle-switch.active { background: var(--accent-orange); }
-        .toggle-switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
-        .toggle-switch.active::after { left: 22px; }
-        .hidden-content { display: none; }
-        .submit-btn { background: var(--btn-success-bg); color: white; width: 100%; padding: 14px; border: none; border-radius: 40px; font-size: 1.2rem; font-weight: bold; margin-top: 12px; cursor: pointer; box-shadow: 0 5px 0 var(--btn-success-shadow); transition: 0.05s linear; text-align: center; }
-        .submit-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-success-shadow); }
-        /* 确保提交消费按钮样式一致 */
-        #submitConsume { background: var(--btn-success-bg); color: white; width: 100%; padding: 14px; border: none; border-radius: 40px; font-size: 1.2rem; font-weight: bold; margin-top: 12px; cursor: pointer; box-shadow: 0 5px 0 var(--btn-success-shadow); transition: 0.05s linear; text-align: center; }
-        #submitConsume:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-success-shadow); }
-        /* 调整间距使内容更紧凑，减少滚动 */
-        .app-container { padding: 16px; }
-        h3 { margin: 0 0 12px 0; font-size: 1.3rem; color: var(--text-primary); }
-        /* 交易记录按钮行 */
-        .records-action-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .login-status {
+            background: var(--btn-gray-bg);
+            border-radius: 40px;
+            padding: 6px 12px;
+            margin-bottom: 12px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+        .setting-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .small-btn {
+            background: var(--btn-gray-bg);
+            border: none;
+            padding: 4px 10px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            box-shadow: 0 3px 0 var(--btn-gray-shadow);
+            transition: 0.05s linear;
+            color: var(--text-primary);
+        }
+        .small-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--btn-gray-shadow);
+        }
+        .danger-btn {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .edit-btn {
+            background: var(--btn-gray-bg);
+            color: var(--text-primary);
+            margin-left: 6px;
+        }
+        hr {
+            margin: 12px 0;
+            border-color: var(--border-color);
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-orange);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: opacity 0.3s;
+            opacity: 1;
+            pointer-events: none;
+            white-space: pre-line;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        .iframe-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            display: none;
+        }
+        .iframe-container iframe {
+            width: 90%;
+            height: 90%;
+            margin: 5% auto;
+            display: block;
+            background: white;
+            border-radius: 20px;
+        }
+        .close-iframe {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: var(--accent-orange);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 6px 12px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .close-iframe:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--accent-orange-shadow);
+        }
+        .recent-record {
+            background: var(--btn-gray-bg);
+            border-radius: 20px;
+            padding: 6px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 0.75rem;
+            border-left: 4px solid var(--accent-orange);
+            color: var(--text-primary);
+        }
+        .settings-section {
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 8px;
+        }
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .settings-content {
+            margin-top: 8px;
+        }
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 24px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .toggle-switch.active {
+            background: var(--accent-orange);
+        }
+        .toggle-switch::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: 0.2s;
+        }
+        .toggle-switch.active::after {
+            left: 22px;
+        }
+        .hidden-content {
+            display: none;
+        }
+        .submit-btn, #submitConsume {
+            background: var(--btn-success-bg);
+            color: white;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 var(--btn-success-shadow);
+            transition: 0.05s linear;
+            text-align: center;
+        }
+        .submit-btn:active, #submitConsume:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--btn-success-shadow);
+        }
+        .records-action-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
     </style>
 </head>
 <body>
@@ -116,14 +460,16 @@
         <button class="nav-btn" id="studentBookingBtn"><i class="fa-solid fa-school"></i><span>學生預約</span></button>
     </div>
 
-    <div class="settings-row">
-        <button id="settingsIconBtn" class="settings-icon"><i class="fa-solid fa-gear"></i></button>
-    </div>
-
     <!-- 產品銷售頁 -->
     <div id="salesPage" class="page">
         <h3>🛍️ 產品銷售</h3>
-        <div class="form-group"><label>📅 日期</label><input type="date" id="salesDate"></div>
+        <div class="form-group">
+            <label>📅 日期</label>
+            <div class="date-with-settings">
+                <input type="date" id="salesDate">
+                <button class="settings-icon-small" id="settingsIconSales"><i class="fa-solid fa-gear"></i></button>
+            </div>
+        </div>
         <div class="form-group"><label>👤 員工</label><div class="staff-group" id="salesStaff"></div></div>
         <div class="form-group"><label>📦 產品</label><div id="productList" class="product-grid"></div><div class="total">總金額: <span id="totalAmount">0</span> 元</div></div>
         <div class="form-group"><label>💳 支付方式</label><div class="payment-group" id="salesPayment"></div></div>
@@ -134,7 +480,13 @@
     <!-- 客人消費頁 -->
     <div id="consumptionPage" class="page">
         <h3>👥 客人消費</h3>
-        <div class="form-group"><label>📅 日期</label><input type="date" id="consumeDate"></div>
+        <div class="form-group">
+            <label>📅 日期</label>
+            <div class="date-with-settings">
+                <input type="date" id="consumeDate">
+                <button class="settings-icon-small" id="settingsIconConsume"><i class="fa-solid fa-gear"></i></button>
+            </div>
+        </div>
         <div class="form-group"><label>👤 員工</label><div class="staff-group" id="consumeStaff"></div></div>
         <div class="form-group"><label>💰 金額</label><div id="presetAmounts" class="preset-grid"></div><input type="number" id="consumeAmount" placeholder="或手動輸入" step="1"></div>
         <div class="form-group"><label>💳 支付方式</label><div class="payment-group" id="consumePayment"></div></div>
@@ -199,7 +551,6 @@
                 <div class="toggle-switch" id="toggleRecords"></div>
             </div>
             <div id="recordsContent" class="settings-content hidden-content">
-                <!-- 调整：将清空按钮移至上方，并新增重试同步失败按钮 -->
                 <div class="records-action-row">
                     <button class="small-btn danger-btn" id="clearLocalDataBtn">🗑️ 清空所有本地記錄</button>
                     <button class="small-btn" id="retryFailedSyncBtn">🔄 重試同步失敗</button>
@@ -385,7 +736,6 @@ async function syncAllPending() {
     for (let rec of records.filter(r => r.syncStatus === "pending")) await syncRecord(rec);
     syncInProgress = false;
 }
-// 新增：重试所有同步失败的记录
 async function retryFailedSync() {
     if (!gapiReady) {
         showToast("尚未登入，請先登入後再重試同步");
@@ -474,7 +824,6 @@ function calcTotal() {
     document.getElementById("totalAmount").innerText = total;
     return total;
 }
-// 修改：预设金额按钮支持高亮互斥，并绑定手动输入清除高亮
 function renderPresetButtons() {
     const container = document.getElementById("presetAmounts");
     if (!container) return;
@@ -484,14 +833,12 @@ function renderPresetButtons() {
         btn.className = "preset-btn";
         btn.textContent = `$${amt}`;
         btn.onclick = () => {
-            // 清除所有预设按钮的高亮
             document.querySelectorAll("#presetAmounts .preset-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             document.getElementById("consumeAmount").value = amt;
         };
         container.appendChild(btn);
     });
-    // 监听手动输入框：如果用户手动输入，清除所有预设按钮高亮
     const amountInput = document.getElementById("consumeAmount");
     if (amountInput) {
         amountInput.removeEventListener("input", clearPresetHighlight);
@@ -499,8 +846,7 @@ function renderPresetButtons() {
     }
 }
 function clearPresetHighlight() {
-    const presetBtns = document.querySelectorAll("#presetAmounts .preset-btn");
-    presetBtns.forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
 }
 function renderRecords() {
     const container = document.getElementById("recordsList");
@@ -639,7 +985,6 @@ async function submitConsumption() {
     await addRecord(record);
     showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
     document.getElementById("consumeAmount").value = "";
-    // 提交后清除预设金额高亮
     clearPresetHighlight();
 }
 function showPage(pageId) {
@@ -682,11 +1027,14 @@ function initToggles() {
         document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
     });
 }
-document.getElementById("settingsIconBtn").addEventListener("click", () => {
+// 統一開啟設定頁面的函數（密碼驗證）
+function openSettingsPage() {
     const pwd = prompt("請輸入管理密碼");
     if (pwd === settingsPassword) showPage("settings");
     else if (pwd !== null) alert("密碼錯誤");
-});
+}
+document.getElementById("settingsIconSales").addEventListener("click", openSettingsPage);
+document.getElementById("settingsIconConsume").addEventListener("click", openSettingsPage);
 document.getElementById("changePasswordBtn").addEventListener("click", async () => {
     const newPwd = document.getElementById("newPassword").value, confirmPwd = document.getElementById("confirmPassword").value;
     if (!newPwd) { alert("請輸入新密碼"); return; }
@@ -728,16 +1076,12 @@ document.getElementById("addPresetBtn").onclick = async () => {
     await syncConfigToSheet();
     document.getElementById("newPresetAmount").value = "";
 };
-// 清空所有本地記錄（已移至上方，功能不变）
 document.getElementById("clearLocalDataBtn").onclick = () => {
     if (confirm("⚠️ 確定清空所有本地記錄？此操作無法復原！")) {
         records = []; saveRecords(); renderRecords(); alert("已清空所有記錄");
     }
 };
-// 新增：重試同步失敗按鈕事件
-document.getElementById("retryFailedSyncBtn").onclick = () => {
-    retryFailedSync();
-};
+document.getElementById("retryFailedSyncBtn").onclick = () => { retryFailedSync(); };
 function gapiLoaded() { gapi.load('client', initGapiClient); }
 async function initGapiClient() {
     await gapi.client.init({ discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] });
