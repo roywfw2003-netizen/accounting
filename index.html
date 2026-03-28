@@ -6,7 +6,7 @@
     <title>賣貨管理系統 | Hair World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ========== 完整原有 CSS ========== */
+        /* ========== 原有 CSS 變數 ========== */
         :root {
             --bg-body: #cfe7ff;
             --bg-card: white;
@@ -91,7 +91,7 @@
                 gap: 6px;
             }
             .product-btn, .preset-btn {
-                padding: 4px 8px;
+                padding: 8px 4px;
                 font-size: 0.8rem;
             }
             .form-group {
@@ -101,7 +101,7 @@
                 gap: 6px;
             }
             .staff-btn, .payment-btn {
-                padding: 4px 8px;
+                padding: 8px 4px;
                 font-size: 0.8rem;
             }
             .total, .recent-record {
@@ -202,22 +202,35 @@
             transform: translateY(2px);
             box-shadow: 0 1px 0 var(--btn-primary-shadow);
         }
+        /* 按鈕均分寬度與高度 - 僅修改佈局，保留原有顏色/陰影/圓角 */
         .staff-group, .payment-group {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 8px;
-            flex-wrap: wrap;
             margin: 6px 0;
         }
+        .product-grid, .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
         .staff-btn, .payment-btn, .preset-btn, .product-btn {
+            padding: 12px 8px;
+            min-height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-sizing: border-box;
+            /* 保留原有樣式 */
             background: var(--btn-gray-bg);
             border: none;
-            padding: 6px 12px;
             border-radius: 40px;
             cursor: pointer;
             font-weight: bold;
             box-shadow: 0 3px 0 var(--btn-gray-shadow);
             transition: 0.05s linear;
-            text-align: center;
             color: var(--text-primary);
         }
         .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active {
@@ -239,19 +252,10 @@
             color: white;
             box-shadow: 0 3px 0 var(--accent-orange-shadow);
         }
-        .product-grid, .preset-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 10px 0;
-        }
         .product-btn .product-price {
             font-weight: bold;
             font-size: 0.85rem;
             color: inherit;
-        }
-        .product-btn.selected .product-price {
-            color: white;
         }
         .total {
             font-size: 1.2rem;
@@ -453,7 +457,6 @@
             margin-bottom: 12px;
             flex-wrap: wrap;
         }
-        /* 新增表格样式 */
         .records-table {
             width: 100%;
             border-collapse: collapse;
@@ -668,7 +671,7 @@ let productList = [
     { name: "打底水", price: 148 }
 ];
 let presetAmounts = [50, 100, 150, 200];
-let records = []; // 新結構：每個產品一行，客人消費一行
+let records = [];
 let selectedProducts = new Set();
 let selectedSalesStaff = null;
 let selectedConsumeStaff = null;
@@ -677,21 +680,17 @@ let selectedConsumePayment = "現金";
 let lastSalesRecord = null;
 let lastConsumeRecord = null;
 const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付"];
-// 銷售支付方式加上「公司」
 const SALES_PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付", "公司"];
 
-// 獨立開關狀態
 let toggleStaff = false, toggleProduct = false, togglePreset = false;
 let toggleSalesRecords = false, toggleConsumeRecords = false;
 
-// 輔助函數：格式化日期顯示為 m月d
 function formatDisplayDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
     return `${d.getMonth()+1}月${d.getDate()}`;
 }
-// 將 YYYY-MM-DD 轉為 dd:mm:yyyy
 function toGoogleDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -701,7 +700,6 @@ function toGoogleDate(dateStr) {
     const year = d.getFullYear();
     return `${day}:${month}:${year}`;
 }
-// 從 dd:mm:yyyy 提取年月日
 function extractYearMonthDay(googleDate) {
     if (!googleDate) return { year: '', month: '', day: '' };
     const parts = googleDate.split(':');
@@ -710,13 +708,11 @@ function extractYearMonthDay(googleDate) {
     }
     return { year: '', month: '', day: '' };
 }
-// 獲取當前時間 HH:MM:SS
 function getCurrentTime() {
     const now = new Date();
     return `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
 }
 
-// 加載本地數據
 function loadLocalData() {
     const storedStaff = localStorage.getItem("staffList");
     if (storedStaff) staffList = JSON.parse(storedStaff);
@@ -756,7 +752,6 @@ function setDarkMode(enabled) {
     localStorage.setItem('darkMode', enabled);
 }
 
-// Google Sheets 操作
 const CONFIG_SHEET = 'staff';
 async function clearSheet(sheetName) {
     const range = `${sheetName}!A:Z`;
@@ -813,7 +808,7 @@ async function syncRecordToSheet(record) {
             const googleDate = toGoogleDate(record.date);
             const { year, month, day } = extractYearMonthDay(googleDate);
             const time = getCurrentTime();
-            // 順序：年、月、日、員工、工號、產品、價錢、支付方式、時間、同步狀態
+            // 產品工作表欄位順序：年、月、日、員工、工號、產品、價錢、支付方式、時間、同步狀態
             row = [
                 year, month, day,
                 record.staffName, record.staffCode,
@@ -825,8 +820,9 @@ async function syncRecordToSheet(record) {
             ];
         } else {
             const googleDate = toGoogleDate(record.date);
-            // 順序：日子(dd:mm:yyyy)、員工、價錢、支付方式、同步狀態
-            row = [googleDate, record.staffName, record.amount.toString(), record.payment, record.syncStatus || 'success'];
+            const time = getCurrentTime();
+            // 客人工作表欄位順序：日子(dd:mm:yyyy)、員工、價錢、支付方式、時間、同步狀態
+            row = [googleDate, record.staffName, record.amount.toString(), record.payment, time, record.syncStatus || 'success'];
         }
         await appendToSheet(sheetName, row);
         return true;
@@ -843,10 +839,8 @@ async function fullSyncToSheets() {
         return false;
     }
     try {
-        // 清空兩個工作表
         await clearSheet('產品');
         await clearSheet('客人');
-        // 分批寫入
         for (const rec of records) {
             const sheetName = rec.type === 'sales' ? '產品' : '客人';
             let row;
@@ -861,15 +855,15 @@ async function fullSyncToSheets() {
                     rec.amount.toString(),
                     rec.payment,
                     time,
-                    'success'  // 全量同步後所有記錄都視為已同步
+                    'success'
                 ];
             } else {
                 const googleDate = toGoogleDate(rec.date);
-                row = [googleDate, rec.staffName, rec.amount.toString(), rec.payment, 'success'];
+                const time = getCurrentTime();
+                row = [googleDate, rec.staffName, rec.amount.toString(), rec.payment, time, 'success'];
             }
             await appendToSheet(sheetName, row);
         }
-        // 更新本地記錄的同步狀態為 success
         records.forEach(r => { r.syncStatus = 'success'; delete r.syncError; });
         saveRecords();
         renderRecordsTables();
@@ -882,7 +876,6 @@ async function fullSyncToSheets() {
     }
 }
 
-// 添加記錄（提交時使用，本地儲存 + 單筆同步）
 async function addRecord(recordData) {
     const newId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
     const newRecord = {
@@ -893,7 +886,6 @@ async function addRecord(recordData) {
     };
     records.unshift(newRecord);
     saveRecords();
-    // 提交後立即嘗試同步到雲端（單筆）
     if (gapiReady) {
         const ok = await syncRecordToSheet(newRecord);
         if (ok) {
@@ -906,7 +898,6 @@ async function addRecord(recordData) {
         saveRecords();
     }
     renderRecordsTables();
-    // 更新最近一筆顯示
     if (recordData.type === 'sales') {
         lastSalesRecord = { ...newRecord };
         updateRecentRecord('sales');
@@ -917,7 +908,6 @@ async function addRecord(recordData) {
     return newRecord;
 }
 
-// 刪除記錄（需密碼）
 async function deleteRecordById(id) {
     const pwd = prompt("請輸入刪除密碼");
     if (pwd !== DELETE_PASSWORD) {
@@ -928,20 +918,18 @@ async function deleteRecordById(id) {
     if (index === -1) return false;
     records.splice(index, 1);
     saveRecords();
-    await fullSyncToSheets();  // 全量同步雲端
+    await fullSyncToSheets();
     renderRecordsTables();
     showToast("記錄已刪除並同步雲端");
     return true;
 }
 
-// 修改記錄（需密碼）
 async function editRecord(record) {
     const pwd = prompt("請輸入刪除密碼（修改操作需要驗證）");
     if (pwd !== DELETE_PASSWORD) {
         alert("密碼錯誤，無法修改");
         return false;
     }
-    // 根據類型彈出編輯表單
     let newData = {};
     if (record.type === 'sales') {
         const newProduct = prompt("輸入新產品名稱", record.productName);
@@ -975,7 +963,6 @@ async function editRecord(record) {
     return true;
 }
 
-// 渲染交易記錄表格（兩個獨立表格）
 function renderRecordsTables() {
     const salesContainer = document.getElementById("salesRecordsTable");
     const consumeContainer = document.getElementById("consumeRecordsTable");
@@ -984,7 +971,6 @@ function renderRecordsTables() {
     const salesRecords = records.filter(r => r.type === 'sales');
     const consumeRecords = records.filter(r => r.type === 'consumption');
 
-    // 產品銷售表格
     if (salesRecords.length === 0) {
         salesContainer.innerHTML = "<div>暫無產品銷售記錄</div>";
     } else {
@@ -1011,7 +997,6 @@ function renderRecordsTables() {
         salesContainer.innerHTML = html;
     }
 
-    // 客人消費表格
     if (consumeRecords.length === 0) {
         consumeContainer.innerHTML = "<div>暫無客人消費記錄</div>";
     } else {
@@ -1037,7 +1022,6 @@ function renderRecordsTables() {
         consumeContainer.innerHTML = html;
     }
 
-    // 綁定按鈕事件
     document.querySelectorAll('#salesRecordsTable .edit-btn, #consumeRecordsTable .edit-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const id = btn.dataset.id;
@@ -1053,7 +1037,6 @@ function renderRecordsTables() {
     });
 }
 
-// 更新最近一筆顯示
 function updateRecentRecord(type) {
     const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
     if (type === 'sales' && lastSalesRecord) {
@@ -1065,7 +1048,6 @@ function updateRecentRecord(type) {
     } else div.style.display = 'none';
 }
 
-// 其餘 UI 渲染函數（員工、產品、支付方式等）
 function renderStaff(containerId, selectedCode, onChange) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
@@ -1093,12 +1075,11 @@ function renderPayment(containerId, selected, onChange, isSales = false) {
             container.querySelectorAll(".payment-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             onChange(p);
-            // 如果是銷售且選擇“公司”，總金額強制為0
             if (isSales && p === "公司") {
                 const totalSpan = document.getElementById("totalAmount");
                 if (totalSpan) totalSpan.innerText = "0";
             } else if (isSales) {
-                calcTotal(); // 重新計算總金額
+                calcTotal();
             }
         };
         container.appendChild(btn);
@@ -1124,7 +1105,6 @@ function renderProducts() {
 function calcTotal() {
     let total = 0;
     productList.forEach(p => { if (selectedProducts.has(p.name)) total += p.price; });
-    // 如果當前支付方式為“公司”，總金額顯示0但實際提交時會強制金額0
     if (selectedSalesPayment === "公司") total = 0;
     document.getElementById("totalAmount").innerText = total;
     return total;
@@ -1250,9 +1230,7 @@ async function submitSales() {
     const selected = [];
     productList.forEach(p => { if (selectedProducts.has(p.name)) { selected.push(p); total += p.price; } });
     if (selected.length === 0 && payment !== "公司") { alert("請至少選擇一件產品"); return; }
-    // 如果支付方式是公司，總金額強制為0，且不要求產品（可選）
     if (payment === "公司") total = 0;
-    // 為每個產品創建獨立記錄
     for (const prod of selected) {
         const record = {
             type: "sales",
@@ -1267,7 +1245,6 @@ async function submitSales() {
         };
         await addRecord(record);
     }
-    // 如果支付方式是公司且沒有產品，仍需創建一筆金額為0的記錄（顯示無產品）
     if (payment === "公司" && selected.length === 0) {
         const record = {
             type: "sales",
@@ -1286,7 +1263,6 @@ async function submitSales() {
     selectedProducts.clear();
     renderProducts();
     document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
-    // 重置支付方式為默認（現金），但保留“公司”選項的視覺
     selectedSalesPayment = "現金";
     renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
 }
@@ -1316,7 +1292,6 @@ function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     document.getElementById(pageId + "Page").classList.add("active");
 
-    // 更新導航按鈕的 active 樣式
     document.querySelectorAll(".nav-btn").forEach(btn => {
         if (btn.dataset.page === pageId) {
             btn.classList.add("active");
@@ -1426,8 +1401,6 @@ document.getElementById("addPresetBtn").onclick = async () => {
     await syncConfigToSheet();
     document.getElementById("newPresetAmount").value = "";
 };
-
-// 獨立清除產品銷售記錄
 document.getElementById("clearSalesRecordsBtn").onclick = async () => {
     if (!confirm("⚠️ 確定清除所有產品銷售記錄？此操作無法復原！")) return;
     records = records.filter(r => r.type !== 'sales');
@@ -1436,7 +1409,6 @@ document.getElementById("clearSalesRecordsBtn").onclick = async () => {
     renderRecordsTables();
     showToast("已清除所有產品銷售記錄並同步雲端");
 };
-// 獨立清除客人消費記錄
 document.getElementById("clearConsumeRecordsBtn").onclick = async () => {
     if (!confirm("⚠️ 確定清除所有客人消費記錄？此操作無法復原！")) return;
     records = records.filter(r => r.type !== 'consumption');
@@ -1445,7 +1417,6 @@ document.getElementById("clearConsumeRecordsBtn").onclick = async () => {
     renderRecordsTables();
     showToast("已清除所有客人消費記錄並同步雲端");
 };
-// 重試銷售同步失敗
 document.getElementById("retrySalesFailedSyncBtn").onclick = async () => {
     if (!gapiReady) { showToast("尚未登入，請先登入後再重試同步"); return; }
     const failed = records.filter(r => r.type === 'sales' && r.syncStatus === "failed");
@@ -1464,7 +1435,6 @@ document.getElementById("retrySalesFailedSyncBtn").onclick = async () => {
     renderRecordsTables();
     showToast(`重試完成：成功 ${successCount} 筆，失敗 ${failed.length - successCount} 筆`);
 };
-// 重試消費同步失敗
 document.getElementById("retryConsumeFailedSyncBtn").onclick = async () => {
     if (!gapiReady) { showToast("尚未登入，請先登入後再重試同步"); return; }
     const failed = records.filter(r => r.type === 'consumption' && r.syncStatus === "failed");
@@ -1483,7 +1453,6 @@ document.getElementById("retryConsumeFailedSyncBtn").onclick = async () => {
     renderRecordsTables();
     showToast(`重試完成：成功 ${successCount} 筆，失敗 ${failed.length - successCount} 筆`);
 };
-// 修復工作表按鈕（強制全量同步）
 document.getElementById("repairSheetsBtn").onclick = async () => {
     if (!gapiReady) { showToast("請先登入"); return; }
     await fullSyncToSheets();
@@ -1514,7 +1483,7 @@ function maybeEnableButtons() {
                 if (resp.error !== undefined) throw resp;
                 document.getElementById('loginStatus').innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
                 await loadConfigFromSheet();
-                await fullSyncToSheets(); // 登入後全量同步，確保本地記錄與雲端一致
+                await fullSyncToSheets();
                 renderUI();
             };
             tokenClient.requestAccessToken();
@@ -1530,7 +1499,6 @@ function renderUI() {
     renderStaffManageList(); renderProductManageList(); renderPresetManageList();
     updateRecentRecord('sales'); updateRecentRecord('consumption');
     initToggles(); setDarkMode(darkMode);
-    // 初始顯示銷售頁，並設定導航按鈕 active 樣式
     showPage("sales");
 }
 function ensureInit() {
