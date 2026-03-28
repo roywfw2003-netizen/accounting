@@ -202,18 +202,11 @@
             transform: translateY(2px);
             box-shadow: 0 1px 0 var(--btn-primary-shadow);
         }
-        /* 按鈕均分寬度與高度 - 僅修改佈局，保留原有顏色/陰影/圓角 */
-        .staff-group, .payment-group {
+        /* 按鈕群組使用動態列數，由 JavaScript 控制 */
+        .staff-group, .payment-group, .product-grid, .preset-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 8px;
             margin: 6px 0;
-        }
-        .product-grid, .preset-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 10px;
-            margin: 10px 0;
         }
         .staff-btn, .payment-btn, .preset-btn, .product-btn {
             padding: 12px 8px;
@@ -223,7 +216,6 @@
             justify-content: center;
             text-align: center;
             box-sizing: border-box;
-            /* 保留原有樣式 */
             background: var(--btn-gray-bg);
             border: none;
             border-radius: 40px;
@@ -232,6 +224,7 @@
             box-shadow: 0 3px 0 var(--btn-gray-shadow);
             transition: 0.05s linear;
             color: var(--text-primary);
+            flex-direction: column;
         }
         .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active {
             transform: translateY(2px);
@@ -252,11 +245,11 @@
             color: white;
             box-shadow: 0 3px 0 var(--accent-orange-shadow);
         }
-        .product-btn .product-price {
-            font-weight: bold;
-            font-size: 0.85rem;
-            color: inherit;
-        }
+        .staff-name { font-size: 1rem; font-weight: bold; }
+        .staff-code { font-size: 0.75rem; opacity: 0.8; }
+        .product-name { font-size: 1rem; font-weight: bold; }
+        .product-price { font-size: 0.85rem; font-weight: bold; }
+        .product-btn.selected .product-price { color: white; }
         .total {
             font-size: 1.2rem;
             font-weight: bold;
@@ -584,6 +577,20 @@
                 </div>
             </div>
         </div>
+        <!-- 新增：按鈕每行數量設定 -->
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>🔘 按鈕每行數量</h4>
+            </div>
+            <div>
+                <div class="setting-row">
+                    <span>員工/產品/支付方式按鈕每行顯示個數：</span>
+                    <input type="number" id="buttonsPerRow" min="1" max="6" value="3" style="width:80px;">
+                    <button class="small-btn" id="applyButtonsPerRow">套用</button>
+                </div>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">數字越大按鈕越窄，會自動縮放文字以充分利用高度</div>
+            </div>
+        </div>
 
         <!-- 產品銷售記錄獨立區塊 -->
         <div class="settings-section">
@@ -684,13 +691,16 @@ const SALES_PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支�
 
 let toggleStaff = false, toggleProduct = false, togglePreset = false;
 let toggleSalesRecords = false, toggleConsumeRecords = false;
+let buttonsPerRow = 3; // 預設每行3個按鈕
 
+// 輔助函數：格式化日期顯示為 m月d
 function formatDisplayDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
     return `${d.getMonth()+1}月${d.getDate()}`;
 }
+// 將 YYYY-MM-DD 轉為 dd/mm/yyyy (新格式)
 function toGoogleDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -698,19 +708,32 @@ function toGoogleDate(dateStr) {
     const day = d.getDate().toString().padStart(2,'0');
     const month = (d.getMonth()+1).toString().padStart(2,'0');
     const year = d.getFullYear();
-    return `${day}:${month}:${year}`;
+    return `${day}/${month}/${year}`;
 }
+// 從 dd/mm/yyyy 提取年月日 (格式日/月/年)
 function extractYearMonthDay(googleDate) {
     if (!googleDate) return { year: '', month: '', day: '' };
-    const parts = googleDate.split(':');
+    const parts = googleDate.split('/');
     if (parts.length === 3) {
         return { day: parts[0], month: parts[1], year: parts[2] };
     }
     return { year: '', month: '', day: '' };
 }
+// 獲取當前時間 HH:MM:SS
 function getCurrentTime() {
     const now = new Date();
     return `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+}
+
+// 設定按鈕每行列數
+function setButtonsPerRow(count) {
+    buttonsPerRow = count;
+    localStorage.setItem('buttonsPerRow', count);
+    // 更新所有按鈕群組的 CSS grid 列數
+    const groups = document.querySelectorAll('.staff-group, .payment-group, .product-grid, .preset-grid');
+    groups.forEach(group => {
+        group.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+    });
 }
 
 function loadLocalData() {
@@ -731,6 +754,8 @@ function loadLocalData() {
         toggleSalesRecords = toggles.salesRecords || false;
         toggleConsumeRecords = toggles.consumeRecords || false;
     }
+    const storedPerRow = localStorage.getItem('buttonsPerRow');
+    if (storedPerRow) buttonsPerRow = parseInt(storedPerRow);
 }
 function saveStaff() { localStorage.setItem("staffList", JSON.stringify(staffList)); }
 function saveProducts() { localStorage.setItem("productList", JSON.stringify(productList)); }
@@ -821,7 +846,7 @@ async function syncRecordToSheet(record) {
         } else {
             const googleDate = toGoogleDate(record.date);
             const time = getCurrentTime();
-            // 客人工作表欄位順序：日子(dd:mm:yyyy)、員工、價錢、支付方式、時間、同步狀態
+            // 客人工作表欄位順序：日子(dd/mm/yyyy)、員工、價錢、支付方式、時間、同步狀態
             row = [googleDate, record.staffName, record.amount.toString(), record.payment, time, record.syncStatus || 'success'];
         }
         await appendToSheet(sheetName, row);
@@ -1048,13 +1073,14 @@ function updateRecentRecord(type) {
     } else div.style.display = 'none';
 }
 
+// 修改員工按鈕：姓名在上，工號在下
 function renderStaff(containerId, selectedCode, onChange) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
     staffList.forEach(s => {
         const btn = document.createElement("div");
         btn.className = "staff-btn" + (selectedCode === s.code ? " active" : "");
-        btn.textContent = `${s.name} (${s.code})`;
+        btn.innerHTML = `<div class="staff-name">${s.name}</div><div class="staff-code">${s.code}</div>`;
         btn.onclick = () => {
             container.querySelectorAll(".staff-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
@@ -1062,7 +1088,33 @@ function renderStaff(containerId, selectedCode, onChange) {
         };
         container.appendChild(btn);
     });
+    // 應用每行列數
+    if (container.style.gridTemplateColumns !== `repeat(${buttonsPerRow}, 1fr)`) {
+        container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+    }
 }
+
+// 修改產品按鈕：產品名稱在上，價格在下
+function renderProducts() {
+    const container = document.getElementById("productList");
+    if (!container) return;
+    container.innerHTML = "";
+    productList.forEach(p => {
+        const btn = document.createElement("div");
+        btn.className = "product-btn" + (selectedProducts.has(p.name) ? " selected" : "");
+        btn.innerHTML = `<div class="product-name">${p.name}</div><div class="product-price">$${p.price}</div>`;
+        btn.onclick = () => {
+            if (selectedProducts.has(p.name)) selectedProducts.delete(p.name);
+            else selectedProducts.add(p.name);
+            renderProducts();
+            calcTotal();
+        };
+        container.appendChild(btn);
+    });
+    // 應用每行列數
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+}
+
 function renderPayment(containerId, selected, onChange, isSales = false) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
@@ -1084,31 +1136,10 @@ function renderPayment(containerId, selected, onChange, isSales = false) {
         };
         container.appendChild(btn);
     });
+    // 應用每行列數
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
 }
-function renderProducts() {
-    const container = document.getElementById("productList");
-    if (!container) return;
-    container.innerHTML = "";
-    productList.forEach(p => {
-        const btn = document.createElement("div");
-        btn.className = "product-btn" + (selectedProducts.has(p.name) ? " selected" : "");
-        btn.innerHTML = `<div>${p.name}</div><div class="product-price">$${p.price}</div>`;
-        btn.onclick = () => {
-            if (selectedProducts.has(p.name)) selectedProducts.delete(p.name);
-            else selectedProducts.add(p.name);
-            renderProducts();
-            calcTotal();
-        };
-        container.appendChild(btn);
-    });
-}
-function calcTotal() {
-    let total = 0;
-    productList.forEach(p => { if (selectedProducts.has(p.name)) total += p.price; });
-    if (selectedSalesPayment === "公司") total = 0;
-    document.getElementById("totalAmount").innerText = total;
-    return total;
-}
+
 function renderPresetButtons() {
     const container = document.getElementById("presetAmounts");
     if (!container) return;
@@ -1124,6 +1155,8 @@ function renderPresetButtons() {
         };
         container.appendChild(btn);
     });
+    // 應用每行列數
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
     const amountInput = document.getElementById("consumeAmount");
     if (amountInput) {
         amountInput.removeEventListener("input", clearPresetHighlight);
@@ -1132,6 +1165,13 @@ function renderPresetButtons() {
 }
 function clearPresetHighlight() {
     document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
+}
+function calcTotal() {
+    let total = 0;
+    productList.forEach(p => { if (selectedProducts.has(p.name)) total += p.price; });
+    if (selectedSalesPayment === "公司") total = 0;
+    document.getElementById("totalAmount").innerText = total;
+    return total;
 }
 function renderStaffManageList() {
     const container = document.getElementById("staffManageList");
@@ -1325,6 +1365,8 @@ function showPage(pageId) {
         document.getElementById("salesRecordsContent").classList.toggle("hidden-content", !toggleSalesRecords);
         document.getElementById("consumeRecordsContent").classList.toggle("hidden-content", !toggleConsumeRecords);
         document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
+        // 設定按鈕每行列數輸入框的值
+        document.getElementById("buttonsPerRow").value = buttonsPerRow;
     }
 }
 function initToggles() {
@@ -1351,6 +1393,21 @@ function initToggles() {
     document.getElementById("toggleDarkMode").addEventListener("click", () => {
         setDarkMode(!darkMode);
         document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
+    });
+    // 按鈕每行列數套用
+    document.getElementById("applyButtonsPerRow").addEventListener("click", () => {
+        let val = parseInt(document.getElementById("buttonsPerRow").value);
+        if (isNaN(val) || val < 1) val = 3;
+        if (val > 6) val = 6;
+        setButtonsPerRow(val);
+        // 重新渲染所有按鈕群組以應用新列數
+        renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+        renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+        renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
+        renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
+        renderProducts();
+        renderPresetButtons();
+        showToast(`按鈕每行數量已改為 ${buttonsPerRow}`);
     });
 }
 function openSettingsPage() {
@@ -1500,6 +1557,8 @@ function renderUI() {
     updateRecentRecord('sales'); updateRecentRecord('consumption');
     initToggles(); setDarkMode(darkMode);
     showPage("sales");
+    // 套用每行列數
+    setButtonsPerRow(buttonsPerRow);
 }
 function ensureInit() {
     if (typeof gapi !== 'undefined' && typeof google !== 'undefined' && typeof google.accounts !== 'undefined') {
