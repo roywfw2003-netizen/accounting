@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
-    <title>賣貨管理系統 | Hair World V2</title>
+    <title>賣貨管理系統 | Hair World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* ========== 原有 CSS 變數 ========== */
@@ -62,6 +62,62 @@
         body.dark .danger-btn {
             color: #ff7b72 !important;
         }
+
+        /* ========== 登录面板样式 ========== */
+        #loginPanel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-body);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+        }
+        .login-card {
+            background: var(--bg-card);
+            border-radius: 48px;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 360px;
+        }
+        .login-card i {
+            font-size: 4rem;
+            color: var(--accent-orange);
+            margin-bottom: 16px;
+        }
+        .login-card h2 {
+            margin: 0 0 8px 0;
+        }
+        .login-card p {
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        #googleLoginBtn {
+            background: var(--btn-primary-bg);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 0 var(--btn-primary-shadow);
+            transition: 0.05s linear;
+        }
+        #googleLoginBtn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--btn-primary-shadow);
+        }
+
+        /* ========== 主容器初始隐藏 ========== */
         .app-container {
             width: 100%;
             max-width: 100%;
@@ -73,9 +129,10 @@
             padding: 12px;
             transition: all 0.2s;
             height: 100vh;
-            display: flex;
+            display: none;  /* 登录后才显示 */
             flex-direction: column;
         }
+
         @media (orientation: landscape) {
             .app-container {
                 padding: 8px 12px;
@@ -128,7 +185,7 @@
             }
         }
         .btn-group {
-            display: none;  /* 初始隱藏，登入後顯示 */
+            display: flex;
             gap: 12px;
             flex-wrap: wrap;
             margin-bottom: 12px;
@@ -207,46 +264,6 @@
             gap: 8px;
             margin: 6px 0;
         }
-        /* 置中群組：讓內部網格容器居中，按鈕保持原有寬度 */
-        .centered-group {
-            text-align: center;
-        }
-        .centered-group .staff-group,
-        .centered-group .payment-group,
-        .centered-group .product-grid,
-        .centered-group .preset-grid {
-            display: inline-grid;
-            width: auto;
-            margin: 0 auto;
-        }
-        /* 讓金額輸入框在置中群組內也居中 */
-        .centered-group input {
-            width: auto;
-            min-width: 200px;
-            margin: 0 auto;
-            display: inline-block;
-        }
-        /* 標題橫線樣式 */
-        .centered-label label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.8rem;
-            font-weight: bold;
-        }
-        .centered-label label::before,
-        .centered-label label::after {
-            content: "";
-            flex: 1;
-            height: 2px;
-            background: var(--border-color);
-        }
-        .centered-label label::before {
-            margin-right: 0.2rem;
-        }
-        .centered-label label::after {
-            margin-left: 0.2rem;
-        }
         .staff-btn, .payment-btn, .preset-btn, .product-btn {
             padding: 12px 8px;
             min-height: 52px;
@@ -314,21 +331,6 @@
         .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
         .sync-pending { background: #fef9c3; color: #854d0e; }
-        .login-status {
-            background: var(--btn-gray-bg);
-            border-radius: 40px;
-            padding: 12px 16px;
-            margin-bottom: 16px;
-            text-align: center;
-            font-size: 1rem;
-            font-weight: bold;
-            color: var(--text-primary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
         .setting-row {
             display: flex;
             gap: 10px;
@@ -527,12 +529,46 @@
                 font-size: 0.7rem;
             }
         }
+
+        /* ========== 标题置中 + 横线装饰 ========== */
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .section-title::before,
+        .section-title::after {
+            content: "==========";
+            font-weight: normal;
+            color: var(--border-color);
+            flex: 1;
+            text-align: center;
+            white-space: nowrap;
+            overflow-x: auto;
+        }
+        .section-title::before {
+            margin-right: 8px;
+        }
+        .section-title::after {
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body>
-<div class="app-container">
-    <div id="loginStatus" class="login-status">載入中...</div>
+<!-- 登录面板 -->
+<div id="loginPanel">
+    <div class="login-card">
+        <i class="fa-solid fa-lock"></i>
+        <h2>賣貨管理系統</h2>
+        <p>請使用 Google 帳號登入以繼續</p>
+        <button id="googleLoginBtn">🔐 登入 Google</button>
+    </div>
+</div>
 
+<div class="app-container">
     <div class="btn-group">
         <button class="nav-btn" data-page="sales"><i class="fa-solid fa-cube"></i><span>產品銷售</span></button>
         <button class="nav-btn" data-page="consumption"><i class="fa-solid fa-user-group"></i><span>客人消費</span></button>
@@ -548,19 +584,9 @@
                 <button class="settings-icon-small" id="settingsIconSales"><i class="fa-solid fa-gear"></i></button>
             </div>
         </div>
-        <div class="form-group centered-label centered-group">
-            <label>👤 員工</label>
-            <div class="staff-group" id="salesStaff"></div>
-        </div>
-        <div class="form-group centered-label centered-group">
-            <label>📦 產品</label>
-            <div id="productList" class="product-grid"></div>
-            <div class="total">總金額: <span id="totalAmount">0</span> 元</div>
-        </div>
-        <div class="form-group centered-label centered-group">
-            <label>💳 支付方式</label>
-            <div class="payment-group" id="salesPayment"></div>
-        </div>
+        <div class="form-group"><label class="section-title">👤 員工</label><div class="staff-group" id="salesStaff"></div></div>
+        <div class="form-group"><label class="section-title">📦 產品</label><div id="productList" class="product-grid"></div><div class="total">總金額: <span id="totalAmount">0</span> 元</div></div>
+        <div class="form-group"><label class="section-title">💳 支付方式</label><div class="payment-group" id="salesPayment"></div></div>
         <button id="submitSales" class="submit-btn">提交銷售</button>
         <div id="salesRecent" class="recent-record" style="display:none;"></div>
     </div>
@@ -574,19 +600,9 @@
                 <button class="settings-icon-small" id="settingsIconConsume"><i class="fa-solid fa-gear"></i></button>
             </div>
         </div>
-        <div class="form-group centered-label centered-group">
-            <label>👤 員工</label>
-            <div class="staff-group" id="consumeStaff"></div>
-        </div>
-        <div class="form-group centered-label centered-group">
-            <label>💰 金額</label>
-            <div id="presetAmounts" class="preset-grid"></div>
-            <input type="number" id="consumeAmount" placeholder="或手動輸入" step="1">
-        </div>
-        <div class="form-group centered-label centered-group">
-            <label>💳 支付方式</label>
-            <div class="payment-group" id="consumePayment"></div>
-        </div>
+        <div class="form-group"><label class="section-title">👤 員工</label><div class="staff-group" id="consumeStaff"></div></div>
+        <div class="form-group"><label class="section-title">💰 金額</label><div id="presetAmounts" class="preset-grid"></div><input type="number" id="consumeAmount" placeholder="或手動輸入" step="1"></div>
+        <div class="form-group"><label class="section-title">💳 支付方式</label><div class="payment-group" id="consumePayment"></div></div>
         <button id="submitConsume" class="submit-btn">提交消費</button>
         <div id="consumeRecent" class="recent-record" style="display:none;"></div>
     </div>
@@ -722,9 +738,6 @@ const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleuser
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
-// 刪除密碼 (可修改)
-const DELETE_PASSWORD = '288288';
-
 let tokenClient;
 let gapiInited = false;
 let gisInited = false;
@@ -732,7 +745,6 @@ let gapiReady = false;
 let syncInProgress = false;
 let settingsPassword = 'admin123';
 let darkMode = localStorage.getItem('darkMode') === 'true';
-let isLoggedIn = false;  // 新增登入狀態
 
 // 全域資料
 let staffList = [
@@ -767,12 +779,10 @@ let passwordAuth = {
     expireTime: 0
 };
 
-// 檢查管理密碼是否在有效期內
 function isPasswordValid() {
     return passwordAuth.verified && Date.now() < passwordAuth.expireTime;
 }
 
-// 要求管理密碼驗證（若1分鐘內已驗證則直接返回true）
 async function requirePassword() {
     if (isPasswordValid()) return true;
     const pwd = prompt("請輸入管理密碼（驗證後1分鐘內無需重複輸入）");
@@ -786,14 +796,13 @@ async function requirePassword() {
     }
 }
 
-// 輔助函數：格式化日期顯示為 m月d
+// 輔助函數
 function formatDisplayDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
     return `${d.getMonth()+1}月${d.getDate()}`;
 }
-// 將 YYYY-MM-DD 轉為 dd/mm/yyyy (新格式)
 function toGoogleDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -803,7 +812,6 @@ function toGoogleDate(dateStr) {
     const year = d.getFullYear();
     return `${day}/${month}/${year}`;
 }
-// 從 dd/mm/yyyy 提取年月日 (格式日/月/年)
 function extractYearMonthDay(googleDate) {
     if (!googleDate) return { year: '', month: '', day: '' };
     const parts = googleDate.split('/');
@@ -812,13 +820,11 @@ function extractYearMonthDay(googleDate) {
     }
     return { year: '', month: '', day: '' };
 }
-// 獲取當前時間 HH:MM:SS
 function getCurrentTime() {
     const now = new Date();
     return `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
 }
 
-// 設定按鈕每行列數（僅本地）
 function setButtonsPerRow(count) {
     buttonsPerRow = count;
     localStorage.setItem('buttonsPerRow', count);
@@ -871,7 +877,6 @@ function setDarkMode(enabled) {
 
 const CONFIG_SHEET = 'staff';
 
-// ========== 清除工作表數據，保留標題行（只清除 A2:Z） ==========
 async function clearSheetData(sheetName) {
     const range = `${sheetName}!A2:Z`;
     await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId: SPREADSHEET_ID, range: range });
@@ -882,7 +887,6 @@ async function appendToSheet(sheetName, values) {
         spreadsheetId: SPREADSHEET_ID, range: range, valueInputOption: 'USER_ENTERED', resource: { values: [values] }
     });
 }
-// 同步配置表（員工、產品、預設金額、密碼）到雲端，保留標題行
 async function syncConfigToSheet() {
     if (!gapiReady) return;
     try {
@@ -893,13 +897,12 @@ async function syncConfigToSheet() {
         await appendToSheet(CONFIG_SHEET, ['password', 'admin', settingsPassword]);
     } catch (err) { console.error("同步設定失敗", err); }
 }
-// 從雲端讀取配置表（跳過標題行）
 async function loadConfigFromSheet() {
     if (!gapiReady) return;
     try {
         const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${CONFIG_SHEET}!A:C` });
         if (resp.result.values && resp.result.values.length > 1) {
-            const rows = resp.result.values.slice(1); // 跳過第一行標題
+            const rows = resp.result.values.slice(1);
             const newStaff = [], newProducts = [], newPresets = [];
             let newPassword = null;
             for (let row of rows) {
@@ -919,19 +922,16 @@ async function loadConfigFromSheet() {
     } catch (err) { console.error("讀取設定失敗", err); }
 }
 
-// ========== 從雲端拉取所有記錄並合併到本地（跳過標題行） ==========
 async function pullAllRecordsFromSheets() {
     if (!gapiReady) {
         showToast("未登入，無法從雲端拉取");
         return false;
     }
     try {
-        // 拉取產品工作表
         const salesResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '產品!A:K' });
         const consumeResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '客人!A:G' });
 
         const cloudRecords = [];
-        // 解析產品工作表 (列: 年,月,日,員工,工號,產品,價錢,支付方式,時間,同步狀態, recordId)
         if (salesResp.result.values && salesResp.result.values.length > 1) {
             const rows = salesResp.result.values.slice(1);
             for (let row of rows) {
@@ -959,7 +959,6 @@ async function pullAllRecordsFromSheets() {
                 });
             }
         }
-        // 解析客人工作表 (列: 日子(dd/mm/yyyy),員工,價錢,支付方式,時間,同步狀態, recordId)
         if (consumeResp.result.values && consumeResp.result.values.length > 1) {
             const rows = consumeResp.result.values.slice(1);
             for (let row of rows) {
@@ -987,7 +986,6 @@ async function pullAllRecordsFromSheets() {
             }
         }
 
-        // 合併：以 id 為準，雲端記錄覆蓋本地相同 id 的記錄，雲端有但本地無則新增
         const localMap = new Map(records.map(r => [r.id, r]));
         for (const cloudRec of cloudRecords) {
             if (localMap.has(cloudRec.id)) {
@@ -1010,7 +1008,6 @@ async function pullAllRecordsFromSheets() {
     }
 }
 
-// 全量同步：清空雲端工作表（保留標題行），寫入本地所有記錄（含 id 列）
 async function fullSyncToSheets() {
     if (!gapiReady) {
         showToast("未登入，無法同步至雲端");
@@ -1055,7 +1052,6 @@ async function fullSyncToSheets() {
     }
 }
 
-// 新增記錄（不會自動同步，由外部控制全量同步）
 async function addRecord(recordData) {
     const newId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
     const newRecord = {
@@ -1077,13 +1073,10 @@ async function addRecord(recordData) {
     return newRecord;
 }
 
-// 刪除記錄（需要刪除密碼驗證，然後全量同步）
+// 统一使用 requirePassword + confirm 的删除
 async function deleteRecordById(id) {
-    const pwd = prompt("請輸入刪除密碼");
-    if (pwd !== DELETE_PASSWORD) {
-        alert("密碼錯誤，無法刪除");
-        return false;
-    }
+    if (!await requirePassword()) return false;
+    if (!confirm("確定要刪除此記錄嗎？此操作不可復原！")) return false;
     const index = records.findIndex(r => r.id === id);
     if (index === -1) return false;
     records.splice(index, 1);
@@ -1094,13 +1087,9 @@ async function deleteRecordById(id) {
     return true;
 }
 
-// 編輯記錄（需要刪除密碼驗證，然後全量同步）
 async function editRecord(record) {
-    const pwd = prompt("請輸入刪除密碼（修改操作需要驗證）");
-    if (pwd !== DELETE_PASSWORD) {
-        alert("密碼錯誤，無法修改");
-        return false;
-    }
+    if (!await requirePassword()) return false;
+    if (!confirm("確定要修改此記錄嗎？")) return false;
     let newData = {};
     if (record.type === 'sales') {
         const newProduct = prompt("輸入新產品名稱", record.productName);
@@ -1219,7 +1208,6 @@ function updateRecentRecord(type) {
     } else div.style.display = 'none';
 }
 
-// 修改員工按鈕：姓名在上，工號在下
 function renderStaff(containerId, selectedCode, onChange) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
@@ -1237,7 +1225,6 @@ function renderStaff(containerId, selectedCode, onChange) {
     container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
 }
 
-// 修改產品按鈕：產品名稱在上，價格在下
 function renderProducts() {
     const container = document.getElementById("productList");
     if (!container) return;
@@ -1313,7 +1300,7 @@ function calcTotal() {
     document.getElementById("totalAmount").innerText = total;
     return total;
 }
-// ========== 員工管理列表的編輯/刪除按鈕，加入管理密碼驗證（1分鐘有效）和同步 ==========
+
 function renderStaffManageList() {
     const container = document.getElementById("staffManageList");
     if (!container) return;
@@ -1352,7 +1339,6 @@ function renderStaffManageList() {
         container.appendChild(div);
     });
 }
-// 產品管理列表的編輯/刪除按鈕，加入管理密碼驗證和同步
 function renderProductManageList() {
     const container = document.getElementById("productManageList");
     if (!container) return;
@@ -1387,7 +1373,6 @@ function renderProductManageList() {
         container.appendChild(div);
     });
 }
-// 預設金額管理列表的編輯/刪除按鈕，加入管理密碼驗證和同步
 function renderPresetManageList() {
     const container = document.getElementById("presetManageList");
     if (!container) return;
@@ -1422,9 +1407,7 @@ function renderPresetManageList() {
     });
 }
 
-// 提交銷售（先拉取合併，新增，全量同步）
 async function submitSales() {
-    if (!isLoggedIn) { alert("請先登入 Google 帳號才能使用系統"); return; }
     if (!gapiReady) alert("尚未登入，記錄將先儲存於本地，登入後自動同步");
     const date = document.getElementById("salesDate").value;
     if (!date) { alert("請選擇日期"); return; }
@@ -1473,7 +1456,6 @@ async function submitSales() {
     renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
 }
 async function submitConsumption() {
-    if (!isLoggedIn) { alert("請先登入 Google 帳號才能使用系統"); return; }
     if (!gapiReady) alert("尚未登入，記錄將先儲存於本地，登入後自動同步");
     const date = document.getElementById("consumeDate").value;
     if (!date) { alert("請選擇日期"); return; }
@@ -1497,7 +1479,6 @@ async function submitConsumption() {
     clearPresetHighlight();
 }
 function showPage(pageId) {
-    if (!isLoggedIn) return;
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     document.getElementById(pageId + "Page").classList.add("active");
     document.querySelectorAll(".nav-btn").forEach(btn => {
@@ -1571,15 +1552,11 @@ function initToggles() {
         showToast(`按鈕每行數量已改為 ${buttonsPerRow}`);
     });
 }
-// ========== 進入系統設定時，輸入密碼後刷新所有資料 ==========
 async function openSettingsPage() {
-    if (!isLoggedIn) { alert("請先登入 Google 帳號"); return; }
     const pwd = prompt("請輸入管理密碼");
     if (pwd === settingsPassword) {
-        // 密碼正確，設置1分鐘有效（便於後續操作）
         passwordAuth.verified = true;
         passwordAuth.expireTime = Date.now() + 60 * 1000;
-        // 刷新所有資料（從雲端拉取最新配置和記錄）
         if (gapiReady) {
             await loadConfigFromSheet();
             await pullAllRecordsFromSheets();
@@ -1601,11 +1578,7 @@ document.getElementById("changePasswordBtn").addEventListener("click", async () 
     document.getElementById("newPassword").value = ""; document.getElementById("confirmPassword").value = "";
 });
 const iframeModal = document.getElementById("iframeModal"), bookingIframe = document.getElementById("bookingIframe");
-document.getElementById("studentBookingBtn").onclick = () => { 
-    if (!isLoggedIn) { alert("請先登入 Google 帳號"); return; }
-    bookingIframe.src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html"; 
-    iframeModal.style.display = "block"; 
-};
+document.getElementById("studentBookingBtn").onclick = () => { bookingIframe.src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html"; iframeModal.style.display = "block"; };
 document.getElementById("closeIframeBtn").onclick = () => { iframeModal.style.display = "none"; bookingIframe.src = ""; };
 document.querySelectorAll("[data-page]").forEach(btn => btn.onclick = () => showPage(btn.dataset.page));
 document.getElementById("submitSales").onclick = submitSales;
@@ -1708,31 +1681,52 @@ function gisLoaded() {
     tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '' });
     gisInited = true; maybeEnableButtons();
 }
+
+// 登录逻辑
+let autoLoginTimer = null;
 function maybeEnableButtons() {
     if (gapiInited && gisInited && !gapiReady) {
         gapiReady = true;
-        document.getElementById('loginStatus').innerHTML = `
-            <div style="display: flex; justify-content: center; width: 100%;">
-                <button id="authBtn" style="background: #4285f4; color: white; border: none; border-radius: 40px; padding: 12px 24px; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                    <i class="fa-brands fa-google"></i> Hair World V2 系統 登入 Google
-                </button>
-            </div>
-        `;
-        document.getElementById('authBtn').onclick = () => {
-            tokenClient.callback = async (resp) => {
-                if (resp.error !== undefined) throw resp;
-                isLoggedIn = true;
-                document.getElementById('loginStatus').innerHTML = '✅ Hair World V2 系統 已登入，歡迎使用！';
-                document.querySelector('.btn-group').style.display = 'flex';
-                await loadConfigFromSheet();
-                await pullAllRecordsFromSheets();
-                renderUI();
-                showPage('sales');
-            };
-            tokenClient.requestAccessToken();
-        };
+        // 尝试自动静默登录
+        attemptAutoLogin();
     }
 }
+function attemptAutoLogin() {
+    autoLoginTimer = setTimeout(() => {
+        // 超时，显示登录面板（主容器保持隐藏）
+        document.getElementById('loginPanel').style.display = 'flex';
+    }, 2000);
+    tokenClient.callback = (resp) => {
+        if (resp.error !== undefined) throw resp;
+        // 登录成功
+        if (autoLoginTimer) clearTimeout(autoLoginTimer);
+        document.getElementById('loginPanel').style.display = 'none';
+        document.querySelector('.app-container').style.display = 'flex';
+        // 移除旧的 loginStatus（已不存在）
+        (async () => {
+            await loadConfigFromSheet();
+            await pullAllRecordsFromSheets();
+            renderUI();
+        })();
+    };
+    tokenClient.requestAccessToken({ prompt: '' });
+}
+// 手动登录按钮
+document.getElementById('googleLoginBtn').onclick = () => {
+    if (autoLoginTimer) clearTimeout(autoLoginTimer);
+    tokenClient.callback = (resp) => {
+        if (resp.error !== undefined) throw resp;
+        document.getElementById('loginPanel').style.display = 'none';
+        document.querySelector('.app-container').style.display = 'flex';
+        (async () => {
+            await loadConfigFromSheet();
+            await pullAllRecordsFromSheets();
+            renderUI();
+        })();
+    };
+    tokenClient.requestAccessToken();
+};
+
 function renderUI() {
     renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
     renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
@@ -1742,6 +1736,7 @@ function renderUI() {
     renderStaffManageList(); renderProductManageList(); renderPresetManageList();
     updateRecentRecord('sales'); updateRecentRecord('consumption');
     initToggles(); setDarkMode(darkMode);
+    showPage("sales");
     setButtonsPerRow(buttonsPerRow);
 }
 function ensureInit() {
@@ -1750,7 +1745,7 @@ function ensureInit() {
         if (!gisInited) gisLoaded();
     } else setTimeout(ensureInit, 200);
 }
-window.addEventListener('load', () => { loadLocalData(); renderUI(); ensureInit(); });
+window.addEventListener('load', () => { loadLocalData(); ensureInit(); });
 </script>
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
