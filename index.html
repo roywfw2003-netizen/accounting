@@ -6,7 +6,7 @@
     <title>賣貨管理系統 | Hair World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ===== 變數與基本樣式（保留原有配色，與 iPhone 一致）===== */
+        /* ========== 完整原有 CSS ========== */
         :root {
             --bg-body: #cfe7ff;
             --bg-card: white;
@@ -47,7 +47,6 @@
             justify-content: center;
             color: var(--text-primary);
         }
-        /* 強制所有文字使用主題色（夜間模式修復） */
         h1, h2, h3, h4, h5, h6, p, span, div, label, button, input, select, .setting-row span, .small-btn, .record-item {
             color: var(--text-primary);
         }
@@ -63,11 +62,10 @@
         body.dark .danger-btn {
             color: #ff7b72 !important;
         }
-        /* 主容器：全螢幕，並考慮安全區域 */
         .app-container {
             width: 100%;
             max-width: 100%;
-            margin: 0;
+            margin: 0 auto;
             background: var(--bg-card);
             border-radius: 0;
             box-shadow: none;
@@ -75,166 +73,419 @@
             padding: 12px;
             transition: all 0.2s;
             height: 100vh;
-            height: -webkit-fill-available;
             display: flex;
             flex-direction: column;
-            padding-bottom: env(safe-area-inset-bottom, 0);
         }
-        /* 橫向模式專用壓縮（確保 Samsung Galaxy S6 Lite 橫向一屏全見） */
         @media (orientation: landscape) {
             .app-container {
-                padding: 6px 12px;
-            }
-            .btn-group {
-                gap: 10px;
-                margin-bottom: 6px;
+                padding: 8px 12px;
             }
             .nav-btn {
-                padding: 6px 4px;
-                font-size: 0.75rem;
-                gap: 4px;
+                padding: 10px 4px;
+                font-size: 0.8rem;
             }
             .nav-btn i {
-                font-size: 1.3rem;
-            }
-            .nav-btn span {
-                font-size: 0.7rem;
-            }
-            .form-group {
-                margin-bottom: 4px;
-            }
-            label {
-                font-size: 0.75rem;
-                margin-bottom: 2px;
-            }
-            select, input {
-                padding: 4px 8px;
-                font-size: 0.75rem;
-            }
-            .date-with-settings input {
-                padding: 4px 8px;
-            }
-            .settings-icon-small {
-                width: 36px;
-                height: 36px;
-                font-size: 1rem;
-            }
-            .staff-group, .payment-group {
-                gap: 6px;
-                margin: 4px 0;
-            }
-            .staff-btn, .payment-btn, .preset-btn, .product-btn {
-                padding: 4px 8px;
-                font-size: 0.7rem;
+                font-size: 1.5rem;
             }
             .product-grid, .preset-grid {
                 gap: 6px;
-                margin: 6px 0;
             }
-            .total {
-                font-size: 1rem;
+            .product-btn, .preset-btn {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+            .form-group {
+                margin-bottom: 6px;
+            }
+            .staff-group, .payment-group {
+                gap: 6px;
+            }
+            .staff-btn, .payment-btn {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+            .total, .recent-record {
+                font-size: 0.9rem;
                 margin-top: 4px;
                 padding-top: 4px;
             }
             .submit-btn, #submitConsume {
-                padding: 8px;
-                font-size: 0.9rem;
-                margin-top: 6px;
-            }
-            .recent-record {
-                padding: 4px;
-                margin-top: 6px;
-                font-size: 0.65rem;
+                padding: 10px;
+                font-size: 1rem;
+                margin-top: 8px;
             }
             .settings-section {
-                margin-bottom: 6px;
+                margin-bottom: 8px;
                 padding: 6px;
-            }
-            .settings-header h4 {
-                font-size: 0.9rem;
-                margin: 0;
-            }
-            .setting-row {
-                margin-bottom: 4px;
-            }
-            .small-btn {
-                padding: 3px 8px;
-                font-size: 0.7rem;
             }
             .record-item {
                 padding: 6px;
-                margin-bottom: 4px;
-                font-size: 0.7rem;
+                font-size: 0.8rem;
             }
-            .sync-badge {
-                font-size: 0.6rem;
-                padding: 1px 4px;
-            }
-            .records-action-row {
-                margin-bottom: 6px;
-                gap: 8px;
-            }
-            hr {
-                margin: 8px 0;
-            }
-            /* 確保交易記錄列表不會過長而溢出，允許內部滾動 */
-            #recordsList {
-                max-height: 35vh;
-                overflow-y: auto;
+            .small-btn {
+                padding: 4px 8px;
+                font-size: 0.75rem;
             }
         }
-        /* 其餘原有樣式保持不變，確保功能正常 */
-        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-        .nav-btn { background: var(--btn-primary-bg); border: none; border-radius: 32px; font-weight: bold; cursor: pointer; flex: 1; min-width: 100px; padding: 12px 8px; text-align: center; transition: 0.05s linear; box-shadow: 0 5px 0 var(--btn-primary-shadow); display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        .nav-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-primary-shadow); }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .nav-btn {
+            background: var(--btn-gray-bg);
+            border: none;
+            border-radius: 32px;
+            color: var(--text-primary);
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 8px;
+            text-align: center;
+            transition: 0.05s linear;
+            box-shadow: 0 5px 0 var(--btn-gray-shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-btn i { font-size: 1.8rem; }
+        .nav-btn span { font-size: 0.85rem; }
+        .nav-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-gray-shadow); }
+        .nav-btn.active {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 5px 0 var(--accent-orange-shadow);
+        }
+        .nav-btn.active:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--accent-orange-shadow);
+        }
         .page { display: none; }
         .active { display: block; }
         .form-group { margin-bottom: 10px; }
-        label { display: block; margin-bottom: 4px; font-weight: 600; }
-        select, input { width: 100%; padding: 8px 12px; border-radius: 40px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); }
-        .date-with-settings { display: flex; gap: 10px; align-items: center; }
-        .date-with-settings input { flex: 1; }
-        .settings-icon-small { background: var(--btn-primary-bg); border: none; border-radius: 40px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 3px 0 var(--btn-primary-shadow); transition: 0.05s linear; font-size: 1.2rem; color: white; }
-        .settings-icon-small:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-primary-shadow); }
-        .staff-group, .payment-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
-        .staff-btn, .payment-btn, .preset-btn, .product-btn { background: var(--btn-gray-bg); border: none; padding: 6px 12px; border-radius: 40px; cursor: pointer; font-weight: bold; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; text-align: center; color: var(--text-primary); }
-        .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
-        .staff-btn.active, .product-btn.selected { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
-        .payment-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
-        .preset-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
-        .product-grid, .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
-        .product-btn .product-price { font-weight: bold; font-size: 0.85rem; color: inherit; }
-        .product-btn.selected .product-price { color: white; }
-        .total { font-size: 1.2rem; font-weight: bold; text-align: right; margin-top: 6px; border-top: 1px solid var(--border-color); padding-top: 6px; color: var(--accent-orange); }
-        .record-item { background: var(--btn-gray-bg); border-radius: 20px; padding: 8px; margin-bottom: 6px; }
-        .sync-badge { display: inline-block; padding: 2px 6px; border-radius: 20px; font-size: 0.7rem; }
+        label { display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-primary); }
+        select, input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 40px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+        .date-with-settings {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .date-with-settings input {
+            flex: 1;
+        }
+        .settings-icon-small {
+            background: var(--btn-primary-bg);
+            border: none;
+            border-radius: 40px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--btn-primary-shadow);
+            transition: 0.05s linear;
+            font-size: 1.2rem;
+            color: white;
+        }
+        .settings-icon-small:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--btn-primary-shadow);
+        }
+        .staff-group, .payment-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 6px 0;
+        }
+        .staff-btn, .payment-btn, .preset-btn, .product-btn {
+            background: var(--btn-gray-bg);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 3px 0 var(--btn-gray-shadow);
+            transition: 0.05s linear;
+            text-align: center;
+            color: var(--text-primary);
+        }
+        .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--btn-gray-shadow);
+        }
+        .staff-btn.active, .product-btn.selected {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .payment-btn.active {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .preset-btn.active {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .product-grid, .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .product-btn .product-price {
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: inherit;
+        }
+        .product-btn.selected .product-price {
+            color: white;
+        }
+        .total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 6px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 6px;
+            color: var(--accent-orange);
+        }
+        .record-item {
+            background: var(--btn-gray-bg);
+            border-radius: 20px;
+            padding: 8px;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+        .sync-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
         .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
         .sync-pending { background: #fef9c3; color: #854d0e; }
-        .login-status { background: var(--btn-gray-bg); border-radius: 40px; padding: 6px 12px; margin-bottom: 12px; text-align: center; font-size: 0.85rem; }
-        .setting-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
-        .small-btn { background: var(--btn-gray-bg); border: none; padding: 4px 10px; border-radius: 40px; cursor: pointer; font-size: 0.8rem; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; color: var(--text-primary); }
-        .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
-        .danger-btn { background: #fee2e2; color: #b91c1c; }
-        .edit-btn { background: var(--btn-gray-bg); margin-left: 6px; }
-        hr { margin: 12px 0; border-color: var(--border-color); }
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--accent-orange); color: white; padding: 8px 16px; border-radius: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; transition: opacity 0.3s; opacity: 1; pointer-events: none; white-space: pre-line; text-align: center; font-size: 0.85rem; }
-        .iframe-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; }
-        .iframe-container iframe { width: 90%; height: 90%; margin: 5% auto; display: block; background: white; border-radius: 20px; }
-        .close-iframe { position: absolute; top: 20px; right: 30px; background: var(--accent-orange); color: white; border: none; border-radius: 40px; padding: 6px 12px; cursor: pointer; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
-        .close-iframe:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
-        .recent-record { background: var(--btn-gray-bg); border-radius: 20px; padding: 6px; margin-top: 10px; text-align: center; font-size: 0.75rem; border-left: 4px solid var(--accent-orange); }
-        .settings-section { margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 24px; padding: 8px; }
-        .settings-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .settings-content { margin-top: 8px; }
-        .toggle-switch { width: 44px; height: 24px; background: #ccc; border-radius: 24px; position: relative; cursor: pointer; transition: 0.2s; }
-        .toggle-switch.active { background: var(--accent-orange); }
-        .toggle-switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
-        .toggle-switch.active::after { left: 22px; }
-        .hidden-content { display: none; }
-        .submit-btn, #submitConsume { background: var(--btn-success-bg); color: white; width: 100%; padding: 12px; border: none; border-radius: 40px; font-size: 1.1rem; font-weight: bold; margin-top: 10px; cursor: pointer; box-shadow: 0 5px 0 var(--btn-success-shadow); transition: 0.05s linear; text-align: center; }
-        .submit-btn:active, #submitConsume:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-success-shadow); }
-        .records-action-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+        .login-status {
+            background: var(--btn-gray-bg);
+            border-radius: 40px;
+            padding: 6px 12px;
+            margin-bottom: 12px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+        .setting-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .small-btn {
+            background: var(--btn-gray-bg);
+            border: none;
+            padding: 4px 10px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            box-shadow: 0 3px 0 var(--btn-gray-shadow);
+            transition: 0.05s linear;
+            color: var(--text-primary);
+        }
+        .small-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--btn-gray-shadow);
+        }
+        .danger-btn {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .edit-btn {
+            background: var(--btn-gray-bg);
+            color: var(--text-primary);
+            margin-left: 6px;
+        }
+        hr {
+            margin: 12px 0;
+            border-color: var(--border-color);
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-orange);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: opacity 0.3s;
+            opacity: 1;
+            pointer-events: none;
+            white-space: pre-line;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        .iframe-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            display: none;
+        }
+        .iframe-container iframe {
+            width: 90%;
+            height: 90%;
+            margin: 5% auto;
+            display: block;
+            background: white;
+            border-radius: 20px;
+        }
+        .close-iframe {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: var(--accent-orange);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 6px 12px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .close-iframe:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--accent-orange-shadow);
+        }
+        .recent-record {
+            background: var(--btn-gray-bg);
+            border-radius: 20px;
+            padding: 6px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 0.75rem;
+            border-left: 4px solid var(--accent-orange);
+            color: var(--text-primary);
+        }
+        .settings-section {
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 8px;
+        }
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .settings-content {
+            margin-top: 8px;
+        }
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 24px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .toggle-switch.active {
+            background: var(--accent-orange);
+        }
+        .toggle-switch::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: 0.2s;
+        }
+        .toggle-switch.active::after {
+            left: 22px;
+        }
+        .hidden-content {
+            display: none;
+        }
+        .submit-btn, #submitConsume {
+            background: var(--btn-success-bg);
+            color: white;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 var(--btn-success-shadow);
+            transition: 0.05s linear;
+            text-align: center;
+        }
+        .submit-btn:active, #submitConsume:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--btn-success-shadow);
+        }
+        .records-action-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        /* 新增表格样式 */
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+            font-size: 0.8rem;
+        }
+        .records-table th, .records-table td {
+            border: 1px solid var(--border-color);
+            padding: 6px;
+            text-align: left;
+        }
+        .records-table th {
+            background: var(--btn-gray-bg);
+        }
+        .record-cell {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+            max-width: 120px;
+        }
+        .action-btns {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 600px) {
+            .records-table th, .records-table td {
+                padding: 4px;
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -249,7 +500,7 @@
 
     <!-- 產品銷售頁 -->
     <div id="salesPage" class="page">
-        <h3>🛍️ 產品銷售</h3>
+        <!-- 移除 h3 標題 -->
         <div class="form-group">
             <label>📅 日期</label>
             <div class="date-with-settings">
@@ -266,7 +517,7 @@
 
     <!-- 客人消費頁 -->
     <div id="consumptionPage" class="page">
-        <h3>👥 客人消費</h3>
+        <!-- 移除 h3 標題 -->
         <div class="form-group">
             <label>📅 日期</label>
             <div class="date-with-settings">
@@ -342,7 +593,10 @@
                     <button class="small-btn danger-btn" id="clearLocalDataBtn">🗑️ 清空所有本地記錄</button>
                     <button class="small-btn" id="retryFailedSyncBtn">🔄 重試同步失敗</button>
                 </div>
-                <div id="recordsList"></div>
+                <h5>🛍️ 產品銷售記錄</h5>
+                <div id="salesRecordsTable"></div>
+                <h5>👥 客人消費記錄</h5>
+                <div id="consumeRecordsTable"></div>
             </div>
         </div>
         <hr>
@@ -367,6 +621,9 @@ const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleuser
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
+// 刪除密碼 (可修改)
+const DELETE_PASSWORD = '288288';
+
 let tokenClient;
 let gapiInited = false;
 let gisInited = false;
@@ -387,7 +644,7 @@ let productList = [
     { name: "打底水", price: 148 }
 ];
 let presetAmounts = [50, 100, 150, 200];
-let records = [];
+let records = []; // 新結構：每個產品一行，客人消費一行
 let selectedProducts = new Set();
 let selectedSalesStaff = null;
 let selectedConsumeStaff = null;
@@ -396,9 +653,44 @@ let selectedConsumePayment = "現金";
 let lastSalesRecord = null;
 let lastConsumeRecord = null;
 const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付"];
+// 銷售支付方式加上「公司」
+const SALES_PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付", "公司"];
 
 let toggleStaff = false, toggleProduct = false, togglePreset = false, toggleRecords = false;
 
+// 輔助函數：格式化日期顯示為 m月d
+function formatDisplayDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return `${d.getMonth()+1}月${d.getDate()}`;
+}
+// 將 YYYY-MM-DD 轉為 dd:mm:yyyy
+function toGoogleDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const day = d.getDate().toString().padStart(2,'0');
+    const month = (d.getMonth()+1).toString().padStart(2,'0');
+    const year = d.getFullYear();
+    return `${day}:${month}:${year}`;
+}
+// 從 dd:mm:yyyy 提取年月日
+function extractYearMonthDay(googleDate) {
+    if (!googleDate) return { year: '', month: '', day: '' };
+    const parts = googleDate.split(':');
+    if (parts.length === 3) {
+        return { day: parts[0], month: parts[1], year: parts[2] };
+    }
+    return { year: '', month: '', day: '' };
+}
+// 獲取當前時間 HH:MM:SS
+function getCurrentTime() {
+    const now = new Date();
+    return `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+}
+
+// 加載本地數據
 function loadLocalData() {
     const storedStaff = localStorage.getItem("staffList");
     if (storedStaff) staffList = JSON.parse(storedStaff);
@@ -433,17 +725,8 @@ function setDarkMode(enabled) {
     localStorage.setItem('darkMode', enabled);
 }
 
+// Google Sheets 操作
 const CONFIG_SHEET = 'staff';
-async function syncConfigToSheet() {
-    if (!gapiReady) return;
-    try {
-        await clearSheet(CONFIG_SHEET);
-        for (let s of staffList) await appendToSheet(CONFIG_SHEET, ['employee', s.code, s.name]);
-        for (let p of productList) await appendToSheet(CONFIG_SHEET, ['product', p.name, p.price.toString()]);
-        for (let amt of presetAmounts) await appendToSheet(CONFIG_SHEET, ['preset', amt.toString(), amt.toString()]);
-        await appendToSheet(CONFIG_SHEET, ['password', 'admin', settingsPassword]);
-    } catch (err) { console.error("同步設定失敗", err); }
-}
 async function clearSheet(sheetName) {
     const range = `${sheetName}!A:Z`;
     await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId: SPREADSHEET_ID, range: range });
@@ -453,6 +736,16 @@ async function appendToSheet(sheetName, values) {
     await gapi.client.sheets.spreadsheets.values.append({
         spreadsheetId: SPREADSHEET_ID, range: range, valueInputOption: 'USER_ENTERED', resource: { values: [values] }
     });
+}
+async function syncConfigToSheet() {
+    if (!gapiReady) return;
+    try {
+        await clearSheet(CONFIG_SHEET);
+        for (let s of staffList) await appendToSheet(CONFIG_SHEET, ['employee', s.code, s.name]);
+        for (let p of productList) await appendToSheet(CONFIG_SHEET, ['product', p.name, p.price.toString()]);
+        for (let amt of presetAmounts) await appendToSheet(CONFIG_SHEET, ['preset', amt.toString(), amt.toString()]);
+        await appendToSheet(CONFIG_SHEET, ['password', 'admin', settingsPassword]);
+    } catch (err) { console.error("同步設定失敗", err); }
 }
 async function loadConfigFromSheet() {
     if (!gapiReady) return;
@@ -479,85 +772,269 @@ async function loadConfigFromSheet() {
     } catch (err) { console.error("讀取設定失敗", err); }
 }
 
-async function syncToSheet(record) {
-    const sheetName = record.type === 'sales' ? '產品' : '客人';
-    const row = [ record.id || '', record.type || '', record.date || '', record.staffCode || '', record.staffName || '', record.amount || '', record.payment || '', record.details || '', record.createdAt || '', record.syncStatus || '' ];
-    await appendToSheet(sheetName, row);
-}
-async function addRecord(recordData) {
-    const newId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
-    const newRecord = { id: newId, syncStatus: "pending", ...recordData };
-    records.unshift(newRecord);
-    saveRecords();
-    renderRecords();
-    if (gapiReady) await syncRecord(newRecord);
-    if (recordData.type === 'sales') { lastSalesRecord = { ...newRecord }; updateRecentRecord('sales'); }
-    else { lastConsumeRecord = { ...newRecord }; updateRecentRecord('consumption'); }
-    return true;
-}
-async function syncRecord(record) {
+// 單筆同步到 Google Sheets（提交時調用，不清空工作表）
+async function syncRecordToSheet(record) {
+    if (!gapiReady) return false;
     try {
-        await syncToSheet(record);
-        const idx = records.findIndex(r => r.id === record.id);
-        if (idx !== -1) {
-            records[idx].syncStatus = "success";
-            delete records[idx].syncError;
-            saveRecords();
-            renderRecords();
+        const sheetName = record.type === 'sales' ? '產品' : '客人';
+        let row;
+        if (record.type === 'sales') {
+            const googleDate = toGoogleDate(record.date);
+            const { year, month, day } = extractYearMonthDay(googleDate);
+            const time = getCurrentTime();
+            // 順序：年、月、日、員工、工號、產品、價錢、支付方式、時間、同步狀態
+            row = [
+                year, month, day,
+                record.staffName, record.staffCode,
+                record.productName,
+                record.amount.toString(),
+                record.payment,
+                time,
+                record.syncStatus || 'success'
+            ];
+        } else {
+            const googleDate = toGoogleDate(record.date);
+            // 順序：日子(dd:mm:yyyy)、員工、價錢、支付方式、同步狀態
+            row = [googleDate, record.staffName, record.amount.toString(), record.payment, record.syncStatus || 'success'];
         }
+        await appendToSheet(sheetName, row);
         return true;
     } catch (err) {
-        const idx = records.findIndex(r => r.id === record.id);
-        if (idx !== -1) {
-            records[idx].syncStatus = "failed";
-            records[idx].syncError = err.message;
-            saveRecords();
-            renderRecords();
-        }
+        console.error("同步單筆失敗", err);
         return false;
     }
 }
-async function syncAllPending() {
-    if (syncInProgress || !gapiReady) return;
-    syncInProgress = true;
-    for (let rec of records.filter(r => r.syncStatus === "pending")) await syncRecord(rec);
-    syncInProgress = false;
-}
-async function retryFailedSync() {
+
+// 全量同步：清空工作表，重寫所有本地記錄（刪除/修改時調用）
+async function fullSyncToSheets() {
     if (!gapiReady) {
-        showToast("尚未登入，請先登入後再重試同步");
-        return;
+        showToast("未登入，無法同步至雲端");
+        return false;
     }
-    const failedRecords = records.filter(r => r.syncStatus === "failed");
-    if (failedRecords.length === 0) {
-        showToast("沒有同步失敗的記錄");
-        return;
+    try {
+        // 清空兩個工作表
+        await clearSheet('產品');
+        await clearSheet('客人');
+        // 分批寫入
+        for (const rec of records) {
+            const sheetName = rec.type === 'sales' ? '產品' : '客人';
+            let row;
+            if (rec.type === 'sales') {
+                const googleDate = toGoogleDate(rec.date);
+                const { year, month, day } = extractYearMonthDay(googleDate);
+                const time = getCurrentTime();
+                row = [
+                    year, month, day,
+                    rec.staffName, rec.staffCode,
+                    rec.productName,
+                    rec.amount.toString(),
+                    rec.payment,
+                    time,
+                    'success'  // 全量同步後所有記錄都視為已同步
+                ];
+            } else {
+                const googleDate = toGoogleDate(rec.date);
+                row = [googleDate, rec.staffName, rec.amount.toString(), rec.payment, 'success'];
+            }
+            await appendToSheet(sheetName, row);
+        }
+        // 更新本地記錄的同步狀態為 success
+        records.forEach(r => { r.syncStatus = 'success'; delete r.syncError; });
+        saveRecords();
+        renderRecordsTables();
+        showToast("全量同步完成");
+        return true;
+    } catch (err) {
+        console.error("全量同步失敗", err);
+        showToast("全量同步失敗: " + err.message);
+        return false;
     }
-    showToast(`開始重試 ${failedRecords.length} 筆失敗記錄...`);
-    let successCount = 0;
-    for (let rec of failedRecords) {
-        const ok = await syncRecord(rec);
-        if (ok) successCount++;
-    }
-    showToast(`重試完成：成功 ${successCount} 筆，失敗 ${failedRecords.length - successCount} 筆`);
 }
-function showToast(msg) {
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.innerText = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
+
+// 添加記錄（提交時使用，本地儲存 + 單筆同步）
+async function addRecord(recordData) {
+    const newId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
+    const newRecord = {
+        id: newId,
+        syncStatus: "pending",
+        ...recordData,
+        displayDate: formatDisplayDate(recordData.date)
+    };
+    records.unshift(newRecord);
+    saveRecords();
+    // 提交後立即嘗試同步到雲端（單筆）
+    if (gapiReady) {
+        const ok = await syncRecordToSheet(newRecord);
+        if (ok) {
+            newRecord.syncStatus = "success";
+            delete newRecord.syncError;
+        } else {
+            newRecord.syncStatus = "failed";
+            newRecord.syncError = "同步失敗";
+        }
+        saveRecords();
+    }
+    renderRecordsTables();
+    // 更新最近一筆顯示
+    if (recordData.type === 'sales') {
+        lastSalesRecord = { ...newRecord };
+        updateRecentRecord('sales');
+    } else {
+        lastConsumeRecord = { ...newRecord };
+        updateRecentRecord('consumption');
+    }
+    return newRecord;
 }
+
+// 刪除記錄（需密碼）
+async function deleteRecordById(id) {
+    const pwd = prompt("請輸入刪除密碼");
+    if (pwd !== DELETE_PASSWORD) {
+        alert("密碼錯誤，無法刪除");
+        return false;
+    }
+    const index = records.findIndex(r => r.id === id);
+    if (index === -1) return false;
+    records.splice(index, 1);
+    saveRecords();
+    await fullSyncToSheets();  // 全量同步雲端
+    renderRecordsTables();
+    showToast("記錄已刪除並同步雲端");
+    return true;
+}
+
+// 修改記錄（需密碼）
+async function editRecord(record) {
+    const pwd = prompt("請輸入刪除密碼（修改操作需要驗證）");
+    if (pwd !== DELETE_PASSWORD) {
+        alert("密碼錯誤，無法修改");
+        return false;
+    }
+    // 根據類型彈出編輯表單
+    let newData = {};
+    if (record.type === 'sales') {
+        const newProduct = prompt("輸入新產品名稱", record.productName);
+        const newPrice = parseFloat(prompt("輸入新價格", record.productPrice));
+        const newPayment = prompt("輸入新支付方式（現金/轉數快/支付寶/PayMe/微信支付/公司）", record.payment);
+        if (newProduct && !isNaN(newPrice) && newPayment) {
+            newData.productName = newProduct.trim();
+            newData.productPrice = newPrice;
+            newData.amount = newPrice;
+            newData.payment = newPayment;
+        } else {
+            alert("修改無效");
+            return false;
+        }
+    } else {
+        const newAmount = parseFloat(prompt("輸入新金額", record.amount));
+        const newPayment = prompt("輸入新支付方式（現金/轉數快/支付寶/PayMe/微信支付）", record.payment);
+        if (!isNaN(newAmount) && newAmount > 0 && newPayment) {
+            newData.amount = newAmount;
+            newData.payment = newPayment;
+        } else {
+            alert("修改無效");
+            return false;
+        }
+    }
+    Object.assign(record, newData);
+    saveRecords();
+    await fullSyncToSheets();
+    renderRecordsTables();
+    showToast("記錄已修改並同步雲端");
+    return true;
+}
+
+// 渲染交易記錄表格（兩個獨立表格）
+function renderRecordsTables() {
+    const salesContainer = document.getElementById("salesRecordsTable");
+    const consumeContainer = document.getElementById("consumeRecordsTable");
+    if (!salesContainer || !consumeContainer) return;
+
+    const salesRecords = records.filter(r => r.type === 'sales');
+    const consumeRecords = records.filter(r => r.type === 'consumption');
+
+    // 產品銷售表格
+    if (salesRecords.length === 0) {
+        salesContainer.innerHTML = "<div>暫無產品銷售記錄</div>";
+    } else {
+        let html = '<table class="records-table"><thead><tr><th>日子</th><th>員工</th><th>產品</th><th>價錢</th><th>支付方式</th><th>同步狀態</th><th>操作</th></tr></thead><tbody>';
+        for (const rec of salesRecords) {
+            const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
+            const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
+            html += `
+                <tr>
+                    <td class="record-cell" title="點擊查看完整日期" onclick="alert('完整日期：${rec.date}')">${rec.displayDate}</td>
+                    <td class="record-cell" title="${rec.staffName}">${rec.staffName}</td>
+                    <td class="record-cell" title="${rec.productName}">${rec.productName}</td>
+                    <td class="record-cell">${rec.amount}</td>
+                    <td class="record-cell">${rec.payment}</td>
+                    <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
+                    <td class="action-btns">
+                        <button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button>
+                        <button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button>
+                    </td>
+                </tr>
+            `;
+        }
+        html += '</tbody></table>';
+        salesContainer.innerHTML = html;
+    }
+
+    // 客人消費表格
+    if (consumeRecords.length === 0) {
+        consumeContainer.innerHTML = "<div>暫無客人消費記錄</div>";
+    } else {
+        let html = '<table class="records-table"><thead><tr><th>日子</th><th>員工</th><th>價錢</th><th>支付方式</th><th>同步狀態</th><th>操作</th></tr></thead><tbody>';
+        for (const rec of consumeRecords) {
+            const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
+            const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
+            html += `
+                <tr>
+                    <td class="record-cell" title="點擊查看完整日期" onclick="alert('完整日期：${rec.date}')">${rec.displayDate}</td>
+                    <td class="record-cell" title="${rec.staffName}">${rec.staffName}</td>
+                    <td class="record-cell">${rec.amount}</td>
+                    <td class="record-cell">${rec.payment}</td>
+                    <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
+                    <td class="action-btns">
+                        <button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button>
+                        <button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button>
+                    </td>
+                </tr>
+            `;
+        }
+        html += '</tbody></table>';
+        consumeContainer.innerHTML = html;
+    }
+
+    // 綁定按鈕事件
+    document.querySelectorAll('#salesRecordsTable .edit-btn, #consumeRecordsTable .edit-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const id = btn.dataset.id;
+            const record = records.find(r => r.id === id);
+            if (record) await editRecord(record);
+        });
+    });
+    document.querySelectorAll('#salesRecordsTable .danger-btn, #consumeRecordsTable .danger-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const id = btn.dataset.id;
+            await deleteRecordById(id);
+        });
+    });
+}
+
+// 更新最近一筆顯示
 function updateRecentRecord(type) {
     const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
     if (type === 'sales' && lastSalesRecord) {
         div.style.display = 'block';
-        div.innerHTML = `📌 最近一筆銷售：${lastSalesRecord.date} ${lastSalesRecord.staffName} | 金額 $${lastSalesRecord.amount} | ${lastSalesRecord.payment}<br>明細：${lastSalesRecord.details}`;
+        div.innerHTML = `📌 最近一筆銷售：${lastSalesRecord.displayDate} ${lastSalesRecord.staffName} | 產品：${lastSalesRecord.productName} 金額 $${lastSalesRecord.amount} | ${lastSalesRecord.payment}`;
     } else if (type === 'consumption' && lastConsumeRecord) {
         div.style.display = 'block';
-        div.innerHTML = `📌 最近一筆消費：${lastConsumeRecord.date} ${lastConsumeRecord.staffName} | 金額 $${lastConsumeRecord.amount} | ${lastConsumeRecord.payment}`;
+        div.innerHTML = `📌 最近一筆消費：${lastConsumeRecord.displayDate} ${lastConsumeRecord.staffName} | 金額 $${lastConsumeRecord.amount} | ${lastConsumeRecord.payment}`;
     } else div.style.display = 'none';
 }
+
+// 其餘 UI 渲染函數（員工、產品、支付方式等）
 function renderStaff(containerId, selectedCode, onChange) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
@@ -573,10 +1050,11 @@ function renderStaff(containerId, selectedCode, onChange) {
         container.appendChild(btn);
     });
 }
-function renderPayment(containerId, selected, onChange) {
+function renderPayment(containerId, selected, onChange, isSales = false) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
-    PAYMENTS.forEach(p => {
+    const payments = isSales ? SALES_PAYMENTS : PAYMENTS;
+    payments.forEach(p => {
         const btn = document.createElement("div");
         btn.className = "payment-btn" + (selected === p ? " active" : "");
         btn.textContent = p;
@@ -584,6 +1062,13 @@ function renderPayment(containerId, selected, onChange) {
             container.querySelectorAll(".payment-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             onChange(p);
+            // 如果是銷售且選擇“公司”，總金額強制為0
+            if (isSales && p === "公司") {
+                const totalSpan = document.getElementById("totalAmount");
+                if (totalSpan) totalSpan.innerText = "0";
+            } else if (isSales) {
+                calcTotal(); // 重新計算總金額
+            }
         };
         container.appendChild(btn);
     });
@@ -608,6 +1093,8 @@ function renderProducts() {
 function calcTotal() {
     let total = 0;
     productList.forEach(p => { if (selectedProducts.has(p.name)) total += p.price; });
+    // 如果當前支付方式為“公司”，總金額顯示0但實際提交時會強制金額0
+    if (selectedSalesPayment === "公司") total = 0;
     document.getElementById("totalAmount").innerText = total;
     return total;
 }
@@ -634,30 +1121,6 @@ function renderPresetButtons() {
 }
 function clearPresetHighlight() {
     document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
-}
-function renderRecords() {
-    const container = document.getElementById("recordsList");
-    if (!container) return;
-    if (records.length === 0) { container.innerHTML = "<div>暫無記錄</div>"; return; }
-    let html = "";
-    records.forEach(rec => {
-        let statusClass = "", statusText = "";
-        if (rec.syncStatus === "success") { statusClass = "sync-success"; statusText = "已同步"; }
-        else if (rec.syncStatus === "failed") { statusClass = "sync-failed"; statusText = "同步失敗"; }
-        else { statusClass = "sync-pending"; statusText = "待同步"; }
-        const typeLabel = rec.type === "sales" ? "🛍️ 產品銷售" : "👥 客人消費";
-        const detail = rec.type === "sales" ? `明細: ${rec.details}` : `金額: $${rec.amount}`;
-        html += `
-            <div class="record-item">
-                <div><strong>${typeLabel}</strong> <span class="sync-badge ${statusClass}">${statusText}</span></div>
-                <div>📅 ${rec.date} ｜ 👤 ${rec.staffName} (${rec.staffCode})</div>
-                <div>💰 ${rec.type==='sales'? `總額 $${rec.amount}` : `消費 $${rec.amount}`} ｜ 💳 ${rec.payment}</div>
-                <div>${detail}</div>
-                ${rec.syncError ? `<div style="color:#b91c1c;">⚠️ ${rec.syncError}</div>` : ''}
-            </div>
-        `;
-    });
-    container.innerHTML = html;
 }
 function renderStaffManageList() {
     const container = document.getElementById("staffManageList");
@@ -751,14 +1214,50 @@ async function submitSales() {
     const date = document.getElementById("salesDate").value;
     if (!date) { alert("請選擇日期"); return; }
     if (!selectedSalesStaff) { alert("請選擇員工"); return; }
-    const payment = selectedSalesPayment;
-    let selected = [], total = 0;
-    productList.forEach(p => { if (selectedProducts.has(p.name)) { selected.push(`${p.name} x1`); total += p.price; } });
-    if (selected.length === 0) { alert("請至少選擇一件產品"); return; }
-    const record = { type: "sales", date, staffCode: selectedSalesStaff.code, staffName: selectedSalesStaff.name, amount: total, payment, details: selected.join("、"), createdAt: new Date().toISOString() };
-    await addRecord(record);
-    showToast(`✅ 訂單已完成！\n${record.details}\n金額: $${record.amount}`);
-    selectedProducts.clear(); renderProducts(); document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
+    let payment = selectedSalesPayment;
+    let total = 0;
+    const selected = [];
+    productList.forEach(p => { if (selectedProducts.has(p.name)) { selected.push(p); total += p.price; } });
+    if (selected.length === 0 && payment !== "公司") { alert("請至少選擇一件產品"); return; }
+    // 如果支付方式是公司，總金額強制為0，且不要求產品（可選）
+    if (payment === "公司") total = 0;
+    // 為每個產品創建獨立記錄
+    for (const prod of selected) {
+        const record = {
+            type: "sales",
+            date: date,
+            staffCode: selectedSalesStaff.code,
+            staffName: selectedSalesStaff.name,
+            productName: prod.name,
+            productPrice: prod.price,
+            amount: payment === "公司" ? 0 : prod.price,
+            payment: payment,
+            createdAt: new Date().toISOString()
+        };
+        await addRecord(record);
+    }
+    // 如果支付方式是公司且沒有產品，仍需創建一筆金額為0的記錄（顯示無產品）
+    if (payment === "公司" && selected.length === 0) {
+        const record = {
+            type: "sales",
+            date: date,
+            staffCode: selectedSalesStaff.code,
+            staffName: selectedSalesStaff.name,
+            productName: "（無產品）",
+            productPrice: 0,
+            amount: 0,
+            payment: "公司",
+            createdAt: new Date().toISOString()
+        };
+        await addRecord(record);
+    }
+    showToast(`✅ 訂單已完成！總共 ${selected.length} 件產品，總金額 ${total} 元`);
+    selectedProducts.clear();
+    renderProducts();
+    document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
+    // 重置支付方式為默認（現金），但保留“公司”選項的視覺
+    selectedSalesPayment = "現金";
+    renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
 }
 async function submitConsumption() {
     if (!gapiReady) alert("尚未登入，記錄將先儲存於本地，登入後自動同步");
@@ -768,7 +1267,15 @@ async function submitConsumption() {
     let amount = parseFloat(document.getElementById("consumeAmount").value);
     if (isNaN(amount) || amount <= 0) { alert("請輸入正確金額或點選預設金額按鈕"); return; }
     const payment = selectedConsumePayment;
-    const record = { type: "consumption", date, staffCode: selectedConsumeStaff.code, staffName: selectedConsumeStaff.name, amount, payment, details: `消費金額 $${amount}`, createdAt: new Date().toISOString() };
+    const record = {
+        type: "consumption",
+        date: date,
+        staffCode: selectedConsumeStaff.code,
+        staffName: selectedConsumeStaff.name,
+        amount: amount,
+        payment: payment,
+        createdAt: new Date().toISOString()
+    };
     await addRecord(record);
     showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
     document.getElementById("consumeAmount").value = "";
@@ -777,10 +1284,30 @@ async function submitConsumption() {
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     document.getElementById(pageId + "Page").classList.add("active");
-    if (pageId === "sales") { document.getElementById("salesDate").value = new Date().toISOString().slice(0,10); renderProducts(); updateRecentRecord('sales'); }
-    if (pageId === "consumption") { document.getElementById("consumeDate").value = new Date().toISOString().slice(0,10); renderPresetButtons(); updateRecentRecord('consumption'); }
+
+    // 更新導航按鈕的 active 樣式
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+        if (btn.dataset.page === pageId) {
+            btn.classList.add("active");
+        } else {
+            btn.classList.remove("active");
+        }
+    });
+
+    if (pageId === "sales") {
+        document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
+        renderProducts();
+        updateRecentRecord('sales');
+        renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
+    }
+    if (pageId === "consumption") {
+        document.getElementById("consumeDate").value = new Date().toISOString().slice(0,10);
+        renderPresetButtons();
+        updateRecentRecord('consumption');
+        renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
+    }
     if (pageId === "settings") {
-        renderStaffManageList(); renderProductManageList(); renderPresetManageList(); renderRecords();
+        renderStaffManageList(); renderProductManageList(); renderPresetManageList(); renderRecordsTables();
         document.getElementById("toggleStaff").classList.toggle("active", toggleStaff);
         document.getElementById("toggleProduct").classList.toggle("active", toggleProduct);
         document.getElementById("togglePreset").classList.toggle("active", togglePreset);
@@ -814,7 +1341,6 @@ function initToggles() {
         document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
     });
 }
-// 統一開啟設定頁面的函數（密碼驗證）
 function openSettingsPage() {
     const pwd = prompt("請輸入管理密碼");
     if (pwd === settingsPassword) showPage("settings");
@@ -865,10 +1391,35 @@ document.getElementById("addPresetBtn").onclick = async () => {
 };
 document.getElementById("clearLocalDataBtn").onclick = () => {
     if (confirm("⚠️ 確定清空所有本地記錄？此操作無法復原！")) {
-        records = []; saveRecords(); renderRecords(); alert("已清空所有記錄");
+        records = []; saveRecords(); renderRecordsTables(); alert("已清空所有記錄");
+        if (gapiReady) fullSyncToSheets(); // 清空後同步到雲端（清空工作表）
     }
 };
-document.getElementById("retryFailedSyncBtn").onclick = () => { retryFailedSync(); };
+document.getElementById("retryFailedSyncBtn").onclick = async () => {
+    if (!gapiReady) { showToast("尚未登入，請先登入後再重試同步"); return; }
+    const failed = records.filter(r => r.syncStatus === "failed");
+    if (failed.length === 0) { showToast("沒有同步失敗的記錄"); return; }
+    showToast(`開始重試 ${failed.length} 筆失敗記錄...`);
+    let successCount = 0;
+    for (let rec of failed) {
+        const ok = await syncRecordToSheet(rec);
+        if (ok) {
+            rec.syncStatus = "success";
+            delete rec.syncError;
+            successCount++;
+        }
+    }
+    saveRecords();
+    renderRecordsTables();
+    showToast(`重試完成：成功 ${successCount} 筆，失敗 ${failed.length - successCount} 筆`);
+};
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
+}
 function gapiLoaded() { gapi.load('client', initGapiClient); }
 async function initGapiClient() {
     await gapi.client.init({ discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] });
@@ -886,7 +1437,9 @@ function maybeEnableButtons() {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) throw resp;
                 document.getElementById('loginStatus').innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
-                await loadConfigFromSheet(); await syncAllPending(); renderUI();
+                await loadConfigFromSheet();
+                await fullSyncToSheets(); // 登入後全量同步，確保本地記錄與雲端一致
+                renderUI();
             };
             tokenClient.requestAccessToken();
         };
@@ -895,12 +1448,14 @@ function maybeEnableButtons() {
 function renderUI() {
     renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
     renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
-    renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p);
-    renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p);
-    renderProducts(); renderPresetButtons(); renderRecords();
+    renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
+    renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
+    renderProducts(); renderPresetButtons(); renderRecordsTables();
     renderStaffManageList(); renderProductManageList(); renderPresetManageList();
     updateRecentRecord('sales'); updateRecentRecord('consumption');
     initToggles(); setDarkMode(darkMode);
+    // 初始顯示銷售頁，並設定導航按鈕 active 樣式
+    showPage("sales");
 }
 function ensureInit() {
     if (typeof gapi !== 'undefined' && typeof google !== 'undefined' && typeof google.accounts !== 'undefined') {
