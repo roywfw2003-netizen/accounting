@@ -6,8 +6,8 @@
     <title>賣貨管理系統 | Hair World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ========== 原有 CSS 不變（因篇幅省略，請使用之前提供的完整 CSS） ========== */
-        /* 此處為節省篇幅，假設 CSS 已存在於最終檔案中，實際請複製先前完整樣式 */
+        /* 此處保留用戶原有完整 CSS，因篇幅省略，實際使用時請貼回完整樣式 */
+        /* 為確保功能，我們使用用戶提供的 CSS，此處僅示意，最終代碼包含完整 CSS */
         :root {
             --bg-body: #cfe7ff;
             --bg-card: white;
@@ -203,7 +203,6 @@
             transform: translateY(2px);
             box-shadow: 0 1px 0 var(--btn-primary-shadow);
         }
-        /* 按鈕群組使用動態列數 */
         .staff-group, .payment-group, .product-grid, .preset-grid {
             display: grid;
             gap: 8px;
@@ -578,7 +577,6 @@
                 </div>
             </div>
         </div>
-        <!-- 按鈕每行數量設定 -->
         <div class="settings-section">
             <div class="settings-header">
                 <h4>🔘 按鈕每行數量</h4>
@@ -592,8 +590,6 @@
                 <div style="font-size:0.7rem; color:var(--text-secondary);">數字越大按鈕越窄，會自動縮放文字以充分利用高度</div>
             </div>
         </div>
-
-        <!-- 產品銷售記錄獨立區塊 -->
         <div class="settings-section">
             <div class="settings-header">
                 <h4>🛍️ 產品銷售記錄</h4>
@@ -607,8 +603,6 @@
                 <div id="salesRecordsTable"></div>
             </div>
         </div>
-
-        <!-- 客人消費記錄獨立區塊 -->
         <div class="settings-section">
             <div class="settings-header">
                 <h4>👥 客人消費記錄</h4>
@@ -622,8 +616,6 @@
                 <div id="consumeRecordsTable"></div>
             </div>
         </div>
-
-        <!-- 手動同步按鈕 -->
         <div class="settings-section">
             <div class="settings-header">
                 <h4>🔄 多設備同步</h4>
@@ -633,8 +625,6 @@
                 <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:5px;">點擊後會從 Google Sheets 拉取所有記錄，並合併到本機</div>
             </div>
         </div>
-
-        <!-- 修復工作表按鈕 -->
         <div class="settings-section">
             <div class="settings-header">
                 <h4>🔧 工作表修復</h4>
@@ -644,7 +634,6 @@
                 <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:5px;">若寫入位置錯亂，請點此按鈕修復</div>
             </div>
         </div>
-
         <hr>
         <h4>🔐 修改管理密碼</h4>
         <div class="setting-row">
@@ -667,7 +656,6 @@ const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleuser
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
-// 刪除密碼 (可修改)
 const DELETE_PASSWORD = '288288';
 
 let tokenClient;
@@ -703,16 +691,15 @@ const SALES_PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支�
 
 let toggleStaff = false, toggleProduct = false, togglePreset = false;
 let toggleSalesRecords = false, toggleConsumeRecords = false;
-let buttonsPerRow = 3; // 預設每行3個按鈕
+let buttonsPerRow = 3;
 
-// 輔助函數：格式化日期顯示為 m月d
+// 輔助函數
 function formatDisplayDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
     return `${d.getMonth()+1}月${d.getDate()}`;
 }
-// 將 YYYY-MM-DD 轉為 dd/mm/yyyy
 function toGoogleDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -722,7 +709,6 @@ function toGoogleDate(dateStr) {
     const year = d.getFullYear();
     return `${day}/${month}/${year}`;
 }
-// 從 dd/mm/yyyy 提取年月日
 function extractYearMonthDay(googleDate) {
     if (!googleDate) return { year: '', month: '', day: '' };
     const parts = googleDate.split('/');
@@ -731,13 +717,11 @@ function extractYearMonthDay(googleDate) {
     }
     return { year: '', month: '', day: '' };
 }
-// 獲取當前時間 HH:MM:SS
 function getCurrentTime() {
     const now = new Date();
     return `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
 }
 
-// 設定按鈕每行列數
 function setButtonsPerRow(count) {
     buttonsPerRow = count;
     localStorage.setItem('buttonsPerRow', count);
@@ -747,115 +731,172 @@ function setButtonsPerRow(count) {
     });
 }
 
-// ========== 多設備同步核心函數 ==========
-// 從雲端拉取所有記錄（產品工作表 + 客人工作表），轉換為本地 records 格式，並合併到 records 陣列（去重按 id）
+function loadLocalData() {
+    const storedStaff = localStorage.getItem("staffList");
+    if (storedStaff) staffList = JSON.parse(storedStaff);
+    const storedProducts = localStorage.getItem("productList");
+    if (storedProducts) productList = JSON.parse(storedProducts);
+    const storedPresets = localStorage.getItem("presetAmounts");
+    if (storedPresets) presetAmounts = JSON.parse(storedPresets);
+    const storedRecords = localStorage.getItem("salesRecords");
+    if (storedRecords) records = JSON.parse(storedRecords);
+    const storedToggles = localStorage.getItem("settingsToggles");
+    if (storedToggles) {
+        const toggles = JSON.parse(storedToggles);
+        toggleStaff = toggles.staff || false;
+        toggleProduct = toggles.product || false;
+        togglePreset = toggles.preset || false;
+        toggleSalesRecords = toggles.salesRecords || false;
+        toggleConsumeRecords = toggles.consumeRecords || false;
+    }
+    const storedPerRow = localStorage.getItem('buttonsPerRow');
+    if (storedPerRow) buttonsPerRow = parseInt(storedPerRow);
+}
+function saveStaff() { localStorage.setItem("staffList", JSON.stringify(staffList)); }
+function saveProducts() { localStorage.setItem("productList", JSON.stringify(productList)); }
+function savePresets() { localStorage.setItem("presetAmounts", JSON.stringify(presetAmounts)); }
+function saveRecords() { localStorage.setItem("salesRecords", JSON.stringify(records)); }
+function saveToggles() {
+    localStorage.setItem("settingsToggles", JSON.stringify({
+        staff: toggleStaff, product: toggleProduct, preset: togglePreset,
+        salesRecords: toggleSalesRecords, consumeRecords: toggleConsumeRecords
+    }));
+}
+function setDarkMode(enabled) {
+    darkMode = enabled;
+    if (enabled) document.body.classList.add('dark');
+    else document.body.classList.remove('dark');
+    localStorage.setItem('darkMode', enabled);
+}
+
+const CONFIG_SHEET = 'staff';
+async function clearSheet(sheetName) {
+    const range = `${sheetName}!A:Z`;
+    await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId: SPREADSHEET_ID, range: range });
+}
+async function appendToSheet(sheetName, values) {
+    const range = `${sheetName}!A:Z`;
+    await gapi.client.sheets.spreadsheets.values.append({
+        spreadsheetId: SPREADSHEET_ID, range: range, valueInputOption: 'USER_ENTERED', resource: { values: [values] }
+    });
+}
+async function syncConfigToSheet() {
+    if (!gapiReady) return;
+    try {
+        await clearSheet(CONFIG_SHEET);
+        for (let s of staffList) await appendToSheet(CONFIG_SHEET, ['employee', s.code, s.name]);
+        for (let p of productList) await appendToSheet(CONFIG_SHEET, ['product', p.name, p.price.toString()]);
+        for (let amt of presetAmounts) await appendToSheet(CONFIG_SHEET, ['preset', amt.toString(), amt.toString()]);
+        await appendToSheet(CONFIG_SHEET, ['password', 'admin', settingsPassword]);
+    } catch (err) { console.error("同步設定失敗", err); }
+}
+async function loadConfigFromSheet() {
+    if (!gapiReady) return;
+    try {
+        const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${CONFIG_SHEET}!A:C` });
+        if (resp.result.values && resp.result.values.length > 0) {
+            const rows = resp.result.values;
+            const newStaff = [], newProducts = [], newPresets = [];
+            let newPassword = null;
+            for (let row of rows) {
+                const type = row[0], key = row[1], val = row[2];
+                if (type === 'employee') newStaff.push({ code: key, name: val });
+                else if (type === 'product') newProducts.push({ name: key, price: parseFloat(val) });
+                else if (type === 'preset') newPresets.push(parseFloat(val));
+                else if (type === 'password' && key === 'admin') newPassword = val;
+            }
+            if (newStaff.length) staffList = newStaff;
+            if (newProducts.length) productList = newProducts;
+            if (newPresets.length) presetAmounts = newPresets;
+            if (newPassword) settingsPassword = newPassword;
+            saveStaff(); saveProducts(); savePresets();
+        }
+        renderUI();
+    } catch (err) { console.error("讀取設定失敗", err); }
+}
+
+// 單筆同步
+async function syncRecordToSheet(record) {
+    if (!gapiReady) return false;
+    try {
+        const sheetName = record.type === 'sales' ? '產品' : '客人';
+        let row;
+        if (record.type === 'sales') {
+            const googleDate = toGoogleDate(record.date);
+            const { year, month, day } = extractYearMonthDay(googleDate);
+            const time = getCurrentTime();
+            row = [ year, month, day, record.staffName, record.staffCode, record.productName,
+                record.amount.toString(), record.payment, time, record.syncStatus || 'success' ];
+        } else {
+            const googleDate = toGoogleDate(record.date);
+            const time = getCurrentTime();
+            row = [googleDate, record.staffName, record.amount.toString(), record.payment, time, record.syncStatus || 'success'];
+        }
+        await appendToSheet(sheetName, row);
+        return true;
+    } catch (err) {
+        console.error("同步單筆失敗", err);
+        return false;
+    }
+}
+
+// 從雲端拉取所有記錄
 async function pullRecordsFromSheet() {
     if (!gapiReady) {
         showToast("未登入，無法同步");
         return false;
     }
     try {
-        // 讀取產品工作表
         const productResp = await gapi.client.sheets.spreadsheets.values.get({
-            spreadsheetId: SPREADSHEET_ID,
-            range: '產品!A:J'
+            spreadsheetId: SPREADSHEET_ID, range: '產品!A:J'
         });
-        // 讀取客人工作表
         const consumeResp = await gapi.client.sheets.spreadsheets.values.get({
-            spreadsheetId: SPREADSHEET_ID,
-            range: '客人!A:F'
+            spreadsheetId: SPREADSHEET_ID, range: '客人!A:F'
         });
-
         const newRecords = [];
-
-        // 處理產品銷售記錄（每行對應一個產品）
         if (productResp.result.values && productResp.result.values.length > 0) {
             for (const row of productResp.result.values) {
-                if (row.length < 10) continue; // 欄位不足跳過
-                const year = row[0];
-                const month = row[1];
-                const day = row[2];
-                const staffName = row[3];
-                const staffCode = row[4];
-                const productName = row[5];
-                const amount = parseFloat(row[6]);
-                const payment = row[7];
-                const time = row[8];
-                const syncStatus = row[9];
-                // 重建日期：假設儲存的是 dd/mm/yyyy 格式，但我們存的是 dd/mm/yyyy，要轉回 YYYY-MM-DD
+                if (row.length < 10) continue;
+                const [year, month, day, staffName, staffCode, productName, amountStr, payment, time] = row;
+                const amount = parseFloat(amountStr);
                 let dateStr = '';
-                if (year && month && day) {
-                    dateStr = `${year}-${month}-${day}`;
-                } else {
-                    // 若無年/月/日，嘗試從時間戳或其他欄位推斷？這裡簡單用當天
-                    dateStr = new Date().toISOString().slice(0,10);
-                }
-                const id = `${dateStr}_${staffCode}_${productName}_${time}_${Math.random()}`; // 簡單產生唯一ID
+                if (year && month && day) dateStr = `${year}-${month}-${day}`;
+                else dateStr = new Date().toISOString().slice(0,10);
+                const id = `${dateStr}_${staffCode}_${productName}_${time}`;
                 newRecords.push({
-                    id: id,
-                    type: 'sales',
-                    date: dateStr,
-                    staffCode: staffCode,
-                    staffName: staffName,
-                    productName: productName,
-                    productPrice: amount,
-                    amount: amount,
-                    payment: payment,
-                    createdAt: new Date().toISOString(),
-                    syncStatus: 'success',
-                    displayDate: formatDisplayDate(dateStr)
+                    id, type: 'sales', date: dateStr, staffCode, staffName, productName,
+                    productPrice: amount, amount, payment,
+                    createdAt: new Date(`${dateStr}T${time}`).toISOString(),
+                    syncStatus: 'success', displayDate: formatDisplayDate(dateStr)
                 });
             }
         }
-
-        // 處理客人消費記錄
         if (consumeResp.result.values && consumeResp.result.values.length > 0) {
             for (const row of consumeResp.result.values) {
                 if (row.length < 6) continue;
-                const googleDate = row[0]; // dd/mm/yyyy
-                const staffName = row[1];
-                const amount = parseFloat(row[2]);
-                const payment = row[3];
-                const time = row[4];
-                const syncStatus = row[5];
-                // 將 dd/mm/yyyy 轉為 YYYY-MM-DD
+                const [googleDate, staffName, amountStr, payment, time] = row;
+                const amount = parseFloat(amountStr);
                 let dateStr = '';
                 if (googleDate) {
                     const parts = googleDate.split('/');
-                    if (parts.length === 3) {
-                        dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                    } else {
-                        dateStr = new Date().toISOString().slice(0,10);
-                    }
-                } else {
-                    dateStr = new Date().toISOString().slice(0,10);
-                }
-                // 尋找對應員工 code（依名稱匹配，若無則保留空）
+                    if (parts.length === 3) dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    else dateStr = new Date().toISOString().slice(0,10);
+                } else dateStr = new Date().toISOString().slice(0,10);
                 const staff = staffList.find(s => s.name === staffName);
                 const staffCode = staff ? staff.code : '';
-                const id = `${dateStr}_${staffCode}_${amount}_${time}_${Math.random()}`;
+                const id = `${dateStr}_${staffCode}_${amount}_${time}`;
                 newRecords.push({
-                    id: id,
-                    type: 'consumption',
-                    date: dateStr,
-                    staffCode: staffCode,
-                    staffName: staffName,
-                    amount: amount,
-                    payment: payment,
-                    createdAt: new Date().toISOString(),
-                    syncStatus: 'success',
-                    displayDate: formatDisplayDate(dateStr)
+                    id, type: 'consumption', date: dateStr, staffCode, staffName,
+                    amount, payment,
+                    createdAt: new Date(`${dateStr}T${time}`).toISOString(),
+                    syncStatus: 'success', displayDate: formatDisplayDate(dateStr)
                 });
             }
         }
-
-        // 合併：以 id 為準，保留新拉取的記錄（覆蓋本地相同 id 的記錄）
         const existingIds = new Set(newRecords.map(r => r.id));
         const filteredLocal = records.filter(r => !existingIds.has(r.id));
-        const mergedRecords = [...filteredLocal, ...newRecords];
-        // 按時間倒序排序（最新在上）
-        mergedRecords.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        records = mergedRecords;
+        records = [...filteredLocal, ...newRecords];
+        records.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
         saveRecords();
         renderRecordsTables();
         showToast(`已從雲端同步 ${newRecords.length} 筆記錄`);
@@ -867,7 +908,7 @@ async function pullRecordsFromSheet() {
     }
 }
 
-// 全量同步：清空工作表，重寫所有本地記錄（刪除/修改/修復時調用）
+// 全量同步
 async function fullSyncToSheets() {
     if (!gapiReady) {
         showToast("未登入，無法同步至雲端");
@@ -883,15 +924,8 @@ async function fullSyncToSheets() {
                 const googleDate = toGoogleDate(rec.date);
                 const { year, month, day } = extractYearMonthDay(googleDate);
                 const time = getCurrentTime();
-                row = [
-                    year, month, day,
-                    rec.staffName, rec.staffCode,
-                    rec.productName,
-                    rec.amount.toString(),
-                    rec.payment,
-                    time,
-                    'success'
-                ];
+                row = [ year, month, day, rec.staffName, rec.staffCode, rec.productName,
+                    rec.amount.toString(), rec.payment, time, 'success' ];
             } else {
                 const googleDate = toGoogleDate(rec.date);
                 const time = getCurrentTime();
@@ -911,37 +945,29 @@ async function fullSyncToSheets() {
     }
 }
 
-// 通用操作：先拉取雲端記錄，再執行本地修改，再全量同步
+// 通用操作
 async function syncOperation(operationFn) {
     if (!gapiReady) {
         showToast("未登入，無法執行操作");
         return false;
     }
-    // 先拉取雲端最新記錄
     const pullOk = await pullRecordsFromSheet();
     if (!pullOk) return false;
-    // 執行本地操作（新增/刪除/修改）
     const opResult = await operationFn();
     if (!opResult) return false;
-    // 全量同步回雲端
     const pushOk = await fullSyncToSheets();
     return pushOk;
 }
 
-// 新增記錄（提交時使用）
-async function addRecord(recordData) {
+// 本地操作函數
+async function addRecordLocally(recordData) {
     const newId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
     const newRecord = {
-        id: newId,
-        syncStatus: "success", // 同步後再設為 success
-        ...recordData,
-        displayDate: formatDisplayDate(recordData.date),
-        createdAt: new Date().toISOString()
+        id: newId, syncStatus: "success", ...recordData,
+        displayDate: formatDisplayDate(recordData.date), createdAt: new Date().toISOString()
     };
-    // 先將記錄加入本地（稍後會全量同步）
     records.unshift(newRecord);
     saveRecords();
-    // 更新最近一筆顯示
     if (recordData.type === 'sales') {
         lastSalesRecord = { ...newRecord };
         updateRecentRecord('sales');
@@ -952,173 +978,59 @@ async function addRecord(recordData) {
     renderRecordsTables();
     return true;
 }
-
-// 刪除記錄（需密碼）
-async function deleteRecordById(id) {
-    const pwd = prompt("請輸入刪除密碼");
-    if (pwd !== DELETE_PASSWORD) {
-        alert("密碼錯誤，無法刪除");
-        return false;
-    }
-    const index = records.findIndex(r => r.id === id);
-    if (index === -1) return false;
-    records.splice(index, 1);
+async function deleteRecordLocally(id) {
+    const idx = records.findIndex(r => r.id === id);
+    if (idx === -1) return false;
+    records.splice(idx, 1);
     saveRecords();
     return true;
 }
-
-// 修改記錄（需密碼）
-async function editRecord(record) {
-    const pwd = prompt("請輸入刪除密碼（修改操作需要驗證）");
-    if (pwd !== DELETE_PASSWORD) {
-        alert("密碼錯誤，無法修改");
-        return false;
-    }
+async function editRecordLocally(record) {
     let newData = {};
     if (record.type === 'sales') {
         const newProduct = prompt("輸入新產品名稱", record.productName);
         const newPrice = parseFloat(prompt("輸入新價格", record.productPrice));
-        const newPayment = prompt("輸入新支付方式（現金/轉數快/支付寶/PayMe/微信支付/公司）", record.payment);
-        if (newProduct && !isNaN(newPrice) && newPayment) {
-            newData.productName = newProduct.trim();
-            newData.productPrice = newPrice;
-            newData.amount = newPrice;
-            newData.payment = newPayment;
-        } else {
-            alert("修改無效");
-            return false;
-        }
+        const newPayment = prompt("輸入新支付方式", record.payment);
+        if (!newProduct || isNaN(newPrice) || !newPayment) { alert("修改無效"); return false; }
+        newData = { productName: newProduct.trim(), productPrice: newPrice, amount: newPrice, payment: newPayment };
     } else {
         const newAmount = parseFloat(prompt("輸入新金額", record.amount));
-        const newPayment = prompt("輸入新支付方式（現金/轉數快/支付寶/PayMe/微信支付）", record.payment);
-        if (!isNaN(newAmount) && newAmount > 0 && newPayment) {
-            newData.amount = newAmount;
-            newData.payment = newPayment;
-        } else {
-            alert("修改無效");
-            return false;
-        }
+        const newPayment = prompt("輸入新支付方式", record.payment);
+        if (isNaN(newAmount) || newAmount <= 0 || !newPayment) { alert("修改無效"); return false; }
+        newData = { amount: newAmount, payment: newPayment };
     }
     Object.assign(record, newData);
     saveRecords();
     return true;
 }
-
-// 清空某類型記錄（需密碼）
-async function clearRecordsByType(type) {
-    const pwd = prompt("請輸入刪除密碼");
-    if (pwd !== DELETE_PASSWORD) {
-        alert("密碼錯誤，無法刪除");
-        return false;
-    }
+async function clearRecordsByTypeLocally(type) {
     records = records.filter(r => r.type !== type);
     saveRecords();
     return true;
 }
 
-// 重試失敗記錄（只針對失敗的記錄重新單筆同步，不清空）
-async function retryFailedSync(type) {
-    if (!gapiReady) {
-        showToast("尚未登入，請先登入後再重試同步");
-        return false;
-    }
-    const failed = records.filter(r => r.type === type && r.syncStatus === "failed");
-    if (failed.length === 0) {
-        showToast(`沒有同步失敗的${type === 'sales' ? '銷售' : '消費'}記錄`);
-        return false;
-    }
-    showToast(`開始重試 ${failed.length} 筆失敗記錄...`);
-    let successCount = 0;
-    for (let rec of failed) {
-        const ok = await syncRecordToSheet(rec);
-        if (ok) {
-            rec.syncStatus = "success";
-            delete rec.syncError;
-            successCount++;
-        }
-    }
-    saveRecords();
-    renderRecordsTables();
-    showToast(`重試完成：成功 ${successCount} 筆，失敗 ${failed.length - successCount} 筆`);
-    return true;
-}
-
-// 原本的單筆同步函數（僅用於重試失敗）
-async function syncRecordToSheet(record) {
-    if (!gapiReady) return false;
-    try {
-        const sheetName = record.type === 'sales' ? '產品' : '客人';
-        let row;
-        if (record.type === 'sales') {
-            const googleDate = toGoogleDate(record.date);
-            const { year, month, day } = extractYearMonthDay(googleDate);
-            const time = getCurrentTime();
-            row = [
-                year, month, day,
-                record.staffName, record.staffCode,
-                record.productName,
-                record.amount.toString(),
-                record.payment,
-                time,
-                record.syncStatus || 'success'
-            ];
-        } else {
-            const googleDate = toGoogleDate(record.date);
-            const time = getCurrentTime();
-            row = [googleDate, record.staffName, record.amount.toString(), record.payment, time, record.syncStatus || 'success'];
-        }
-        await appendToSheet(sheetName, row);
-        return true;
-    } catch (err) {
-        console.error("同步單筆失敗", err);
-        return false;
-    }
-}
-
-// 其餘輔助函數（clearSheet, appendToSheet, syncConfigToSheet, loadConfigFromSheet 等保持不變，因篇幅略）
-// 此處僅列出必要函數，實際完整代碼需包含所有之前定義的函數
-// 由於篇幅限制，這裡僅展示核心修改，實際最終檔案需包含完整的輔助函數
-
-// 為節省篇幅，以下為必要的輔助函數聲明（實際應從原代碼複製）
-// 我們在最終答案中提供完整程式碼檔案，此處僅示意
-
-// ... (原有函數全部保留，但需要改寫調用方式) ...
-
-// 提交銷售和消費的調用方式改為使用 syncOperation
-async function submitSalesWithSync() {
+// 事件處理
+async function submitSales() {
     const date = document.getElementById("salesDate").value;
     if (!date) { alert("請選擇日期"); return; }
     if (!selectedSalesStaff) { alert("請選擇員工"); return; }
     let payment = selectedSalesPayment;
     const selected = [];
-    productList.forEach(p => { if (selectedProducts.has(p.name)) { selected.push(p); } });
+    productList.forEach(p => { if (selectedProducts.has(p.name)) selected.push(p); });
     if (selected.length === 0 && payment !== "公司") { alert("請至少選擇一件產品"); return; }
-    if (payment === "公司") total = 0;
+
     const operation = async () => {
-        // 本地新增記錄（多筆）
         for (const prod of selected) {
-            const record = {
-                type: "sales",
-                date: date,
-                staffCode: selectedSalesStaff.code,
-                staffName: selectedSalesStaff.name,
-                productName: prod.name,
-                productPrice: prod.price,
-                amount: payment === "公司" ? 0 : prod.price,
-                payment: payment,
-            };
-            await addRecord(record);
+            await addRecordLocally({
+                type: "sales", date, staffCode: selectedSalesStaff.code, staffName: selectedSalesStaff.name,
+                productName: prod.name, productPrice: prod.price,
+                amount: payment === "公司" ? 0 : prod.price, payment
+            });
         }
         if (payment === "公司" && selected.length === 0) {
-            await addRecord({
-                type: "sales",
-                date: date,
-                staffCode: selectedSalesStaff.code,
-                staffName: selectedSalesStaff.name,
-                productName: "（無產品）",
-                productPrice: 0,
-                amount: 0,
-                payment: "公司",
+            await addRecordLocally({
+                type: "sales", date, staffCode: selectedSalesStaff.code, staffName: selectedSalesStaff.name,
+                productName: "（無產品）", productPrice: 0, amount: 0, payment: "公司"
             });
         }
         return true;
@@ -1135,22 +1047,18 @@ async function submitSalesWithSync() {
         showToast("提交失敗，請檢查網路後重試");
     }
 }
-
-async function submitConsumptionWithSync() {
+async function submitConsumption() {
     const date = document.getElementById("consumeDate").value;
     if (!date) { alert("請選擇日期"); return; }
     if (!selectedConsumeStaff) { alert("請選擇員工"); return; }
     let amount = parseFloat(document.getElementById("consumeAmount").value);
     if (isNaN(amount) || amount <= 0) { alert("請輸入正確金額或點選預設金額按鈕"); return; }
     const payment = selectedConsumePayment;
+
     const operation = async () => {
-        await addRecord({
-            type: "consumption",
-            date: date,
-            staffCode: selectedConsumeStaff.code,
-            staffName: selectedConsumeStaff.name,
-            amount: amount,
-            payment: payment,
+        await addRecordLocally({
+            type: "consumption", date, staffCode: selectedConsumeStaff.code,
+            staffName: selectedConsumeStaff.name, amount, payment
         });
         return true;
     };
@@ -1163,21 +1071,503 @@ async function submitConsumptionWithSync() {
         showToast("提交失敗，請檢查網路後重試");
     }
 }
+async function deleteRecordById(id) {
+    const pwd = prompt("請輸入刪除密碼");
+    if (pwd !== DELETE_PASSWORD) { alert("密碼錯誤"); return false; }
+    return await syncOperation(async () => await deleteRecordLocally(id));
+}
+async function editRecord(record) {
+    const pwd = prompt("請輸入刪除密碼");
+    if (pwd !== DELETE_PASSWORD) { alert("密碼錯誤"); return false; }
+    return await syncOperation(async () => await editRecordLocally(record));
+}
 
-// 同樣，刪除記錄、修改記錄、清除記錄等也需用 syncOperation 包裝
-// 此處不再逐一列出，實際程式碼中會完整修改。
+// 渲染函數 (以下保留原有)
+function renderStaff(containerId, selectedCode, onChange) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    staffList.forEach(s => {
+        const btn = document.createElement("div");
+        btn.className = "staff-btn" + (selectedCode === s.code ? " active" : "");
+        btn.innerHTML = `<div class="staff-name">${s.name}</div><div class="staff-code">${s.code}</div>`;
+        btn.onclick = () => {
+            container.querySelectorAll(".staff-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            onChange(s.code, s.name);
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+}
+function renderPayment(containerId, selected, onChange, isSales = false) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    const payments = isSales ? SALES_PAYMENTS : PAYMENTS;
+    payments.forEach(p => {
+        const btn = document.createElement("div");
+        btn.className = "payment-btn" + (selected === p ? " active" : "");
+        btn.textContent = p;
+        btn.onclick = () => {
+            container.querySelectorAll(".payment-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            onChange(p);
+            if (isSales && p === "公司") document.getElementById("totalAmount").innerText = "0";
+            else if (isSales) calcTotal();
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+}
+function renderProducts() {
+    const container = document.getElementById("productList");
+    if (!container) return;
+    container.innerHTML = "";
+    productList.forEach(p => {
+        const btn = document.createElement("div");
+        btn.className = "product-btn" + (selectedProducts.has(p.name) ? " selected" : "");
+        btn.innerHTML = `<div class="product-name">${p.name}</div><div class="product-price">$${p.price}</div>`;
+        btn.onclick = () => {
+            if (selectedProducts.has(p.name)) selectedProducts.delete(p.name);
+            else selectedProducts.add(p.name);
+            renderProducts();
+            calcTotal();
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+}
+function renderPresetButtons() {
+    const container = document.getElementById("presetAmounts");
+    if (!container) return;
+    container.innerHTML = "";
+    presetAmounts.forEach(amt => {
+        const btn = document.createElement("div");
+        btn.className = "preset-btn";
+        btn.textContent = `$${amt}`;
+        btn.onclick = () => {
+            document.querySelectorAll("#presetAmounts .preset-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById("consumeAmount").value = amt;
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+    const amountInput = document.getElementById("consumeAmount");
+    if (amountInput) {
+        amountInput.removeEventListener("input", clearPresetHighlight);
+        amountInput.addEventListener("input", clearPresetHighlight);
+    }
+}
+function clearPresetHighlight() {
+    document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
+}
+function calcTotal() {
+    let total = 0;
+    productList.forEach(p => { if (selectedProducts.has(p.name)) total += p.price; });
+    if (selectedSalesPayment === "公司") total = 0;
+    document.getElementById("totalAmount").innerText = total;
+    return total;
+}
+function renderRecordsTables() {
+    const salesContainer = document.getElementById("salesRecordsTable");
+    const consumeContainer = document.getElementById("consumeRecordsTable");
+    if (!salesContainer || !consumeContainer) return;
+    const salesRecords = records.filter(r => r.type === 'sales');
+    const consumeRecords = records.filter(r => r.type === 'consumption');
+    if (salesRecords.length === 0) {
+        salesContainer.innerHTML = "<div>暫無產品銷售記錄</div>";
+    } else {
+        let html = '<table class="records-table"><thead><tr><th>日子</th><th>員工</th><th>產品</th><th>價錢</th><th>支付方式</th><th>同步狀態</th><th>操作</th></tr></thead><tbody>';
+        for (const rec of salesRecords) {
+            const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
+            const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
+            html += `<tr>
+                <td class="record-cell" onclick="alert('完整日期：${rec.date}')">${rec.displayDate}</td>
+                <td>${rec.staffName}</td>
+                <td>${rec.productName}</td>
+                <td>${rec.amount}</td>
+                <td>${rec.payment}</td>
+                <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
+                <td class="action-btns">
+                    <button class="small-btn edit-btn" data-id="${rec.id}">✏️ 修改</button>
+                    <button class="small-btn danger-btn" data-id="${rec.id}">🗑️ 刪除</button>
+                </td>
+            </tr>`;
+        }
+        html += '</tbody></table>';
+        salesContainer.innerHTML = html;
+    }
+    if (consumeRecords.length === 0) {
+        consumeContainer.innerHTML = "<div>暫無客人消費記錄</div>";
+    } else {
+        let html = '<table class="records-table"><thead><tr><th>日子</th><th>員工</th><th>價錢</th><th>支付方式</th><th>同步狀態</th><th>操作</th></tr></thead><tbody>';
+        for (const rec of consumeRecords) {
+            const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
+            const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
+            html += `<tr>
+                <td class="record-cell" onclick="alert('完整日期：${rec.date}')">${rec.displayDate}</td>
+                <td>${rec.staffName}</td>
+                <td>${rec.amount}</td>
+                <td>${rec.payment}</td>
+                <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
+                <td class="action-btns">
+                    <button class="small-btn edit-btn" data-id="${rec.id}">✏️ 修改</button>
+                    <button class="small-btn danger-btn" data-id="${rec.id}">🗑️ 刪除</button>
+                </td>
+            </tr>`;
+        }
+        html += '</tbody></table>';
+        consumeContainer.innerHTML = html;
+    }
+    document.querySelectorAll('#salesRecordsTable .edit-btn, #consumeRecordsTable .edit-btn').forEach(btn => {
+        btn.onclick = async () => {
+            const id = btn.dataset.id;
+            const record = records.find(r => r.id === id);
+            if (record) await editRecord(record);
+        };
+    });
+    document.querySelectorAll('#salesRecordsTable .danger-btn, #consumeRecordsTable .danger-btn').forEach(btn => {
+        btn.onclick = async () => {
+            const id = btn.dataset.id;
+            await deleteRecordById(id);
+        };
+    });
+}
+function updateRecentRecord(type) {
+    const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
+    if (type === 'sales' && lastSalesRecord) {
+        div.style.display = 'block';
+        div.innerHTML = `📌 最近一筆銷售：${lastSalesRecord.displayDate} ${lastSalesRecord.staffName} | 產品：${lastSalesRecord.productName} 金額 $${lastSalesRecord.amount} | ${lastSalesRecord.payment}`;
+    } else if (type === 'consumption' && lastConsumeRecord) {
+        div.style.display = 'block';
+        div.innerHTML = `📌 最近一筆消費：${lastConsumeRecord.displayDate} ${lastConsumeRecord.staffName} | 金額 $${lastConsumeRecord.amount} | ${lastConsumeRecord.payment}`;
+    } else div.style.display = 'none';
+}
+function renderStaffManageList() {
+    const container = document.getElementById("staffManageList");
+    if (!container) return;
+    container.innerHTML = "";
+    staffList.forEach((staff, idx) => {
+        const div = document.createElement("div");
+        div.className = "setting-row";
+        div.innerHTML = `<span style="flex:2;"><strong>${staff.name}</strong> (${staff.code})</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="staff">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="staff">🗑️ 刪除</button>`;
+        div.querySelector(".edit-btn").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能編輯員工"); return; }
+            const newName = prompt("輸入新姓名", staff.name);
+            const newCode = prompt("輸入新工號", staff.code);
+            if (newName && newCode) {
+                staff.name = newName.trim(); staff.code = newCode.trim();
+                saveStaff(); renderStaffManageList();
+                renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+                renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+                await syncConfigToSheet();
+            }
+        };
+        div.querySelector(".danger-btn").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能刪除員工"); return; }
+            staffList.splice(idx, 1); saveStaff(); renderStaffManageList();
+            renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+            renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+            await syncConfigToSheet();
+        };
+        container.appendChild(div);
+    });
+}
+function renderProductManageList() {
+    const container = document.getElementById("productManageList");
+    if (!container) return;
+    container.innerHTML = "";
+    productList.forEach((prod, idx) => {
+        const div = document.createElement("div");
+        div.className = "setting-row";
+        div.innerHTML = `<span style="flex:2;">${prod.name} - $${prod.price}</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="product">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="product">🗑️ 刪除</button>`;
+        div.querySelector(".edit-btn").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能編輯產品"); return; }
+            const newName = prompt("輸入新產品名稱", prod.name);
+            const newPrice = prompt("輸入新價格", prod.price);
+            if (newName && newPrice && !isNaN(parseFloat(newPrice))) {
+                prod.name = newName.trim(); prod.price = parseFloat(newPrice);
+                saveProducts(); renderProductManageList(); renderProducts();
+                await syncConfigToSheet();
+            }
+        };
+        div.querySelector(".danger-btn").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能刪除產品"); return; }
+            productList.splice(idx, 1); saveProducts(); renderProductManageList(); renderProducts();
+            await syncConfigToSheet();
+        };
+        container.appendChild(div);
+    });
+}
+function renderPresetManageList() {
+    const container = document.getElementById("presetManageList");
+    if (!container) return;
+    container.innerHTML = "";
+    presetAmounts.forEach((amt, idx) => {
+        const div = document.createElement("div");
+        div.className = "setting-row";
+        div.innerHTML = `<span style="flex:2;">$${amt}</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="preset">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="preset">🗑️ 刪除</button>`;
+        div.querySelector(".edit-btn").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能編輯預設金額"); return; }
+            const newAmt = prompt("輸入新金額", amt);
+            if (newAmt && !isNaN(parseFloat(newAmt))) {
+                presetAmounts[idx] = parseFloat(newAmt);
+                savePresets(); renderPresetManageList(); renderPresetButtons();
+                await syncConfigToSheet();
+            }
+        };
+        div.querySelector(".danger-btn").onclick = async () => {
+            if (!gapiReady) { alert("請先登入才能刪除預設金額"); return; }
+            presetAmounts.splice(idx, 1); savePresets(); renderPresetManageList(); renderPresetButtons();
+            await syncConfigToSheet();
+        };
+        container.appendChild(div);
+    });
+}
+function showPage(pageId) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(pageId + "Page").classList.add("active");
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+        if (btn.dataset.page === pageId) btn.classList.add("active");
+        else btn.classList.remove("active");
+    });
+    if (pageId === "sales") {
+        document.getElementById("salesDate").value = new Date().toISOString().slice(0,10);
+        renderProducts();
+        updateRecentRecord('sales');
+        renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
+    }
+    if (pageId === "consumption") {
+        document.getElementById("consumeDate").value = new Date().toISOString().slice(0,10);
+        renderPresetButtons();
+        updateRecentRecord('consumption');
+        renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
+    }
+    if (pageId === "settings") {
+        renderStaffManageList(); renderProductManageList(); renderPresetManageList(); renderRecordsTables();
+        document.getElementById("toggleStaff").classList.toggle("active", toggleStaff);
+        document.getElementById("toggleProduct").classList.toggle("active", toggleProduct);
+        document.getElementById("togglePreset").classList.toggle("active", togglePreset);
+        document.getElementById("toggleSalesRecords").classList.toggle("active", toggleSalesRecords);
+        document.getElementById("toggleConsumeRecords").classList.toggle("active", toggleConsumeRecords);
+        document.getElementById("staffContent").classList.toggle("hidden-content", !toggleStaff);
+        document.getElementById("productContent").classList.toggle("hidden-content", !toggleProduct);
+        document.getElementById("presetContent").classList.toggle("hidden-content", !togglePreset);
+        document.getElementById("salesRecordsContent").classList.toggle("hidden-content", !toggleSalesRecords);
+        document.getElementById("consumeRecordsContent").classList.toggle("hidden-content", !toggleConsumeRecords);
+        document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
+        document.getElementById("buttonsPerRow").value = buttonsPerRow;
+    }
+}
+function initToggles() {
+    document.getElementById("toggleStaff").addEventListener("click", () => {
+        toggleStaff = !toggleStaff; document.getElementById("toggleStaff").classList.toggle("active", toggleStaff);
+        document.getElementById("staffContent").classList.toggle("hidden-content", !toggleStaff); saveToggles();
+    });
+    document.getElementById("toggleProduct").addEventListener("click", () => {
+        toggleProduct = !toggleProduct; document.getElementById("toggleProduct").classList.toggle("active", toggleProduct);
+        document.getElementById("productContent").classList.toggle("hidden-content", !toggleProduct); saveToggles();
+    });
+    document.getElementById("togglePreset").addEventListener("click", () => {
+        togglePreset = !togglePreset; document.getElementById("togglePreset").classList.toggle("active", togglePreset);
+        document.getElementById("presetContent").classList.toggle("hidden-content", !togglePreset); saveToggles();
+    });
+    document.getElementById("toggleSalesRecords").addEventListener("click", () => {
+        toggleSalesRecords = !toggleSalesRecords; document.getElementById("toggleSalesRecords").classList.toggle("active", toggleSalesRecords);
+        document.getElementById("salesRecordsContent").classList.toggle("hidden-content", !toggleSalesRecords); saveToggles();
+    });
+    document.getElementById("toggleConsumeRecords").addEventListener("click", () => {
+        toggleConsumeRecords = !toggleConsumeRecords; document.getElementById("toggleConsumeRecords").classList.toggle("active", toggleConsumeRecords);
+        document.getElementById("consumeRecordsContent").classList.toggle("hidden-content", !toggleConsumeRecords); saveToggles();
+    });
+    document.getElementById("toggleDarkMode").addEventListener("click", () => {
+        setDarkMode(!darkMode);
+        document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
+    });
+    document.getElementById("applyButtonsPerRow").addEventListener("click", () => {
+        let val = parseInt(document.getElementById("buttonsPerRow").value);
+        if (isNaN(val) || val < 1) val = 3;
+        if (val > 6) val = 6;
+        setButtonsPerRow(val);
+        renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+        renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+        renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
+        renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
+        renderProducts();
+        renderPresetButtons();
+        showToast(`按鈕每行數量已改為 ${buttonsPerRow}`);
+    });
+}
+function openSettingsPage() {
+    const pwd = prompt("請輸入管理密碼");
+    if (pwd === settingsPassword) showPage("settings");
+    else if (pwd !== null) alert("密碼錯誤");
+}
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
+}
+function gapiLoaded() { gapi.load('client', initGapiClient); }
+async function initGapiClient() {
+    await gapi.client.init({ discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] });
+    gapiInited = true; maybeEnableButtons();
+}
+function gisLoaded() {
+    tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '' });
+    gisInited = true; maybeEnableButtons();
+}
+function maybeEnableButtons() {
+    if (gapiInited && gisInited && !gapiReady) {
+        gapiReady = true;
+        document.getElementById('loginStatus').innerHTML = '✅ 已準備就緒，請按下方按鈕登入授權 <button id="authBtn">登入 Google</button>';
+        document.getElementById('authBtn').onclick = () => {
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) throw resp;
+                document.getElementById('loginStatus').innerHTML = '✅ 已登入並授權，可以開始使用賣貨系統！';
+                await loadConfigFromSheet();
+                await pullRecordsFromSheet();
+                renderUI();
+            };
+            tokenClient.requestAccessToken();
+        };
+    }
+}
+function renderUI() {
+    renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+    renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+    renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
+    renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
+    renderProducts(); renderPresetButtons(); renderRecordsTables();
+    renderStaffManageList(); renderProductManageList(); renderPresetManageList();
+    updateRecentRecord('sales'); updateRecentRecord('consumption');
+    initToggles(); setDarkMode(darkMode);
+    showPage("sales");
+    setButtonsPerRow(buttonsPerRow);
+}
+function ensureInit() {
+    if (typeof gapi !== 'undefined' && typeof google !== 'undefined' && typeof google.accounts !== 'undefined') {
+        if (!gapiInited) gapiLoaded();
+        if (!gisInited) gisLoaded();
+    } else setTimeout(ensureInit, 200);
+}
+window.addEventListener('load', () => { loadLocalData(); renderUI(); ensureInit(); });
 
-// 手動同步按鈕
+// 按鈕事件綁定
+document.getElementById("settingsIconSales").addEventListener("click", openSettingsPage);
+document.getElementById("settingsIconConsume").addEventListener("click", openSettingsPage);
+document.getElementById("changePasswordBtn").addEventListener("click", async () => {
+    const newPwd = document.getElementById("newPassword").value, confirmPwd = document.getElementById("confirmPassword").value;
+    if (!newPwd) { alert("請輸入新密碼"); return; }
+    if (newPwd !== confirmPwd) { alert("兩次密碼不一致"); return; }
+    settingsPassword = newPwd;
+    if (gapiReady) await syncConfigToSheet();
+    alert("密碼已更新");
+    document.getElementById("newPassword").value = ""; document.getElementById("confirmPassword").value = "";
+});
+document.getElementById("studentBookingBtn").onclick = () => {
+    document.getElementById("bookingIframe").src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html";
+    document.getElementById("iframeModal").style.display = "block";
+};
+document.getElementById("closeIframeBtn").onclick = () => {
+    document.getElementById("iframeModal").style.display = "none";
+    document.getElementById("bookingIframe").src = "";
+};
+document.querySelectorAll("[data-page]").forEach(btn => btn.onclick = () => showPage(btn.dataset.page));
+document.getElementById("submitSales").onclick = submitSales;
+document.getElementById("submitConsume").onclick = submitConsumption;
+document.getElementById("addStaffBtn").onclick = async () => {
+    if (!gapiReady) { alert("請先登入才能新增員工"); return; }
+    const name = document.getElementById("newStaffName").value.trim(), code = document.getElementById("newStaffCode").value.trim();
+    if (!name || !code) { alert("請填寫員工姓名與工號"); return; }
+    staffList.push({ code, name }); saveStaff(); renderStaffManageList();
+    renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+    renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+    await syncConfigToSheet();
+    document.getElementById("newStaffName").value = ""; document.getElementById("newStaffCode").value = "";
+};
+document.getElementById("addProductBtn").onclick = async () => {
+    if (!gapiReady) { alert("請先登入才能新增產品"); return; }
+    const name = document.getElementById("newProductName").value.trim(), price = parseFloat(document.getElementById("newProductPrice").value);
+    if (!name || isNaN(price) || price <= 0) { alert("請填寫產品名稱與正確價格"); return; }
+    productList.push({ name, price }); saveProducts(); renderProductManageList(); renderProducts();
+    await syncConfigToSheet();
+    document.getElementById("newProductName").value = ""; document.getElementById("newProductPrice").value = "";
+};
+document.getElementById("addPresetBtn").onclick = async () => {
+    if (!gapiReady) { alert("請先登入才能新增預設金額"); return; }
+    const amt = parseFloat(document.getElementById("newPresetAmount").value);
+    if (isNaN(amt) || amt <= 0) { alert("請輸入正確金額"); return; }
+    presetAmounts.push(amt); savePresets(); renderPresetManageList(); renderPresetButtons();
+    await syncConfigToSheet();
+    document.getElementById("newPresetAmount").value = "";
+};
+document.getElementById("clearSalesRecordsBtn").onclick = async () => {
+    if (!confirm("⚠️ 確定清除所有產品銷售記錄？此操作無法復原！")) return;
+    await syncOperation(async () => await clearRecordsByTypeLocally('sales'));
+};
+document.getElementById("clearConsumeRecordsBtn").onclick = async () => {
+    if (!confirm("⚠️ 確定清除所有客人消費記錄？此操作無法復原！")) return;
+    await syncOperation(async () => await clearRecordsByTypeLocally('consumption'));
+};
+document.getElementById("retrySalesFailedSyncBtn").onclick = async () => {
+    if (!gapiReady) { showToast("尚未登入，請先登入後再重試同步"); return; }
+    await pullRecordsFromSheet();
+    const failed = records.filter(r => r.type === 'sales' && r.syncStatus === "failed");
+    if (failed.length === 0) { showToast("沒有同步失敗的銷售記錄"); return; }
+    showToast(`開始重試 ${failed.length} 筆失敗記錄...`);
+    let successCount = 0;
+    for (let rec of failed) {
+        const ok = await syncRecordToSheet(rec);
+        if (ok) {
+            rec.syncStatus = "success";
+            delete rec.syncError;
+            successCount++;
+        }
+    }
+    saveRecords();
+    renderRecordsTables();
+    showToast(`重試完成：成功 ${successCount} 筆，失敗 ${failed.length - successCount} 筆`);
+    await fullSyncToSheets();
+};
+document.getElementById("retryConsumeFailedSyncBtn").onclick = async () => {
+    if (!gapiReady) { showToast("尚未登入，請先登入後再重試同步"); return; }
+    await pullRecordsFromSheet();
+    const failed = records.filter(r => r.type === 'consumption' && r.syncStatus === "failed");
+    if (failed.length === 0) { showToast("沒有同步失敗的消費記錄"); return; }
+    showToast(`開始重試 ${failed.length} 筆失敗記錄...`);
+    let successCount = 0;
+    for (let rec of failed) {
+        const ok = await syncRecordToSheet(rec);
+        if (ok) {
+            rec.syncStatus = "success";
+            delete rec.syncError;
+            successCount++;
+        }
+    }
+    saveRecords();
+    renderRecordsTables();
+    showToast(`重試完成：成功 ${successCount} 筆，失敗 ${failed.length - successCount} 筆`);
+    await fullSyncToSheets();
+};
 document.getElementById("manualSyncBtn").onclick = async () => {
     if (!gapiReady) { showToast("請先登入"); return; }
     await pullRecordsFromSheet();
 };
-
-// 注意：由於最終答案篇幅限制，無法在此展示所有 2000 行完整程式碼。
-// 我們將提供一個完整檔案的下載鏈接（虛擬），或說明如何將上述邏輯整合。
-// 但鑑於對話環境，我將直接提供一個完整 HTML 檔案，其中包含所有必要的函數和修改。
-// 下方是完整程式碼（為節省空間，略去了重複的輔助函數，實際需補齊）。
+document.getElementById("repairSheetsBtn").onclick = async () => {
+    if (!gapiReady) { showToast("請先登入"); return; }
+    await fullSyncToSheets();
+};
 </script>
-<!-- 實際完整程式碼需包含所有之前定義的函數，因篇幅限制在此省略 -->
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client"></script>
 </body>
 </html>
