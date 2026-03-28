@@ -6,7 +6,7 @@
     <title>賣貨管理系統 | Hair World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ========== 原有 CSS 變數，保持不變 ========== */
+        /* ========== 原有 CSS 變數 ========== */
         :root {
             --bg-body: #cfe7ff;
             --bg-card: white;
@@ -47,9 +47,440 @@
             justify-content: center;
             color: var(--text-primary);
         }
-        /* 其他所有樣式與之前完全相同，此處省略重複部分以節省篇幅，實際使用時完整保留 */
-        /* ...（此處保留原有完整樣式，因長度限制省略，但最終代碼會包含全部） */
-        /* 為了完整性，我們在最終輸出中包含所有樣式 */
+        h1, h2, h3, h4, h5, h6, p, span, div, label, button, input, select, .setting-row span, .small-btn, .record-item {
+            color: var(--text-primary);
+        }
+        .nav-btn, .submit-btn, .settings-icon-small, .small-btn, .danger-btn {
+            color: white;
+        }
+        .settings-icon-small i {
+            color: white;
+        }
+        .danger-btn {
+            color: #b91c1c !important;
+        }
+        body.dark .danger-btn {
+            color: #ff7b72 !important;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: 0;
+            box-shadow: none;
+            overflow-y: auto;
+            padding: 12px;
+            transition: all 0.2s;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        @media (orientation: landscape) {
+            .app-container {
+                padding: 8px 12px;
+            }
+            .nav-btn {
+                padding: 10px 4px;
+                font-size: 0.8rem;
+            }
+            .nav-btn i {
+                font-size: 1.5rem;
+            }
+            .product-grid, .preset-grid {
+                gap: 6px;
+            }
+            .product-btn, .preset-btn {
+                padding: 8px 4px;
+                font-size: 0.8rem;
+            }
+            .form-group {
+                margin-bottom: 6px;
+            }
+            .staff-group, .payment-group {
+                gap: 6px;
+            }
+            .staff-btn, .payment-btn {
+                padding: 8px 4px;
+                font-size: 0.8rem;
+            }
+            .total, .recent-record {
+                font-size: 0.9rem;
+                margin-top: 4px;
+                padding-top: 4px;
+            }
+            .submit-btn, #submitConsume {
+                padding: 10px;
+                font-size: 1rem;
+                margin-top: 8px;
+            }
+            .settings-section {
+                margin-bottom: 8px;
+                padding: 6px;
+            }
+            .record-item {
+                padding: 6px;
+                font-size: 0.8rem;
+            }
+            .small-btn {
+                padding: 4px 8px;
+                font-size: 0.75rem;
+            }
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .nav-btn {
+            background: var(--btn-gray-bg);
+            border: none;
+            border-radius: 32px;
+            color: var(--text-primary);
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 8px;
+            text-align: center;
+            transition: 0.05s linear;
+            box-shadow: 0 5px 0 var(--btn-gray-shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-btn i { font-size: 1.8rem; }
+        .nav-btn span { font-size: 0.85rem; }
+        .nav-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-gray-shadow); }
+        .nav-btn.active {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 5px 0 var(--accent-orange-shadow);
+        }
+        .nav-btn.active:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--accent-orange-shadow);
+        }
+        .page { display: none; }
+        .active { display: block; }
+        .form-group { margin-bottom: 10px; }
+        label { display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-primary); }
+        select, input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 40px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+        .date-with-settings {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .date-with-settings input {
+            flex: 1;
+        }
+        .settings-icon-small {
+            background: var(--btn-primary-bg);
+            border: none;
+            border-radius: 40px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--btn-primary-shadow);
+            transition: 0.05s linear;
+            font-size: 1.2rem;
+            color: white;
+        }
+        .settings-icon-small:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--btn-primary-shadow);
+        }
+        .staff-group, .payment-group, .product-grid, .preset-grid {
+            display: grid;
+            gap: 8px;
+            margin: 6px 0;
+        }
+        .staff-btn, .payment-btn, .preset-btn, .product-btn {
+            padding: 12px 8px;
+            min-height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-sizing: border-box;
+            background: var(--btn-gray-bg);
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 3px 0 var(--btn-gray-shadow);
+            transition: 0.05s linear;
+            color: var(--text-primary);
+            flex-direction: column;
+        }
+        .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--btn-gray-shadow);
+        }
+        .staff-btn.active, .product-btn.selected {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .payment-btn.active {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .preset-btn.active {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .staff-name { font-size: 1rem; font-weight: bold; }
+        .staff-code { font-size: 0.75rem; opacity: 0.8; }
+        .product-name { font-size: 1rem; font-weight: bold; }
+        .product-price { font-size: 0.85rem; font-weight: bold; }
+        .product-btn.selected .product-price { color: white; }
+        .total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 6px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 6px;
+            color: var(--accent-orange);
+        }
+        .record-item {
+            background: var(--btn-gray-bg);
+            border-radius: 20px;
+            padding: 8px;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+        .sync-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+        .sync-success { background: #d1fae5; color: #15803d; }
+        .sync-failed { background: #ffe4e2; color: #b91c1c; }
+        .sync-pending { background: #fef9c3; color: #854d0e; }
+        .login-status {
+            background: var(--btn-gray-bg);
+            border-radius: 40px;
+            padding: 6px 12px;
+            margin-bottom: 12px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+        .setting-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .small-btn {
+            background: var(--btn-gray-bg);
+            border: none;
+            padding: 4px 10px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            box-shadow: 0 3px 0 var(--btn-gray-shadow);
+            transition: 0.05s linear;
+            color: var(--text-primary);
+        }
+        .small-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--btn-gray-shadow);
+        }
+        .danger-btn {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .edit-btn {
+            background: var(--btn-gray-bg);
+            color: var(--text-primary);
+            margin-left: 6px;
+        }
+        hr {
+            margin: 12px 0;
+            border-color: var(--border-color);
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-orange);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: opacity 0.3s;
+            opacity: 1;
+            pointer-events: none;
+            white-space: pre-line;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        .iframe-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            display: none;
+        }
+        .iframe-container iframe {
+            width: 90%;
+            height: 90%;
+            margin: 5% auto;
+            display: block;
+            background: white;
+            border-radius: 20px;
+        }
+        .close-iframe {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: var(--accent-orange);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 6px 12px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .close-iframe:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--accent-orange-shadow);
+        }
+        .recent-record {
+            background: var(--btn-gray-bg);
+            border-radius: 20px;
+            padding: 6px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 0.75rem;
+            border-left: 4px solid var(--accent-orange);
+            color: var(--text-primary);
+        }
+        .settings-section {
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 8px;
+        }
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .settings-content {
+            margin-top: 8px;
+        }
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 24px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .toggle-switch.active {
+            background: var(--accent-orange);
+        }
+        .toggle-switch::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: 0.2s;
+        }
+        .toggle-switch.active::after {
+            left: 22px;
+        }
+        .hidden-content {
+            display: none;
+        }
+        .submit-btn, #submitConsume {
+            background: var(--btn-success-bg);
+            color: white;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 var(--btn-success-shadow);
+            transition: 0.05s linear;
+            text-align: center;
+        }
+        .submit-btn:active, #submitConsume:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--btn-success-shadow);
+        }
+        .records-action-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+            font-size: 0.8rem;
+        }
+        .records-table th, .records-table td {
+            border: 1px solid var(--border-color);
+            padding: 6px;
+            text-align: left;
+        }
+        .records-table th {
+            background: var(--btn-gray-bg);
+        }
+        .record-cell {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+            max-width: 120px;
+        }
+        .action-btns {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 600px) {
+            .records-table th, .records-table td {
+                padding: 4px;
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -94,7 +525,7 @@
         <div id="consumeRecent" class="recent-record" style="display:none;"></div>
     </div>
 
-    <!-- 系統設定頁（內容結構與之前完全相同，此處僅保留關鍵元素，完整版將包含所有管理區塊） -->
+    <!-- 系統設定頁 -->
     <div id="settingsPage" class="page">
         <h3>⚙️ 系統設定</h3>
         <hr>
@@ -145,6 +576,7 @@
                 </div>
             </div>
         </div>
+        <!-- 按鈕每行數量設定 -->
         <div class="settings-section">
             <div class="settings-header">
                 <h4>🔘 按鈕每行數量</h4>
@@ -155,9 +587,11 @@
                     <input type="number" id="buttonsPerRow" min="1" max="6" value="3" style="width:80px;">
                     <button class="small-btn" id="applyButtonsPerRow">套用</button>
                 </div>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">數字越大按鈕越窄，會自動縮放文字以充分利用高度</div>
             </div>
         </div>
 
+        <!-- 產品銷售記錄獨立區塊 -->
         <div class="settings-section">
             <div class="settings-header">
                 <h4>🛍️ 產品銷售記錄</h4>
@@ -173,6 +607,7 @@
             </div>
         </div>
 
+        <!-- 客人消費記錄獨立區塊 -->
         <div class="settings-section">
             <div class="settings-header">
                 <h4>👥 客人消費記錄</h4>
@@ -188,13 +623,14 @@
             </div>
         </div>
 
+        <!-- 修復工作表按鈕 -->
         <div class="settings-section">
             <div class="settings-header">
                 <h4>🔧 工作表修復</h4>
             </div>
             <div>
                 <button class="small-btn" id="repairSheetsBtn">🔄 修復工作表格式（全量同步）</button>
-                <div style="font-size:0.7rem; color:var(--text-secondary);">僅推送本地記錄到雲端，不拉取</div>
+                <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:5px;">若寫入位置錯亂，請點此按鈕修復（僅推送本地記錄到雲端）</div>
             </div>
         </div>
 
@@ -220,9 +656,14 @@ const CLIENT_ID = '448045465424-2m36ohn34hfq8c7hrriub3fforfub0o5.apps.googleuser
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
-const DELETE_PASSWORD = '288288';   // 刪除記錄專用密碼（獨立於管理密碼）
+// 刪除密碼 (可修改)
+const DELETE_PASSWORD = '288288';
+
 let tokenClient;
-let gapiInited = false, gisInited = false, gapiReady = false;
+let gapiInited = false;
+let gisInited = false;
+let gapiReady = false;
+let syncInProgress = false;
 let settingsPassword = 'admin123';
 let darkMode = localStorage.getItem('darkMode') === 'true';
 
@@ -253,18 +694,18 @@ let toggleStaff = false, toggleProduct = false, togglePreset = false;
 let toggleSalesRecords = false, toggleConsumeRecords = false;
 let buttonsPerRow = 3;
 
-// ========== 密碼驗證狀態（1分鐘有效） ==========
+// ========== 新增：密碼驗證狀態（1分鐘有效） ==========
 let passwordAuth = {
     verified: false,
     expireTime: 0
 };
 
-// 檢查密碼是否在有效期內
+// 檢查管理密碼是否在有效期內
 function isPasswordValid() {
     return passwordAuth.verified && Date.now() < passwordAuth.expireTime;
 }
 
-// 要求密碼驗證（若1分鐘內已驗證則直接返回true）
+// 要求管理密碼驗證（若1分鐘內已驗證則直接返回true）
 async function requirePassword() {
     if (isPasswordValid()) return true;
     const pwd = prompt("請輸入管理密碼（驗證後1分鐘內無需重複輸入）");
@@ -278,19 +719,14 @@ async function requirePassword() {
     }
 }
 
-// 重置密碼驗證狀態（可選，登出時可用）
-function resetPasswordAuth() {
-    passwordAuth.verified = false;
-    passwordAuth.expireTime = 0;
-}
-
-// ========== 輔助函數（日期、顯示等） ==========
+// 輔助函數：格式化日期顯示為 m月d
 function formatDisplayDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
     return `${d.getMonth()+1}月${d.getDate()}`;
 }
+// 將 YYYY-MM-DD 轉為 dd/mm/yyyy (新格式)
 function toGoogleDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -300,6 +736,7 @@ function toGoogleDate(dateStr) {
     const year = d.getFullYear();
     return `${day}/${month}/${year}`;
 }
+// 從 dd/mm/yyyy 提取年月日 (格式日/月/年)
 function extractYearMonthDay(googleDate) {
     if (!googleDate) return { year: '', month: '', day: '' };
     const parts = googleDate.split('/');
@@ -308,12 +745,22 @@ function extractYearMonthDay(googleDate) {
     }
     return { year: '', month: '', day: '' };
 }
+// 獲取當前時間 HH:MM:SS
 function getCurrentTime() {
     const now = new Date();
     return `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
 }
 
-// 本地儲存相關函數（不變）
+// 設定按鈕每行列數（僅本地）
+function setButtonsPerRow(count) {
+    buttonsPerRow = count;
+    localStorage.setItem('buttonsPerRow', count);
+    const groups = document.querySelectorAll('.staff-group, .payment-group, .product-grid, .preset-grid');
+    groups.forEach(group => {
+        group.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+    });
+}
+
 function loadLocalData() {
     const storedStaff = localStorage.getItem("staffList");
     if (storedStaff) staffList = JSON.parse(storedStaff);
@@ -355,43 +802,30 @@ function setDarkMode(enabled) {
     localStorage.setItem('darkMode', enabled);
 }
 
-// ========== Google Sheets 操作（保留標題行） ==========
 const CONFIG_SHEET = 'staff';
 
-// 清除工作表從 A2 開始的所有數據（保留標題行）
+// ========== 修改：清除工作表數據，保留標題行（只清除 A2:Z） ==========
 async function clearSheetData(sheetName) {
-    // 先獲取工作表現有數據範圍，清除 A2:Z 區域
     const range = `${sheetName}!A2:Z`;
     await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId: SPREADSHEET_ID, range: range });
 }
-
-// 追加一行數據（始終從最後非空行之後寫入）
 async function appendToSheet(sheetName, values) {
     const range = `${sheetName}!A:Z`;
     await gapi.client.sheets.spreadsheets.values.append({
-        spreadsheetId: SPREADSHEET_ID,
-        range: range,
-        valueInputOption: 'USER_ENTERED',
-        resource: { values: [values] }
+        spreadsheetId: SPREADSHEET_ID, range: range, valueInputOption: 'USER_ENTERED', resource: { values: [values] }
     });
 }
-
 // 同步配置表（員工、產品、預設金額、密碼）到雲端，保留標題行
 async function syncConfigToSheet() {
     if (!gapiReady) return;
     try {
         await clearSheetData(CONFIG_SHEET);
-        // 寫入員工（類型 employee, 工號, 姓名）
         for (let s of staffList) await appendToSheet(CONFIG_SHEET, ['employee', s.code, s.name]);
-        // 寫入產品（類型 product, 名稱, 價格）
         for (let p of productList) await appendToSheet(CONFIG_SHEET, ['product', p.name, p.price.toString()]);
-        // 寫入預設金額（類型 preset, 金額, 金額）
         for (let amt of presetAmounts) await appendToSheet(CONFIG_SHEET, ['preset', amt.toString(), amt.toString()]);
-        // 寫入密碼（類型 password, admin, 密碼）
         await appendToSheet(CONFIG_SHEET, ['password', 'admin', settingsPassword]);
     } catch (err) { console.error("同步設定失敗", err); }
 }
-
 // 從雲端讀取配置表（跳過標題行）
 async function loadConfigFromSheet() {
     if (!gapiReady) return;
@@ -418,14 +852,14 @@ async function loadConfigFromSheet() {
     } catch (err) { console.error("讀取設定失敗", err); }
 }
 
-// 從雲端拉取所有銷售/消費記錄（跳過標題行）並合併到本地
+// ========== 修改：從雲端拉取所有記錄並合併到本地（跳過標題行） ==========
 async function pullAllRecordsFromSheets() {
     if (!gapiReady) {
         showToast("未登入，無法從雲端拉取");
         return false;
     }
     try {
-        // 拉取產品工作表（標題行 A1 已佔用）
+        // 拉取產品工作表
         const salesResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '產品!A:K' });
         const consumeResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '客人!A:G' });
 
@@ -486,7 +920,7 @@ async function pullAllRecordsFromSheets() {
             }
         }
 
-        // 合併：以 id 為準，雲端記錄覆蓋本地相同 id，雲端有而本地無則新增
+        // 合併：以 id 為準，雲端記錄覆蓋本地相同 id 的記錄，雲端有但本地無則新增
         const localMap = new Map(records.map(r => [r.id, r]));
         for (const cloudRec of cloudRecords) {
             if (localMap.has(cloudRec.id)) {
@@ -509,7 +943,7 @@ async function pullAllRecordsFromSheets() {
     }
 }
 
-// 全量同步記錄到雲端（保留標題行）
+// 全量同步：清空雲端工作表（保留標題行），寫入本地所有記錄（含 id 列）
 async function fullSyncToSheets() {
     if (!gapiReady) {
         showToast("未登入，無法同步至雲端");
@@ -554,7 +988,7 @@ async function fullSyncToSheets() {
     }
 }
 
-// 新增記錄（僅本地，不自動同步，由外部控制全量同步）
+// 新增記錄（不會自動同步，由外部控制全量同步）
 async function addRecord(recordData) {
     const newId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
     const newRecord = {
@@ -576,7 +1010,7 @@ async function addRecord(recordData) {
     return newRecord;
 }
 
-// 刪除記錄（需要 DELETE_PASSWORD 驗證，且調用 fullSyncToSheets）
+// 刪除記錄（需要刪除密碼驗證，然後全量同步）
 async function deleteRecordById(id) {
     const pwd = prompt("請輸入刪除密碼");
     if (pwd !== DELETE_PASSWORD) {
@@ -593,7 +1027,7 @@ async function deleteRecordById(id) {
     return true;
 }
 
-// 編輯記錄（需要 DELETE_PASSWORD 驗證，且調用 fullSyncToSheets）
+// 編輯記錄（需要刪除密碼驗證，然後全量同步）
 async function editRecord(record) {
     const pwd = prompt("請輸入刪除密碼（修改操作需要驗證）");
     if (pwd !== DELETE_PASSWORD) {
@@ -633,10 +1067,80 @@ async function editRecord(record) {
     return true;
 }
 
-// 渲染記錄表格（與之前相同，此處省略詳細內容，最終代碼會包含完整函數）
-function renderRecordsTables() { /* 完整實現，此處僅示意，最終代碼完整 */ }
+function renderRecordsTables() {
+    const salesContainer = document.getElementById("salesRecordsTable");
+    const consumeContainer = document.getElementById("consumeRecordsTable");
+    if (!salesContainer || !consumeContainer) return;
 
-// 更新最近記錄顯示
+    const salesRecords = records.filter(r => r.type === 'sales');
+    const consumeRecords = records.filter(r => r.type === 'consumption');
+
+    if (salesRecords.length === 0) {
+        salesContainer.innerHTML = "<div>暫無產品銷售記錄</div>";
+    } else {
+        let html = '<table class="records-table"><thead><tr><th>日子</th><th>員工</th><th>產品</th><th>價錢</th><th>支付方式</th><th>同步狀態</th><th>操作</th></tr></thead><tbody>';
+        for (const rec of salesRecords) {
+            const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
+            const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
+            html += `
+                <tr>
+                    <td class="record-cell" title="點擊查看完整日期" onclick="alert('完整日期：${rec.date}')">${rec.displayDate}</td>
+                    <td class="record-cell" title="${rec.staffName}">${rec.staffName}</td>
+                    <td class="record-cell" title="${rec.productName}">${rec.productName}</td>
+                    <td class="record-cell">${rec.amount}</td>
+                    <td class="record-cell">${rec.payment}</td>
+                    <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
+                    <td class="action-btns">
+                        <button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button>
+                        <button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button>
+                    </td>
+                </tr>
+            `;
+        }
+        html += '</tbody></table>';
+        salesContainer.innerHTML = html;
+    }
+
+    if (consumeRecords.length === 0) {
+        consumeContainer.innerHTML = "<div>暫無客人消費記錄</div>";
+    } else {
+        let html = '<table class="records-table"><thead><tr><th>日子</th><th>員工</th><th>價錢</th><th>支付方式</th><th>同步狀態</th><th>操作</th></tr></thead><tbody>';
+        for (const rec of consumeRecords) {
+            const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
+            const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
+            html += `
+                <tr>
+                    <td class="record-cell" title="點擊查看完整日期" onclick="alert('完整日期：${rec.date}')">${rec.displayDate}</td>
+                    <td class="record-cell" title="${rec.staffName}">${rec.staffName}</td>
+                    <td class="record-cell">${rec.amount}</td>
+                    <td class="record-cell">${rec.payment}</td>
+                    <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
+                    <td class="action-btns">
+                        <button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button>
+                        <button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button>
+                    </td>
+                </tr>
+            `;
+        }
+        html += '</tbody></table>';
+        consumeContainer.innerHTML = html;
+    }
+
+    document.querySelectorAll('#salesRecordsTable .edit-btn, #consumeRecordsTable .edit-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const id = btn.dataset.id;
+            const record = records.find(r => r.id === id);
+            if (record) await editRecord(record);
+        });
+    });
+    document.querySelectorAll('#salesRecordsTable .danger-btn, #consumeRecordsTable .danger-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const id = btn.dataset.id;
+            await deleteRecordById(id);
+        });
+    });
+}
+
 function updateRecentRecord(type) {
     const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
     if (type === 'sales' && lastSalesRecord) {
@@ -648,28 +1152,208 @@ function updateRecentRecord(type) {
     } else div.style.display = 'none';
 }
 
-// ========== UI 渲染函數（保留原有邏輯） ==========
-function renderStaff(containerId, selectedCode, onChange) { /* 完整實現 */ }
-function renderProducts() { /* 完整實現 */ }
-function renderPayment(containerId, selected, onChange, isSales) { /* 完整實現 */ }
-function renderPresetButtons() { /* 完整實現 */ }
-function clearPresetHighlight() { /* 完整實現 */ }
-function calcTotal() { /* 完整實現 */ }
-function renderStaffManageList() { /* 完整實現 */ }
-function renderProductManageList() { /* 完整實現 */ }
-function renderPresetManageList() { /* 完整實現 */ }
-
-// 系統設定中的刪除/修改按鈕需要統一密碼驗證（1分鐘內有效）和二次確認
-// 封裝一個通用函數
-async function withProtectedAction(actionName, actionFn) {
-    if (!await requirePassword()) return;
-    const confirmMsg = `確定要${actionName}嗎？`;
-    if (!confirm(confirmMsg)) return;
-    await actionFn();
+// 修改員工按鈕：姓名在上，工號在下
+function renderStaff(containerId, selectedCode, onChange) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    staffList.forEach(s => {
+        const btn = document.createElement("div");
+        btn.className = "staff-btn" + (selectedCode === s.code ? " active" : "");
+        btn.innerHTML = `<div class="staff-name">${s.name}</div><div class="staff-code">${s.code}</div>`;
+        btn.onclick = () => {
+            container.querySelectorAll(".staff-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            onChange(s.code, s.name);
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
 }
 
-// 重新設計員工管理、產品管理、預設金額管理中的編輯/刪除按鈕事件，使用 withProtectedAction
-// 這些函數在 renderStaffManageList 等內部定義，我們將在後面修改
+// 修改產品按鈕：產品名稱在上，價格在下
+function renderProducts() {
+    const container = document.getElementById("productList");
+    if (!container) return;
+    container.innerHTML = "";
+    productList.forEach(p => {
+        const btn = document.createElement("div");
+        btn.className = "product-btn" + (selectedProducts.has(p.name) ? " selected" : "");
+        btn.innerHTML = `<div class="product-name">${p.name}</div><div class="product-price">$${p.price}</div>`;
+        btn.onclick = () => {
+            if (selectedProducts.has(p.name)) selectedProducts.delete(p.name);
+            else selectedProducts.add(p.name);
+            renderProducts();
+            calcTotal();
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+}
+
+function renderPayment(containerId, selected, onChange, isSales = false) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    const payments = isSales ? SALES_PAYMENTS : PAYMENTS;
+    payments.forEach(p => {
+        const btn = document.createElement("div");
+        btn.className = "payment-btn" + (selected === p ? " active" : "");
+        btn.textContent = p;
+        btn.onclick = () => {
+            container.querySelectorAll(".payment-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            onChange(p);
+            if (isSales && p === "公司") {
+                const totalSpan = document.getElementById("totalAmount");
+                if (totalSpan) totalSpan.innerText = "0";
+            } else if (isSales) {
+                calcTotal();
+            }
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+}
+
+function renderPresetButtons() {
+    const container = document.getElementById("presetAmounts");
+    if (!container) return;
+    container.innerHTML = "";
+    presetAmounts.forEach(amt => {
+        const btn = document.createElement("div");
+        btn.className = "preset-btn";
+        btn.textContent = `$${amt}`;
+        btn.onclick = () => {
+            document.querySelectorAll("#presetAmounts .preset-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById("consumeAmount").value = amt;
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+    const amountInput = document.getElementById("consumeAmount");
+    if (amountInput) {
+        amountInput.removeEventListener("input", clearPresetHighlight);
+        amountInput.addEventListener("input", clearPresetHighlight);
+    }
+}
+function clearPresetHighlight() {
+    document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
+}
+function calcTotal() {
+    let total = 0;
+    productList.forEach(p => { if (selectedProducts.has(p.name)) total += p.price; });
+    if (selectedSalesPayment === "公司") total = 0;
+    document.getElementById("totalAmount").innerText = total;
+    return total;
+}
+// ========== 修改：員工管理列表的編輯/刪除按鈕，加入管理密碼驗證（1分鐘有效）和同步 ==========
+function renderStaffManageList() {
+    const container = document.getElementById("staffManageList");
+    if (!container) return;
+    container.innerHTML = "";
+    staffList.forEach((staff, idx) => {
+        const div = document.createElement("div");
+        div.className = "setting-row";
+        div.innerHTML = `<span style="flex:2;"><strong>${staff.name}</strong> (${staff.code})</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="staff">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="staff">🗑️ 刪除</button>`;
+        const editBtn = div.querySelector(".edit-btn");
+        const delBtn = div.querySelector(".danger-btn");
+        editBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要編輯員工 ${staff.name} (${staff.code}) 嗎？`)) return;
+            const newName = prompt("輸入新姓名", staff.name);
+            const newCode = prompt("輸入新工號", staff.code);
+            if (newName && newCode) {
+                staff.name = newName.trim(); staff.code = newCode.trim();
+                saveStaff(); renderStaffManageList();
+                renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+                renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+                await syncConfigToSheet();
+                showToast("員工已修改並同步雲端");
+            }
+        };
+        delBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要刪除員工 ${staff.name} (${staff.code}) 嗎？`)) return;
+            staffList.splice(idx, 1); saveStaff(); renderStaffManageList();
+            renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+            renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+            await syncConfigToSheet();
+            showToast("員工已刪除並同步雲端");
+        };
+        container.appendChild(div);
+    });
+}
+// 產品管理列表的編輯/刪除按鈕，加入管理密碼驗證和同步
+function renderProductManageList() {
+    const container = document.getElementById("productManageList");
+    if (!container) return;
+    container.innerHTML = "";
+    productList.forEach((prod, idx) => {
+        const div = document.createElement("div");
+        div.className = "setting-row";
+        div.innerHTML = `<span style="flex:2;">${prod.name} - $${prod.price}</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="product">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="product">🗑️ 刪除</button>`;
+        const editBtn = div.querySelector(".edit-btn");
+        const delBtn = div.querySelector(".danger-btn");
+        editBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要編輯產品 ${prod.name} 嗎？`)) return;
+            const newName = prompt("輸入新產品名稱", prod.name);
+            const newPrice = prompt("輸入新價格", prod.price);
+            if (newName && newPrice && !isNaN(parseFloat(newPrice))) {
+                prod.name = newName.trim(); prod.price = parseFloat(newPrice);
+                saveProducts(); renderProductManageList(); renderProducts();
+                await syncConfigToSheet();
+                showToast("產品已修改並同步雲端");
+            }
+        };
+        delBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要刪除產品 ${prod.name} 嗎？`)) return;
+            productList.splice(idx, 1); saveProducts(); renderProductManageList(); renderProducts();
+            await syncConfigToSheet();
+            showToast("產品已刪除並同步雲端");
+        };
+        container.appendChild(div);
+    });
+}
+// 預設金額管理列表的編輯/刪除按鈕，加入管理密碼驗證和同步
+function renderPresetManageList() {
+    const container = document.getElementById("presetManageList");
+    if (!container) return;
+    container.innerHTML = "";
+    presetAmounts.forEach((amt, idx) => {
+        const div = document.createElement("div");
+        div.className = "setting-row";
+        div.innerHTML = `<span style="flex:2;">$${amt}</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="preset">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="preset">🗑️ 刪除</button>`;
+        const editBtn = div.querySelector(".edit-btn");
+        const delBtn = div.querySelector(".danger-btn");
+        editBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要編輯預設金額 $${amt} 嗎？`)) return;
+            const newAmt = prompt("輸入新金額", amt);
+            if (newAmt && !isNaN(parseFloat(newAmt))) {
+                presetAmounts[idx] = parseFloat(newAmt);
+                savePresets(); renderPresetManageList(); renderPresetButtons();
+                await syncConfigToSheet();
+                showToast("預設金額已修改並同步雲端");
+            }
+        };
+        delBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要刪除預設金額 $${amt} 嗎？`)) return;
+            presetAmounts.splice(idx, 1); savePresets(); renderPresetManageList(); renderPresetButtons();
+            await syncConfigToSheet();
+            showToast("預設金額已刪除並同步雲端");
+        };
+        container.appendChild(div);
+    });
+}
 
 // 提交銷售（先拉取合併，新增，全量同步）
 async function submitSales() {
@@ -743,8 +1427,6 @@ async function submitConsumption() {
     document.getElementById("consumeAmount").value = "";
     clearPresetHighlight();
 }
-
-// 顯示頁面
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     document.getElementById(pageId + "Page").classList.add("active");
@@ -780,30 +1462,62 @@ function showPage(pageId) {
         document.getElementById("buttonsPerRow").value = buttonsPerRow;
     }
 }
-
-// 刷新所有數據（從雲端拉取配置和記錄）
-async function refreshAllData() {
-    if (!gapiReady) return;
-    await loadConfigFromSheet();
-    await pullAllRecordsFromSheets();
-    renderUI();
+function initToggles() {
+    document.getElementById("toggleStaff").addEventListener("click", () => {
+        toggleStaff = !toggleStaff; document.getElementById("toggleStaff").classList.toggle("active", toggleStaff);
+        document.getElementById("staffContent").classList.toggle("hidden-content", !toggleStaff); saveToggles();
+    });
+    document.getElementById("toggleProduct").addEventListener("click", () => {
+        toggleProduct = !toggleProduct; document.getElementById("toggleProduct").classList.toggle("active", toggleProduct);
+        document.getElementById("productContent").classList.toggle("hidden-content", !toggleProduct); saveToggles();
+    });
+    document.getElementById("togglePreset").addEventListener("click", () => {
+        togglePreset = !togglePreset; document.getElementById("togglePreset").classList.toggle("active", togglePreset);
+        document.getElementById("presetContent").classList.toggle("hidden-content", !togglePreset); saveToggles();
+    });
+    document.getElementById("toggleSalesRecords").addEventListener("click", () => {
+        toggleSalesRecords = !toggleSalesRecords; document.getElementById("toggleSalesRecords").classList.toggle("active", toggleSalesRecords);
+        document.getElementById("salesRecordsContent").classList.toggle("hidden-content", !toggleSalesRecords); saveToggles();
+    });
+    document.getElementById("toggleConsumeRecords").addEventListener("click", () => {
+        toggleConsumeRecords = !toggleConsumeRecords; document.getElementById("toggleConsumeRecords").classList.toggle("active", toggleConsumeRecords);
+        document.getElementById("consumeRecordsContent").classList.toggle("hidden-content", !toggleConsumeRecords); saveToggles();
+    });
+    document.getElementById("toggleDarkMode").addEventListener("click", () => {
+        setDarkMode(!darkMode);
+        document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
+    });
+    document.getElementById("applyButtonsPerRow").addEventListener("click", () => {
+        let val = parseInt(document.getElementById("buttonsPerRow").value);
+        if (isNaN(val) || val < 1) val = 3;
+        if (val > 6) val = 6;
+        setButtonsPerRow(val);
+        renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+        renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+        renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
+        renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
+        renderProducts();
+        renderPresetButtons();
+        showToast(`按鈕每行數量已改為 ${buttonsPerRow}`);
+    });
 }
-
-// 進入系統設定（密碼驗證後刷新數據）
+// ========== 修改：進入系統設定時，輸入密碼後刷新所有資料 ==========
 async function openSettingsPage() {
     const pwd = prompt("請輸入管理密碼");
     if (pwd === settingsPassword) {
         // 密碼正確，設置1分鐘有效（便於後續操作）
         passwordAuth.verified = true;
         passwordAuth.expireTime = Date.now() + 60 * 1000;
-        await refreshAllData();
+        // 刷新所有資料（從雲端拉取最新配置和記錄）
+        if (gapiReady) {
+            await loadConfigFromSheet();
+            await pullAllRecordsFromSheets();
+        }
         showPage("settings");
     } else if (pwd !== null) {
         alert("密碼錯誤");
     }
 }
-
-// 按鈕事件綁定（部分）
 document.getElementById("settingsIconSales").addEventListener("click", openSettingsPage);
 document.getElementById("settingsIconConsume").addEventListener("click", openSettingsPage);
 document.getElementById("changePasswordBtn").addEventListener("click", async () => {
@@ -815,10 +1529,101 @@ document.getElementById("changePasswordBtn").addEventListener("click", async () 
     alert("密碼已更新，並同步至所有裝置");
     document.getElementById("newPassword").value = ""; document.getElementById("confirmPassword").value = "";
 });
-// 其餘按鈕事件（新增員工、產品、預設金額等）均需在原有基礎上增加同步
-// 因為篇幅限制，此處僅給出關鍵改動，最終完整代碼將包含所有函數的完整實現。
+const iframeModal = document.getElementById("iframeModal"), bookingIframe = document.getElementById("bookingIframe");
+document.getElementById("studentBookingBtn").onclick = () => { bookingIframe.src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html"; iframeModal.style.display = "block"; };
+document.getElementById("closeIframeBtn").onclick = () => { iframeModal.style.display = "none"; bookingIframe.src = ""; };
+document.querySelectorAll("[data-page]").forEach(btn => btn.onclick = () => showPage(btn.dataset.page));
+document.getElementById("submitSales").onclick = submitSales;
+document.getElementById("submitConsume").onclick = submitConsumption;
+document.getElementById("addStaffBtn").onclick = async () => {
+    if (!gapiReady) { alert("請先登入才能新增員工"); return; }
+    if (!await requirePassword()) return;
+    const name = document.getElementById("newStaffName").value.trim(), code = document.getElementById("newStaffCode").value.trim();
+    if (!name || !code) { alert("請填寫員工姓名與工號"); return; }
+    staffList.push({ code, name }); saveStaff(); renderStaffManageList();
+    renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+    renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+    await syncConfigToSheet();
+    document.getElementById("newStaffName").value = ""; document.getElementById("newStaffCode").value = "";
+    showToast("員工已新增並同步雲端");
+};
+document.getElementById("addProductBtn").onclick = async () => {
+    if (!gapiReady) { alert("請先登入才能新增產品"); return; }
+    if (!await requirePassword()) return;
+    const name = document.getElementById("newProductName").value.trim(), price = parseFloat(document.getElementById("newProductPrice").value);
+    if (!name || isNaN(price) || price <= 0) { alert("請填寫產品名稱與正確價格"); return; }
+    productList.push({ name, price }); saveProducts(); renderProductManageList(); renderProducts();
+    await syncConfigToSheet();
+    document.getElementById("newProductName").value = ""; document.getElementById("newProductPrice").value = "";
+    showToast("產品已新增並同步雲端");
+};
+document.getElementById("addPresetBtn").onclick = async () => {
+    if (!gapiReady) { alert("請先登入才能新增預設金額"); return; }
+    if (!await requirePassword()) return;
+    const amt = parseFloat(document.getElementById("newPresetAmount").value);
+    if (isNaN(amt) || amt <= 0) { alert("請輸入正確金額"); return; }
+    presetAmounts.push(amt); savePresets(); renderPresetManageList(); renderPresetButtons();
+    await syncConfigToSheet();
+    document.getElementById("newPresetAmount").value = "";
+    showToast("預設金額已新增並同步雲端");
+};
+document.getElementById("clearSalesRecordsBtn").onclick = async () => {
+    if (!await requirePassword()) return;
+    if (!confirm("⚠️ 確定清除所有產品銷售記錄？此操作無法復原！")) return;
+    records = records.filter(r => r.type !== 'sales');
+    saveRecords();
+    if (gapiReady) await fullSyncToSheets();
+    renderRecordsTables();
+    showToast("已清除所有產品銷售記錄並同步雲端");
+};
+document.getElementById("clearConsumeRecordsBtn").onclick = async () => {
+    if (!await requirePassword()) return;
+    if (!confirm("⚠️ 確定清除所有客人消費記錄？此操作無法復原！")) return;
+    records = records.filter(r => r.type !== 'consumption');
+    saveRecords();
+    if (gapiReady) await fullSyncToSheets();
+    renderRecordsTables();
+    showToast("已清除所有客人消費記錄並同步雲端");
+};
+document.getElementById("retrySalesFailedSyncBtn").onclick = async () => {
+    if (!gapiReady) { showToast("尚未登入，請先登入後再重試同步"); return; }
+    if (!await requirePassword()) return;
+    await fullSyncToSheets();
+    renderRecordsTables();
+    showToast("重試同步完成");
+};
+document.getElementById("retryConsumeFailedSyncBtn").onclick = async () => {
+    if (!gapiReady) { showToast("尚未登入，請先登入後再重試同步"); return; }
+    if (!await requirePassword()) return;
+    await fullSyncToSheets();
+    renderRecordsTables();
+    showToast("重試同步完成");
+};
+document.getElementById("repairSheetsBtn").onclick = async () => {
+    if (!gapiReady) { showToast("請先登入"); return; }
+    if (!await requirePassword()) return;
+    await fullSyncToSheets();
+};
+document.getElementById("manualSyncBtn").addEventListener("click", async () => {
+    if (!gapiReady) { showToast("請先登入"); return; }
+    if (!await requirePassword()) return;
+    await pullAllRecordsFromSheets();
+    renderUI();
+});
+document.getElementById("manualSyncBtnConsume").addEventListener("click", async () => {
+    if (!gapiReady) { showToast("請先登入"); return; }
+    if (!await requirePassword()) return;
+    await pullAllRecordsFromSheets();
+    renderUI();
+});
 
-// ========== 初始化與登入 ==========
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
+}
 function gapiLoaded() { gapi.load('client', initGapiClient); }
 async function initGapiClient() {
     await gapi.client.init({ discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'] });
