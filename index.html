@@ -6,7 +6,7 @@
     <title>賣貨管理系統 | Hair World</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ========== 原有 CSS 變數 ========== */
+        /* ========== 全局变量 ========== */
         :root {
             --bg-body: #cfe7ff;
             --bg-card: white;
@@ -21,6 +21,7 @@
             --btn-gray-shadow: #94a3b8;
             --accent-orange: #f97316;
             --accent-orange-shadow: #b45309;
+            --button-font-scale: 1.5;   /* 默认放大50% */
         }
         body.dark {
             --bg-body: #1f2937;
@@ -63,7 +64,7 @@
             color: #ff7b72 !important;
         }
 
-        /* ========== 登录面板样式 ========== */
+        /* ========== 登录面板 ========== */
         #loginPanel {
             position: fixed;
             top: 0;
@@ -105,7 +106,7 @@
             color: white;
             padding: 12px 24px;
             border-radius: 40px;
-            font-size: 1rem;
+            font-size: calc(1rem * var(--button-font-scale));
             font-weight: bold;
             width: 100%;
             cursor: pointer;
@@ -129,8 +130,22 @@
             padding: 12px;
             transition: all 0.2s;
             height: 100vh;
-            display: none;  /* 登录后才显示 */
+            display: none;
             flex-direction: column;
+        }
+
+        /* 按钮字体缩放 */
+        .nav-btn, .staff-btn, .payment-btn, .preset-btn, .product-btn, .small-btn, .submit-btn, #submitConsume, .settings-icon-small {
+            font-size: calc(0.9rem * var(--button-font-scale));
+        }
+        .staff-name, .product-name {
+            font-size: calc(1rem * var(--button-font-scale));
+        }
+        .staff-code, .product-price {
+            font-size: calc(0.75rem * var(--button-font-scale));
+        }
+        .record-item {
+            font-size: calc(0.85rem * var(--button-font-scale));
         }
 
         @media (orientation: landscape) {
@@ -139,36 +154,24 @@
             }
             .nav-btn {
                 padding: 10px 4px;
-                font-size: 0.8rem;
             }
             .nav-btn i {
-                font-size: 1.5rem;
-            }
-            .product-grid, .preset-grid {
-                gap: 6px;
+                font-size: calc(1.5rem * var(--button-font-scale));
             }
             .product-btn, .preset-btn {
                 padding: 8px 4px;
-                font-size: 0.8rem;
-            }
-            .form-group {
-                margin-bottom: 6px;
-            }
-            .staff-group, .payment-group {
-                gap: 6px;
             }
             .staff-btn, .payment-btn {
                 padding: 8px 4px;
-                font-size: 0.8rem;
             }
             .total, .recent-record {
-                font-size: 0.9rem;
+                font-size: calc(0.9rem * var(--button-font-scale));
                 margin-top: 4px;
                 padding-top: 4px;
             }
             .submit-btn, #submitConsume {
                 padding: 10px;
-                font-size: 1rem;
+                font-size: calc(1rem * var(--button-font-scale));
                 margin-top: 8px;
             }
             .settings-section {
@@ -177,11 +180,9 @@
             }
             .record-item {
                 padding: 6px;
-                font-size: 0.8rem;
             }
             .small-btn {
                 padding: 4px 8px;
-                font-size: 0.75rem;
             }
         }
         .btn-group {
@@ -194,7 +195,6 @@
             background: var(--btn-gray-bg);
             border: none;
             border-radius: 32px;
-            color: var(--text-primary);
             font-weight: bold;
             cursor: pointer;
             flex: 1;
@@ -208,8 +208,8 @@
             align-items: center;
             gap: 6px;
         }
-        .nav-btn i { font-size: 1.8rem; }
-        .nav-btn span { font-size: 0.85rem; }
+        .nav-btn i { font-size: calc(1.8rem * var(--button-font-scale)); }
+        .nav-btn span { font-size: calc(0.85rem * var(--button-font-scale)); }
         .nav-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-gray-shadow); }
         .nav-btn.active {
             background: var(--accent-orange);
@@ -252,8 +252,6 @@
             cursor: pointer;
             box-shadow: 0 3px 0 var(--btn-primary-shadow);
             transition: 0.05s linear;
-            font-size: 1.2rem;
-            color: white;
         }
         .settings-icon-small:active {
             transform: translateY(2px);
@@ -301,13 +299,11 @@
             color: white;
             box-shadow: 0 3px 0 var(--accent-orange-shadow);
         }
-        .staff-name { font-size: 1rem; font-weight: bold; }
-        .staff-code { font-size: 0.75rem; opacity: 0.8; }
-        .product-name { font-size: 1rem; font-weight: bold; }
-        .product-price { font-size: 0.85rem; font-weight: bold; }
+        .staff-name { font-weight: bold; }
+        .staff-code { opacity: 0.8; }
+        .product-price { font-weight: bold; }
         .product-btn.selected .product-price { color: white; }
         .total {
-            font-size: 1.2rem;
             font-weight: bold;
             text-align: right;
             margin-top: 6px;
@@ -326,7 +322,7 @@
             display: inline-block;
             padding: 2px 6px;
             border-radius: 20px;
-            font-size: 0.7rem;
+            font-size: calc(0.7rem * var(--button-font-scale));
         }
         .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
@@ -344,7 +340,6 @@
             padding: 4px 10px;
             border-radius: 40px;
             cursor: pointer;
-            font-size: 0.8rem;
             box-shadow: 0 3px 0 var(--btn-gray-shadow);
             transition: 0.05s linear;
             color: var(--text-primary);
@@ -382,7 +377,7 @@
             pointer-events: none;
             white-space: pre-line;
             text-align: center;
-            font-size: 0.85rem;
+            font-size: calc(0.85rem * var(--button-font-scale));
         }
         .iframe-container {
             position: fixed;
@@ -413,6 +408,7 @@
             padding: 6px 12px;
             cursor: pointer;
             box-shadow: 0 3px 0 var(--accent-orange-shadow);
+            font-size: calc(0.9rem * var(--button-font-scale));
         }
         .close-iframe:active {
             transform: translateY(2px);
@@ -424,7 +420,6 @@
             padding: 6px;
             margin-top: 10px;
             text-align: center;
-            font-size: 0.75rem;
             border-left: 4px solid var(--accent-orange);
             color: var(--text-primary);
         }
@@ -479,7 +474,6 @@
             padding: 12px;
             border: none;
             border-radius: 40px;
-            font-size: 1.1rem;
             font-weight: bold;
             margin-top: 10px;
             cursor: pointer;
@@ -501,12 +495,12 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 16px;
-            font-size: 0.8rem;
         }
         .records-table th, .records-table td {
             border: 1px solid var(--border-color);
             padding: 6px;
             text-align: left;
+            font-size: calc(0.8rem * var(--button-font-scale));
         }
         .records-table th {
             background: var(--btn-gray-bg);
@@ -526,11 +520,10 @@
         @media (max-width: 600px) {
             .records-table th, .records-table td {
                 padding: 4px;
-                font-size: 0.7rem;
             }
         }
 
-        /* ========== 标题置中 + 横线装饰 ========== */
+        /* 标题横线装饰 */
         .section-title {
             display: flex;
             align-items: center;
@@ -555,6 +548,16 @@
         .section-title::after {
             margin-left: 8px;
         }
+
+        /* 字体大小滑块样式 */
+        .font-scale-slider {
+            width: 100%;
+            margin: 8px 0;
+        }
+        .font-scale-value {
+            font-weight: bold;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -562,7 +565,7 @@
 <div id="loginPanel">
     <div class="login-card">
         <i class="fa-solid fa-lock"></i>
-        <h2>🔐Hair World系統🔐</h2>
+        <h2>🔐🔐Hair World管理系統🔐🔐</h2>
         <p>請使用 Google 帳號登入以繼續</p>
         <button id="googleLoginBtn">🔐 登入 Google</button>
     </div>
@@ -615,6 +618,16 @@
             <div class="settings-header">
                 <h4>🌙 夜間模式</h4>
                 <div class="toggle-switch" id="toggleDarkMode"></div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>🔘 按鈕字體大小</h4>
+            </div>
+            <div>
+                <input type="range" id="fontScaleSlider" class="font-scale-slider" min="0.5" max="2.5" step="0.01" value="1.5">
+                <span id="fontScaleValue" class="font-scale-value">150%</span>
+                <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:5px;">數值越大按鈕文字越大</div>
             </div>
         </div>
         <div class="settings-section">
@@ -1073,7 +1086,6 @@ async function addRecord(recordData) {
     return newRecord;
 }
 
-// 统一使用 requirePassword + confirm 的删除
 async function deleteRecordById(id) {
     if (!await requirePassword()) return false;
     if (!confirm("確定要刪除此記錄嗎？此操作不可復原！")) return false;
@@ -1511,6 +1523,10 @@ function showPage(pageId) {
         document.getElementById("consumeRecordsContent").classList.toggle("hidden-content", !toggleConsumeRecords);
         document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
         document.getElementById("buttonsPerRow").value = buttonsPerRow;
+        // 同步滑块显示当前缩放系数
+        const currentScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--button-font-scale')) || 1.5;
+        document.getElementById("fontScaleSlider").value = currentScale;
+        document.getElementById("fontScaleValue").innerText = Math.round(currentScale * 100) + "%";
     }
 }
 function initToggles() {
@@ -1551,6 +1567,27 @@ function initToggles() {
         renderPresetButtons();
         showToast(`按鈕每行數量已改為 ${buttonsPerRow}`);
     });
+
+    // 按钮字体大小调节
+    const slider = document.getElementById("fontScaleSlider");
+    const scaleValue = document.getElementById("fontScaleValue");
+    const updateFontScale = (value) => {
+        value = parseFloat(value);
+        if (isNaN(value)) return;
+        document.documentElement.style.setProperty('--button-font-scale', value);
+        localStorage.setItem('buttonFontScale', value);
+        scaleValue.innerText = Math.round(value * 100) + "%";
+    };
+    slider.addEventListener("input", (e) => updateFontScale(e.target.value));
+    // 加载保存的缩放系数
+    const savedScale = localStorage.getItem('buttonFontScale');
+    if (savedScale !== null && !isNaN(parseFloat(savedScale))) {
+        updateFontScale(parseFloat(savedScale));
+        slider.value = parseFloat(savedScale);
+    } else {
+        updateFontScale(1.5);
+        slider.value = 1.5;
+    }
 }
 async function openSettingsPage() {
     const pwd = prompt("請輸入管理密碼");
@@ -1682,27 +1719,22 @@ function gisLoaded() {
     gisInited = true; maybeEnableButtons();
 }
 
-// 登录逻辑
 let autoLoginTimer = null;
 function maybeEnableButtons() {
     if (gapiInited && gisInited && !gapiReady) {
         gapiReady = true;
-        // 尝试自动静默登录
         attemptAutoLogin();
     }
 }
 function attemptAutoLogin() {
     autoLoginTimer = setTimeout(() => {
-        // 超时，显示登录面板（主容器保持隐藏）
         document.getElementById('loginPanel').style.display = 'flex';
     }, 2000);
     tokenClient.callback = (resp) => {
         if (resp.error !== undefined) throw resp;
-        // 登录成功
         if (autoLoginTimer) clearTimeout(autoLoginTimer);
         document.getElementById('loginPanel').style.display = 'none';
         document.querySelector('.app-container').style.display = 'flex';
-        // 移除旧的 loginStatus（已不存在）
         (async () => {
             await loadConfigFromSheet();
             await pullAllRecordsFromSheets();
@@ -1711,7 +1743,6 @@ function attemptAutoLogin() {
     };
     tokenClient.requestAccessToken({ prompt: '' });
 }
-// 手动登录按钮
 document.getElementById('googleLoginBtn').onclick = () => {
     if (autoLoginTimer) clearTimeout(autoLoginTimer);
     tokenClient.callback = (resp) => {
