@@ -21,7 +21,8 @@
             --btn-gray-shadow: #94a3b8;
             --accent-orange: #f97316;
             --accent-orange-shadow: #b45309;
-            --button-font-scale: 1.5;
+            --button-font-scale: 1.5;      /* 按鈕字體大小 */
+            --records-font-scale: 1;        /* 記錄表格字體大小，預設正常 */
         }
         body.dark {
             --bg-body: #1f2937;
@@ -145,6 +146,17 @@
         }
         .record-item {
             font-size: calc(0.85rem * var(--button-font-scale));
+        }
+
+        /* 记录表格独立字体缩放 */
+        .records-table, .records-table th, .records-table td, .sync-badge {
+            font-size: calc(0.8rem * var(--records-font-scale));
+        }
+        .records-table th, .records-table td {
+            font-size: calc(0.8rem * var(--records-font-scale));
+        }
+        .sync-badge {
+            font-size: calc(0.7rem * var(--records-font-scale));
         }
 
         @media (orientation: landscape) {
@@ -321,7 +333,6 @@
             display: inline-block;
             padding: 2px 6px;
             border-radius: 20px;
-            font-size: calc(0.7rem * var(--button-font-scale));
         }
         .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
@@ -416,7 +427,7 @@
         .recent-record {
             background: var(--btn-gray-bg);
             border-radius: 20px;
-            padding: 6px;
+            padding: 8px 12px;
             margin-top: 10px;
             text-align: left;
             border-left: 4px solid var(--accent-orange);
@@ -425,13 +436,15 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            gap: 8px;
         }
         .recent-record span {
             flex: 1;
+            word-break: break-word;
         }
         .recent-record .action-btns {
             display: flex;
-            gap: 6px;
+            gap: 8px;
         }
         .settings-section {
             margin-bottom: 12px;
@@ -510,7 +523,6 @@
             border: 1px solid var(--border-color);
             padding: 6px;
             text-align: left;
-            font-size: calc(0.8rem * var(--button-font-scale));
         }
         .records-table th {
             background: var(--btn-gray-bg);
@@ -559,11 +571,11 @@
             margin-left: 8px;
         }
 
-        .font-scale-slider {
+        .font-scale-slider, .records-scale-slider {
             width: 100%;
             margin: 8px 0;
         }
-        .font-scale-value {
+        .scale-value {
             font-weight: bold;
             margin-left: 10px;
         }
@@ -577,7 +589,7 @@
 <div id="loginPanel">
     <div class="login-card">
         <i class="fa-solid fa-lock"></i>
-        <h2>賣貨管理系統</h2>
+        <h2>🔐Hair Wirld系統🔐</h2>
         <p>請使用 Google 帳號登入以繼續</p>
         <button id="googleLoginBtn">🔐 登入 Google</button>
     </div>
@@ -638,8 +650,18 @@
             </div>
             <div>
                 <input type="range" id="fontScaleSlider" class="font-scale-slider" min="0.5" max="2.5" step="0.01" value="1.5">
-                <span id="fontScaleValue" class="font-scale-value">150%</span>
-                <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:5px;">數值越大按鈕文字越大</div>
+                <span id="fontScaleValue" class="scale-value">150%</span>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">數值越大按鈕文字越大</div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>📋 記錄表格字體大小</h4>
+            </div>
+            <div>
+                <input type="range" id="recordsScaleSlider" class="records-scale-slider" min="0.5" max="2.0" step="0.01" value="1">
+                <span id="recordsScaleValue" class="scale-value">100%</span>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">僅影響「產品銷售記錄」與「客人消費記錄」表格</div>
             </div>
         </div>
         <div class="settings-section">
@@ -1176,7 +1198,7 @@ function renderRecordsTables() {
                 <td class="action-btns">
                     <button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button>
                     <button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button>
-                </td>
+                 </td>
             </tr>`;
         }
         html += '</tbody></table>';
@@ -1552,9 +1574,13 @@ function showPage(pageId) {
         document.getElementById("consumeRecordsContent").classList.toggle("hidden-content", !toggleConsumeRecords);
         document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
         document.getElementById("buttonsPerRow").value = buttonsPerRow;
+        // 同步滑块显示当前缩放系数
         const currentScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--button-font-scale')) || 1.5;
         document.getElementById("fontScaleSlider").value = currentScale;
         document.getElementById("fontScaleValue").innerText = Math.round(currentScale * 100) + "%";
+        const currentRecordsScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--records-font-scale')) || 1;
+        document.getElementById("recordsScaleSlider").value = currentRecordsScale;
+        document.getElementById("recordsScaleValue").innerText = Math.round(currentRecordsScale * 100) + "%";
     }
 }
 
@@ -1596,23 +1622,43 @@ function initToggles() {
         renderPresetButtons();
         showToast(`按鈕每行數量已改為 ${buttonsPerRow}`);
     });
-    const slider = document.getElementById("fontScaleSlider");
-    const scaleValue = document.getElementById("fontScaleValue");
+    // 按钮字体大小调节
+    const btnSlider = document.getElementById("fontScaleSlider");
+    const btnScaleValue = document.getElementById("fontScaleValue");
     const updateFontScale = (value) => {
         value = parseFloat(value);
         if (isNaN(value)) return;
         document.documentElement.style.setProperty('--button-font-scale', value);
         localStorage.setItem('buttonFontScale', value);
-        scaleValue.innerText = Math.round(value * 100) + "%";
+        btnScaleValue.innerText = Math.round(value * 100) + "%";
     };
-    slider.addEventListener("input", (e) => updateFontScale(e.target.value));
-    const savedScale = localStorage.getItem('buttonFontScale');
-    if (savedScale !== null && !isNaN(parseFloat(savedScale))) {
-        updateFontScale(parseFloat(savedScale));
-        slider.value = parseFloat(savedScale);
+    btnSlider.addEventListener("input", (e) => updateFontScale(e.target.value));
+    const savedBtnScale = localStorage.getItem('buttonFontScale');
+    if (savedBtnScale !== null && !isNaN(parseFloat(savedBtnScale))) {
+        updateFontScale(parseFloat(savedBtnScale));
+        btnSlider.value = parseFloat(savedBtnScale);
     } else {
         updateFontScale(1.5);
-        slider.value = 1.5;
+        btnSlider.value = 1.5;
+    }
+    // 记录表格字体大小调节
+    const recordsSlider = document.getElementById("recordsScaleSlider");
+    const recordsScaleValue = document.getElementById("recordsScaleValue");
+    const updateRecordsScale = (value) => {
+        value = parseFloat(value);
+        if (isNaN(value)) return;
+        document.documentElement.style.setProperty('--records-font-scale', value);
+        localStorage.setItem('recordsFontScale', value);
+        recordsScaleValue.innerText = Math.round(value * 100) + "%";
+    };
+    recordsSlider.addEventListener("input", (e) => updateRecordsScale(e.target.value));
+    const savedRecordsScale = localStorage.getItem('recordsFontScale');
+    if (savedRecordsScale !== null && !isNaN(parseFloat(savedRecordsScale))) {
+        updateRecordsScale(parseFloat(savedRecordsScale));
+        recordsSlider.value = parseFloat(savedRecordsScale);
+    } else {
+        updateRecordsScale(1);
+        recordsSlider.value = 1;
     }
 }
 
