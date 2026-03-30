@@ -1164,7 +1164,7 @@ function renderRecordsTables() {
     const consumeRecords = records.filter(r => r.type === 'consumption');
     if (salesRecords.length === 0) salesContainer.innerHTML = "<div>暫無產品銷售記錄</div>";
     else {
-        let html = '<table class="records-table"><thead> tr<th>日子</th><th>員工</th><th>產品</th><th>支付方式</th><th>同步狀態</th><th>操作</th> </tr></thead><tbody>';
+        let html = '<table class="records-table"><thead> tr<th>日子</th><th>員工</th><th>產品</th><th>支付方式</th><th>同步狀態</th><th>操作</th>  </thead><tbody>';
         for (const rec of salesRecords) {
             const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
             const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
