@@ -1109,24 +1109,11 @@ async function addRecord(recordData) {
     return newRecord;
 }
 
-async function deleteRecordById(id) {
-    if (!await requirePassword()) return false;
-    if (!confirm("確定要刪除此記錄嗎？此操作不可復原！")) return false;
-    const index = records.findIndex(r => r.id === id);
-    if (index === -1) return false;
-    records.splice(index, 1);
-    saveRecords();
-    if (gapiReady) await fullSyncToSheets();
-    renderRecordsTables();
-    // 刷新最近记录显示
-    updateRecentRecord('sales');
-    updateRecentRecord('consumption');
-    showToast("記錄已刪除並同步雲端");
-    return true;
-}
-
-async function editRecord(record) {
-    if (!await requirePassword()) return false;
+// 修改记录（支持跳过密码，用于最近记录快速修改）
+async function editRecord(record, options = {}) {
+    if (!options.skipPassword) {
+        if (!await requirePassword()) return false;
+    }
     if (!confirm("確定要修改此記錄嗎？")) return false;
     let newData = {};
     if (record.type === 'sales') {
@@ -1156,6 +1143,27 @@ async function editRecord(record) {
     return true;
 }
 
+// 删除记录（支持跳过密码，用于最近记录快速删除）
+async function deleteRecordById(id, options = {}) {
+    if (!options.skipPassword) {
+        if (!await requirePassword()) return false;
+    }
+    if (!confirm("確定要刪除此記錄嗎？此操作不可復原！")) return false;
+    const index = records.findIndex(r => r.id === id);
+    if (index === -1) return false;
+    const deletedRecord = records[index];
+    records.splice(index, 1);
+    saveRecords();
+    if (gapiReady) await fullSyncToSheets();
+    renderRecordsTables();
+    // 更新最近记录显示（因为可能删除了最新一笔）
+    if (deletedRecord) {
+        updateRecentRecord(deletedRecord.type === 'sales' ? 'sales' : 'consumption');
+    }
+    showToast("記錄已刪除並同步雲端");
+    return true;
+}
+
 function renderRecordsTables() {
     const salesContainer = document.getElementById("salesRecordsTable");
     const consumeContainer = document.getElementById("consumeRecordsTable");
@@ -1178,7 +1186,7 @@ function renderRecordsTables() {
                     <button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button>
                     <button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button>
                 </td>
-             </tr>`;
+              </tr>`;
         }
         html += '</tbody></table>';
         salesContainer.innerHTML = html;
@@ -1199,29 +1207,34 @@ function renderRecordsTables() {
                     <button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button>
                     <button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button>
                 </td>
-             </tr>`;
+              </tr>`;
         }
         html += '</tbody></table>';
         consumeContainer.innerHTML = html;
     }
+    // 绑定表格内修改/删除事件（需要密码）
     document.querySelectorAll('#salesRecordsTable .edit-btn, #consumeRecordsTable .edit-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
             const id = btn.dataset.id;
             const record = records.find(r => r.id === id);
-            if (record) await editRecord(record);
+            if (record) await editRecord(record); // 默认需要密码
         });
     });
     document.querySelectorAll('#salesRecordsTable .danger-btn, #consumeRecordsTable .danger-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
             const id = btn.dataset.id;
-            await deleteRecordById(id);
+            await deleteRecordById(id); // 默认需要密码
         });
     });
 }
 
 function updateRecentRecord(type) {
     const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
-    const record = type === 'sales' ? lastSalesRecord : lastConsumeRecord;
+    // 获取最新一条记录
+    const recordsOfType = records.filter(r => r.type === type).sort((a,b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
+    const record = recordsOfType.length ? recordsOfType[0] : null;
+    if (type === 'sales') lastSalesRecord = record;
+    else lastConsumeRecord = record;
     if (!record) { if(div) div.style.display = 'none'; return; }
     div.style.display = 'flex';
     let content = '';
@@ -1238,13 +1251,11 @@ function updateRecentRecord(type) {
     const delBtn = div.querySelector('.delete-recent-btn');
     editBtn.onclick = async () => {
         const targetRecord = records.find(r => r.id === record.id);
-        if (targetRecord) await editRecord(targetRecord);
+        if (targetRecord) await editRecord(targetRecord, { skipPassword: true }); // 最近记录修改跳过密码
         updateRecentRecord(type);
     };
     delBtn.onclick = async () => {
-        await deleteRecordById(record.id);
-        if (type === 'sales') lastSalesRecord = records.find(r => r.type === 'sales') || null;
-        else lastConsumeRecord = records.find(r => r.type === 'consumption') || null;
+        await deleteRecordById(record.id, { skipPassword: true }); // 最近记录删除跳过密码
         updateRecentRecord(type);
     };
 }
