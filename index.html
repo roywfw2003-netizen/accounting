@@ -583,6 +583,83 @@
             opacity: 0.6;
             pointer-events: none;
         }
+
+        /* 自定义模态框样式 */
+        .edit-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+        .edit-modal-content {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .edit-modal-content h3 {
+            margin-top: 0;
+            text-align: center;
+        }
+        .edit-option-grid {
+            display: grid;
+            gap: 8px;
+            margin: 16px 0;
+        }
+        .edit-option-btn {
+            background: var(--btn-gray-bg);
+            padding: 12px;
+            border-radius: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.05s linear;
+            font-weight: bold;
+        }
+        .edit-option-btn:active {
+            transform: scale(0.98);
+        }
+        .edit-modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 16px;
+        }
+        .password-toggle-btn {
+            background: var(--btn-gray-bg);
+            border: none;
+            border-radius: 40px;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 0 var(--btn-gray-shadow);
+            transition: 0.05s linear;
+        }
+        .password-toggle-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 0px 0 var(--btn-gray-shadow);
+        }
+        .password-input-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex: 1;
+        }
+        .password-input-wrapper input {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -762,8 +839,14 @@
         <hr>
         <h4>🔐 修改管理密碼</h4>
         <div class="setting-row">
-            <input type="password" id="newPassword" placeholder="新密碼">
-            <input type="password" id="confirmPassword" placeholder="確認新密碼">
+            <div class="password-input-wrapper">
+                <input type="password" id="newPassword" placeholder="新密碼" style="flex:1;">
+                <button class="password-toggle-btn" data-target="newPassword">👁️</button>
+            </div>
+            <div class="password-input-wrapper">
+                <input type="password" id="confirmPassword" placeholder="確認新密碼" style="flex:1;">
+                <button class="password-toggle-btn" data-target="confirmPassword">👁️</button>
+            </div>
             <button class="small-btn" id="changePasswordBtn">更新密碼</button>
         </div>
     </div>
@@ -1109,7 +1192,7 @@ async function addRecord(recordData) {
     return newRecord;
 }
 
-// 修改记录（支持跳过密码，用于最近记录快速修改）
+// 修改记录（通用，支持跳过密码）
 async function editRecord(record, options = {}) {
     if (!options.skipPassword) {
         if (!await requirePassword()) return false;
@@ -1143,7 +1226,7 @@ async function editRecord(record, options = {}) {
     return true;
 }
 
-// 删除记录（支持跳过密码，用于最近记录快速删除）
+// 删除记录（通用，支持跳过密码）
 async function deleteRecordById(id, options = {}) {
     if (!options.skipPassword) {
         if (!await requirePassword()) return false;
@@ -1156,12 +1239,104 @@ async function deleteRecordById(id, options = {}) {
     saveRecords();
     if (gapiReady) await fullSyncToSheets();
     renderRecordsTables();
-    // 更新最近记录显示（因为可能删除了最新一笔）
     if (deletedRecord) {
         updateRecentRecord(deletedRecord.type === 'sales' ? 'sales' : 'consumption');
     }
     showToast("記錄已刪除並同步雲端");
     return true;
+}
+
+// 显示自定义修改模态框（用于最新记录，无需密码）
+function showEditModal(record) {
+    const modal = document.createElement('div');
+    modal.className = 'edit-modal';
+    const content = document.createElement('div');
+    content.className = 'edit-modal-content';
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+
+    const title = document.createElement('h3');
+    title.innerText = record.type === 'sales' ? '修改銷售記錄' : '修改消費記錄';
+    content.appendChild(title);
+
+    const optionGrid = document.createElement('div');
+    optionGrid.className = 'edit-option-grid';
+
+    if (record.type === 'sales') {
+        // 產品選項
+        const productLabel = document.createElement('div');
+        productLabel.innerText = '選擇產品：';
+        optionGrid.appendChild(productLabel);
+        productList.forEach(prod => {
+            const btn = document.createElement('div');
+            btn.className = 'edit-option-btn';
+            btn.innerText = `${prod.name} ($${prod.price})`;
+            btn.onclick = () => {
+                record.productName = prod.name;
+                record.productPrice = prod.price;
+                record.amount = prod.price;
+                // 繼續選擇支付方式
+                showPaymentSelection(record, modal);
+            };
+            optionGrid.appendChild(btn);
+        });
+        content.appendChild(optionGrid);
+    } else {
+        // 金額選項
+        const amountLabel = document.createElement('div');
+        amountLabel.innerText = '選擇金額：';
+        optionGrid.appendChild(amountLabel);
+        presetAmounts.forEach(amt => {
+            const btn = document.createElement('div');
+            btn.className = 'edit-option-btn';
+            btn.innerText = `$${amt}`;
+            btn.onclick = () => {
+                record.amount = amt;
+                showPaymentSelection(record, modal);
+            };
+            optionGrid.appendChild(btn);
+        });
+        content.appendChild(optionGrid);
+    }
+
+    function showPaymentSelection(record, modal) {
+        // 清除現有內容，顯示支付方式
+        while (content.children.length > 1) content.removeChild(content.lastChild);
+        const paymentLabel = document.createElement('div');
+        paymentLabel.innerText = '選擇支付方式：';
+        content.appendChild(paymentLabel);
+        const paymentGrid = document.createElement('div');
+        paymentGrid.className = 'edit-option-grid';
+        const payments = record.type === 'sales' ? SALES_PAYMENTS : PAYMENTS;
+        payments.forEach(p => {
+            const btn = document.createElement('div');
+            btn.className = 'edit-option-btn';
+            btn.innerText = p;
+            btn.onclick = async () => {
+                record.payment = p;
+                await finalizeEdit(record, modal);
+            };
+            paymentGrid.appendChild(btn);
+        });
+        content.appendChild(paymentGrid);
+        // 添加取消按鈕
+        const cancelBtn = document.createElement('button');
+        cancelBtn.innerText = '取消';
+        cancelBtn.className = 'small-btn';
+        cancelBtn.style.marginTop = '16px';
+        cancelBtn.onclick = () => modal.remove();
+        content.appendChild(cancelBtn);
+    }
+
+    async function finalizeEdit(record, modal) {
+        // 保存修改
+        saveRecords();
+        if (gapiReady) await fullSyncToSheets();
+        renderRecordsTables();
+        updateRecentRecord(record.type === 'sales' ? 'sales' : 'consumption');
+        showToast("記錄已修改並同步雲端");
+        modal.remove();
+    }
 }
 
 function renderRecordsTables() {
@@ -1172,7 +1347,7 @@ function renderRecordsTables() {
     const consumeRecords = records.filter(r => r.type === 'consumption');
     if (salesRecords.length === 0) salesContainer.innerHTML = "<div>暫無產品銷售記錄</div>";
     else {
-        let html = '<table class="records-table"><thead> tr<th>日子</th><th>員工</th><th>產品</th><th>支付方式</th><th>同步狀態</th><th>操作</th>  </thead><tbody>';
+        let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>產品</th><th>支付方式</th><th>同步狀態</th><th>操作</th></tr> </thead><tbody>';
         for (const rec of salesRecords) {
             const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
             const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
@@ -1193,7 +1368,7 @@ function renderRecordsTables() {
     }
     if (consumeRecords.length === 0) consumeContainer.innerHTML = "<div>暫無客人消費記錄</div>";
     else {
-        let html = '<table class="records-table"><thead><tr><th>日子</th><th>員工</th><th>金額</th><th>支付方式</th><th>同步狀態</th><th>操作</th></tr></thead><tbody>';
+        let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>金額</th><th>支付方式</th><th>同步狀態</th><th>操作</th></tr> </thead><tbody>';
         for (const rec of consumeRecords) {
             const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
             const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
@@ -1251,11 +1426,13 @@ function updateRecentRecord(type) {
     const delBtn = div.querySelector('.delete-recent-btn');
     editBtn.onclick = async () => {
         const targetRecord = records.find(r => r.id === record.id);
-        if (targetRecord) await editRecord(targetRecord, { skipPassword: true }); // 最近记录修改跳过密码
-        updateRecentRecord(type);
+        if (targetRecord) {
+            // 使用自定义模态框修改，无需密码
+            showEditModal(targetRecord);
+        }
     };
     delBtn.onclick = async () => {
-        await deleteRecordById(record.id, { skipPassword: true }); // 最近记录删除跳过密码
+        await deleteRecordById(record.id, { skipPassword: true }); // 最新记录删除跳过密码
         updateRecentRecord(type);
     };
 }
@@ -1696,6 +1873,21 @@ document.getElementById("changePasswordBtn").addEventListener("click", async () 
     if (gapiReady) await syncConfigToSheet();
     alert("密碼已更新，並同步至所有裝置");
     document.getElementById("newPassword").value = ""; document.getElementById("confirmPassword").value = "";
+});
+
+// 密码显示/隐藏切换
+document.querySelectorAll('.password-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const input = document.getElementById(targetId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            btn.textContent = '👁️';
+        }
+    });
 });
 
 const iframeModal = document.getElementById("iframeModal"), bookingIframe = document.getElementById("bookingIframe");
