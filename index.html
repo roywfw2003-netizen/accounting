@@ -23,6 +23,7 @@
             --accent-orange-shadow: #b45309;
             --button-font-scale: 1.5;
             --records-font-scale: 1;
+            --button-text-scale: 1;  /* 新增：主頁面按鈕文字專用縮放 */
         }
         body.dark {
             --bg-body: #1f2937;
@@ -134,15 +135,19 @@
             flex-direction: column;
         }
 
-        /* 按钮字体缩放 */
+        /* 按钮字体缩放 - 整体按钮大小（含图标、内边距）保持不变 */
         .nav-btn, .staff-btn, .payment-btn, .preset-btn, .product-btn, .small-btn, .submit-btn, #submitConsume, .settings-icon-small {
             font-size: calc(0.9rem * var(--button-font-scale));
         }
+        /* 新增：主頁面按鈕文字大小（只影響員工、產品、支付、預設金額按鈕上的文字） */
+        .staff-btn, .payment-btn, .preset-btn, .product-btn {
+            font-size: calc(0.9rem * var(--button-text-scale));
+        }
         .staff-name, .product-name {
-            font-size: calc(1rem * var(--button-font-scale));
+            font-size: calc(1rem * var(--button-text-scale));
         }
         .staff-code, .product-price {
-            font-size: calc(0.75rem * var(--button-font-scale));
+            font-size: calc(0.75rem * var(--button-text-scale));
         }
         .record-item {
             font-size: calc(0.85rem * var(--button-font-scale));
@@ -571,7 +576,7 @@
             margin-left: 8px;
         }
 
-        .font-scale-slider, .records-scale-slider {
+        .font-scale-slider, .records-scale-slider, .button-text-slider {
             width: 100%;
             margin: 8px 0;
         }
@@ -723,12 +728,22 @@
         </div>
         <div class="settings-section">
             <div class="settings-header">
-                <h4>🔘 按鈕字體大小</h4>
+                <h4>🔘 按鈕字體大小（主頁面）</h4>
+            </div>
+            <div>
+                <input type="range" id="buttonTextSlider" class="button-text-slider" min="0.5" max="2.0" step="0.01" value="1.0">
+                <span id="buttonTextValue" class="scale-value">100%</span>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">僅影響「員工、產品、支付方式、預設金額」按鈕上的文字大小</div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>🔘 導航按鈕字體大小</h4>
             </div>
             <div>
                 <input type="range" id="fontScaleSlider" class="font-scale-slider" min="0.5" max="2.5" step="0.01" value="1.5">
                 <span id="fontScaleValue" class="scale-value">150%</span>
-                <div style="font-size:0.7rem; color:var(--text-secondary);">數值越大按鈕文字越大</div>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">影響頂部「產品銷售、客人消費、學生預約」按鈕</div>
             </div>
         </div>
         <div class="settings-section">
@@ -1022,7 +1037,8 @@ async function fullSyncToSheets() {
             } else {
                 const googleDate = toGoogleDate(rec.date);
                 const time = getCurrentTime();
-                row = [googleDate, rec.staffName, rec.amount.toString(), rec.payment, time, 'success', rec.id];
+                // 客人消費：日期, 員工, 工號, 價錢, 支付方式, 時間, 同步, 訂單編號
+                row = [googleDate, rec.staffName, rec.staffCode, rec.amount.toString(), rec.payment, time, 'success', rec.id];
             }
             await appendToSheet(sheetName, row);
         }
@@ -1051,7 +1067,7 @@ async function appendSingleRecord(rec) {
         } else {
             const googleDate = toGoogleDate(rec.date);
             const time = getCurrentTime();
-            row = [googleDate, rec.staffName, rec.amount.toString(), rec.payment, time, 'success', rec.id];
+            row = [googleDate, rec.staffName, rec.staffCode, rec.amount.toString(), rec.payment, time, 'success', rec.id];
         }
         await appendToSheet(sheetName, row);
         rec.syncStatus = 'success';
@@ -1096,7 +1112,7 @@ async function pullAllRecordsFromSheets() {
     if (!gapiReady) { showToast("未登入，無法從雲端拉取"); return false; }
     try {
         const salesResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '產品!A:K' });
-        const consumeResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '客人!A:G' });
+        const consumeResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '客人!A:H' }); // 8列
         const cloudRecords = [];
         if (salesResp.result.values && salesResp.result.values.length > 1) {
             for (let row of salesResp.result.values.slice(1)) {
@@ -1124,7 +1140,7 @@ async function pullAllRecordsFromSheets() {
         if (consumeResp.result.values && consumeResp.result.values.length > 1) {
             for (let row of consumeResp.result.values.slice(1)) {
                 if (row.length < 3) continue;
-                const recordId = row.length >= 7 ? row[6] : null;
+                const recordId = row.length >= 8 ? row[7] : null;
                 const googleDate = row[0];
                 let isoDate = '';
                 const parts = googleDate.split('/');
@@ -1135,9 +1151,9 @@ async function pullAllRecordsFromSheets() {
                     type: 'consumption',
                     date: isoDate,
                     staffName: row[1] || '',
-                    staffCode: '',
-                    amount: parseFloat(row[2]) || 0,
-                    payment: row[3] || '',
+                    staffCode: row[2] || '',
+                    amount: parseFloat(row[3]) || 0,
+                    payment: row[4] || '',
                     syncStatus: 'success',
                     createdAt: new Date().toISOString()
                 });
@@ -1226,10 +1242,21 @@ async function editRecord(record, options = {}) {
     return true;
 }
 
-// 删除记录（通用，支持跳过密码）
+// 删除记录（通用，支持跳过密码，并检查是否为最新）
 async function deleteRecordById(id, options = {}) {
     if (!options.skipPassword) {
         if (!await requirePassword()) return false;
+    }
+    const recordToDelete = records.find(r => r.id === id);
+    if (!recordToDelete) return false;
+    // 檢查是否為該類型的最新一筆
+    const sameType = records.filter(r => r.type === recordToDelete.type);
+    if (sameType.length > 0) {
+        const latest = sameType.reduce((a,b) => new Date(b.createdAt || b.date) > new Date(a.createdAt || a.date) ? b : a);
+        if (latest.id !== id) {
+            alert("只能刪除最新一筆記錄，無法刪除其他記錄。");
+            return false;
+        }
     }
     if (!confirm("確定要刪除此記錄嗎？此操作不可復原！")) return false;
     const index = records.findIndex(r => r.id === id);
@@ -1347,7 +1374,7 @@ function renderRecordsTables() {
     const consumeRecords = records.filter(r => r.type === 'consumption');
     if (salesRecords.length === 0) salesContainer.innerHTML = "<div>暫無產品銷售記錄</div>";
     else {
-        let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>產品</th><th>支付方式</th><th>同步狀態</th><th>操作</th></tr> </thead><tbody>';
+        let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>產品</th><th>支付方式</th><th>同步狀態</th><th>操作</th> </tr> </thead><tbody>';
         for (const rec of salesRecords) {
             const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
             const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
@@ -1368,13 +1395,14 @@ function renderRecordsTables() {
     }
     if (consumeRecords.length === 0) consumeContainer.innerHTML = "<div>暫無客人消費記錄</div>";
     else {
-        let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>金額</th><th>支付方式</th><th>同步狀態</th><th>操作</th></tr> </thead><tbody>';
+        let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>工號</th><th>金額</th><th>支付方式</th><th>同步狀態</th><th>操作</th> </tr> </thead><tbody>';
         for (const rec of consumeRecords) {
             const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
             const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
             html += `<tr>
                 <td class="record-cell" title="${rec.date}">${rec.displayDate}</td>
                 <td>${rec.staffName}</td>
+                <td>${rec.staffCode || ''}</td>
                 <td>${rec.amount}</td>
                 <td>${rec.payment}</td>
                 <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
@@ -1432,7 +1460,7 @@ function updateRecentRecord(type) {
         }
     };
     delBtn.onclick = async () => {
-        await deleteRecordById(record.id, { skipPassword: true }); // 最新记录删除跳过密码
+        await deleteRecordById(record.id, { skipPassword: true }); // 最新记录删除跳过密码（且会检查是否最新）
         updateRecentRecord(type);
     };
 }
@@ -1769,6 +1797,9 @@ function showPage(pageId) {
         const currentRecordsScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--records-font-scale')) || 1;
         document.getElementById("recordsScaleSlider").value = currentRecordsScale;
         document.getElementById("recordsScaleValue").innerText = Math.round(currentRecordsScale * 100) + "%";
+        const currentButtonTextScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--button-text-scale')) || 1;
+        document.getElementById("buttonTextSlider").value = currentButtonTextScale;
+        document.getElementById("buttonTextValue").innerText = Math.round(currentButtonTextScale * 100) + "%";
     }
 }
 
@@ -1810,7 +1841,7 @@ function initToggles() {
         renderPresetButtons();
         showToast(`按鈕每行數量已改為 ${buttonsPerRow}`);
     });
-    // 按钮字体大小调节
+    // 导航按钮字体大小调节
     const btnSlider = document.getElementById("fontScaleSlider");
     const btnScaleValue = document.getElementById("fontScaleValue");
     const updateFontScale = (value) => {
@@ -1847,6 +1878,25 @@ function initToggles() {
     } else {
         updateRecordsScale(1);
         recordsSlider.value = 1;
+    }
+    // 主页面按钮文字大小调节
+    const buttonTextSlider = document.getElementById("buttonTextSlider");
+    const buttonTextValue = document.getElementById("buttonTextValue");
+    const updateButtonTextScale = (value) => {
+        value = parseFloat(value);
+        if (isNaN(value)) return;
+        document.documentElement.style.setProperty('--button-text-scale', value);
+        localStorage.setItem('buttonTextScale', value);
+        buttonTextValue.innerText = Math.round(value * 100) + "%";
+    };
+    buttonTextSlider.addEventListener("input", (e) => updateButtonTextScale(e.target.value));
+    const savedButtonTextScale = localStorage.getItem('buttonTextScale');
+    if (savedButtonTextScale !== null && !isNaN(parseFloat(savedButtonTextScale))) {
+        updateButtonTextScale(parseFloat(savedButtonTextScale));
+        buttonTextSlider.value = parseFloat(savedButtonTextScale);
+    } else {
+        updateButtonTextScale(1);
+        buttonTextSlider.value = 1;
     }
 }
 
