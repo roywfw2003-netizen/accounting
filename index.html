@@ -23,7 +23,7 @@
             --accent-orange-shadow: #b45309;
             --button-font-scale: 1.5;
             --records-font-scale: 1;
-            --button-text-scale: 1;  /* 新增：主頁面按鈕文字專用縮放 */
+            --button-text-scale: 1;
         }
         body.dark {
             --bg-body: #1f2937;
@@ -139,7 +139,6 @@
         .nav-btn, .staff-btn, .payment-btn, .preset-btn, .product-btn, .small-btn, .submit-btn, #submitConsume, .settings-icon-small {
             font-size: calc(0.9rem * var(--button-font-scale));
         }
-        /* 新增：主頁面按鈕文字大小（只影響員工、產品、支付、預設金額按鈕上的文字） */
         .staff-btn, .payment-btn, .preset-btn, .product-btn {
             font-size: calc(0.9rem * var(--button-text-scale));
         }
@@ -665,6 +664,16 @@
         .password-input-wrapper input {
             flex: 1;
         }
+        .back-home-btn {
+            margin-bottom: 12px;
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .back-home-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--accent-orange-shadow);
+        }
     </style>
 </head>
 <body>
@@ -718,6 +727,7 @@
 
     <!-- 系統設定頁 -->
     <div id="settingsPage" class="page">
+        <button id="backToHomeBtn" class="small-btn back-home-btn" style="width:100%; margin-bottom:12px;">🏠 返回主頁</button>
         <h3>⚙️ 系統設定</h3>
         <hr>
         <div class="settings-section">
@@ -913,13 +923,24 @@ let buttonsPerRow = 3;
 
 // 密碼驗證
 let passwordAuth = { verified: false, expireTime: 0 };
-function isPasswordValid() { return passwordAuth.verified && Date.now() < passwordAuth.expireTime; }
+let lastQuickDeleteTime = 0; // 記錄最後一次免密刪除的時間戳
+
+// 檢查當前是否在系統設定頁面
+function isInSettingsPage() {
+    const settingsPage = document.getElementById("settingsPage");
+    return settingsPage && settingsPage.classList.contains("active");
+}
+
 async function requirePassword() {
-    if (isPasswordValid()) return true;
-    const pwd = prompt("請輸入管理密碼（驗證後1分鐘內無需重複輸入）");
+    // 如果在系統設定頁面且已經驗證，直接通過
+    if (isInSettingsPage() && passwordAuth.verified) {
+        return true;
+    }
+    // 否則彈出密碼框
+    const pwd = prompt("請輸入管理密碼");
     if (pwd === settingsPassword) {
         passwordAuth.verified = true;
-        passwordAuth.expireTime = Date.now() + 60 * 1000;
+        passwordAuth.expireTime = Date.now() + 60 * 1000; // 保留一分鐘，但實際只在設定頁面內有效
         return true;
     } else {
         if (pwd !== null) alert("密碼錯誤");
@@ -1037,7 +1058,6 @@ async function fullSyncToSheets() {
             } else {
                 const googleDate = toGoogleDate(rec.date);
                 const time = getCurrentTime();
-                // 客人消費：日期, 員工, 工號, 價錢, 支付方式, 時間, 同步, 訂單編號
                 row = [googleDate, rec.staffName, rec.staffCode, rec.amount.toString(), rec.payment, time, 'success', rec.id];
             }
             await appendToSheet(sheetName, row);
@@ -1112,7 +1132,7 @@ async function pullAllRecordsFromSheets() {
     if (!gapiReady) { showToast("未登入，無法從雲端拉取"); return false; }
     try {
         const salesResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '產品!A:K' });
-        const consumeResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '客人!A:H' }); // 8列
+        const consumeResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '客人!A:H' });
         const cloudRecords = [];
         if (salesResp.result.values && salesResp.result.values.length > 1) {
             for (let row of salesResp.result.values.slice(1)) {
@@ -1201,7 +1221,6 @@ async function addRecord(recordData) {
         lastConsumeRecord = { ...newRecord };
         updateRecentRecord('consumption');
     }
-    // 增量同步到云端
     if (gapiReady) {
         await appendSingleRecord(newRecord);
     }
@@ -1242,20 +1261,30 @@ async function editRecord(record, options = {}) {
     return true;
 }
 
-// 删除记录（通用，支持跳过密码，并检查是否为最新）
+// 删除记录（通用，支持跳过密码，并检查是否为最新记录）
 async function deleteRecordById(id, options = {}) {
-    if (!options.skipPassword) {
-        if (!await requirePassword()) return false;
-    }
     const recordToDelete = records.find(r => r.id === id);
     if (!recordToDelete) return false;
     // 檢查是否為該類型的最新一筆
     const sameType = records.filter(r => r.type === recordToDelete.type);
+    let isLatest = false;
     if (sameType.length > 0) {
         const latest = sameType.reduce((a,b) => new Date(b.createdAt || b.date) > new Date(a.createdAt || a.date) ? b : a);
-        if (latest.id !== id) {
-            alert("只能刪除最新一筆記錄，無法刪除其他記錄。");
-            return false;
+        isLatest = (latest.id === id);
+    }
+    // 如果不是最新，則必須輸入密碼
+    if (!isLatest) {
+        if (!await requirePassword()) return false;
+    } else {
+        // 是最新記錄，且要求跳過密碼時，檢查是否短時間內再次免密刪除
+        if (options.skipPassword) {
+            const now = Date.now();
+            if (now - lastQuickDeleteTime < 5000) { // 5秒內連續免密刪除，需要密碼
+                if (!await requirePassword()) return false;
+            }
+            lastQuickDeleteTime = now;
+        } else {
+            if (!await requirePassword()) return false;
         }
     }
     if (!confirm("確定要刪除此記錄嗎？此操作不可復原！")) return false;
@@ -1290,7 +1319,6 @@ function showEditModal(record) {
     optionGrid.className = 'edit-option-grid';
 
     if (record.type === 'sales') {
-        // 產品選項
         const productLabel = document.createElement('div');
         productLabel.innerText = '選擇產品：';
         optionGrid.appendChild(productLabel);
@@ -1302,14 +1330,12 @@ function showEditModal(record) {
                 record.productName = prod.name;
                 record.productPrice = prod.price;
                 record.amount = prod.price;
-                // 繼續選擇支付方式
                 showPaymentSelection(record, modal);
             };
             optionGrid.appendChild(btn);
         });
         content.appendChild(optionGrid);
     } else {
-        // 金額選項
         const amountLabel = document.createElement('div');
         amountLabel.innerText = '選擇金額：';
         optionGrid.appendChild(amountLabel);
@@ -1327,7 +1353,6 @@ function showEditModal(record) {
     }
 
     function showPaymentSelection(record, modal) {
-        // 清除現有內容，顯示支付方式
         while (content.children.length > 1) content.removeChild(content.lastChild);
         const paymentLabel = document.createElement('div');
         paymentLabel.innerText = '選擇支付方式：';
@@ -1346,7 +1371,6 @@ function showEditModal(record) {
             paymentGrid.appendChild(btn);
         });
         content.appendChild(paymentGrid);
-        // 添加取消按鈕
         const cancelBtn = document.createElement('button');
         cancelBtn.innerText = '取消';
         cancelBtn.className = 'small-btn';
@@ -1356,7 +1380,6 @@ function showEditModal(record) {
     }
 
     async function finalizeEdit(record, modal) {
-        // 保存修改
         saveRecords();
         if (gapiReady) await fullSyncToSheets();
         renderRecordsTables();
@@ -1374,7 +1397,7 @@ function renderRecordsTables() {
     const consumeRecords = records.filter(r => r.type === 'consumption');
     if (salesRecords.length === 0) salesContainer.innerHTML = "<div>暫無產品銷售記錄</div>";
     else {
-        let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>產品</th><th>支付方式</th><th>同步狀態</th><th>操作</th> </tr> </thead><tbody>';
+        let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>產品</th><th>支付方式</th><th>同步狀態</th><th>操作</th> </thead><tbody>';
         for (const rec of salesRecords) {
             const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
             const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
@@ -1395,7 +1418,7 @@ function renderRecordsTables() {
     }
     if (consumeRecords.length === 0) consumeContainer.innerHTML = "<div>暫無客人消費記錄</div>";
     else {
-        let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>工號</th><th>金額</th><th>支付方式</th><th>同步狀態</th><th>操作</th> </tr> </thead><tbody>';
+        let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>工號</th><th>金額</th><th>支付方式</th><th>同步狀態</th><th>操作</th> </thead><tbody>';
         for (const rec of consumeRecords) {
             const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
             const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
@@ -1415,25 +1438,23 @@ function renderRecordsTables() {
         html += '</tbody></table>';
         consumeContainer.innerHTML = html;
     }
-    // 绑定表格内修改/删除事件（需要密码）
     document.querySelectorAll('#salesRecordsTable .edit-btn, #consumeRecordsTable .edit-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
             const id = btn.dataset.id;
             const record = records.find(r => r.id === id);
-            if (record) await editRecord(record); // 默认需要密码
+            if (record) await editRecord(record);
         });
     });
     document.querySelectorAll('#salesRecordsTable .danger-btn, #consumeRecordsTable .danger-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
             const id = btn.dataset.id;
-            await deleteRecordById(id); // 默认需要密码
+            await deleteRecordById(id);
         });
     });
 }
 
 function updateRecentRecord(type) {
     const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
-    // 获取最新一条记录
     const recordsOfType = records.filter(r => r.type === type).sort((a,b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
     const record = recordsOfType.length ? recordsOfType[0] : null;
     if (type === 'sales') lastSalesRecord = record;
@@ -1455,12 +1476,11 @@ function updateRecentRecord(type) {
     editBtn.onclick = async () => {
         const targetRecord = records.find(r => r.id === record.id);
         if (targetRecord) {
-            // 使用自定义模态框修改，无需密码
             showEditModal(targetRecord);
         }
     };
     delBtn.onclick = async () => {
-        await deleteRecordById(record.id, { skipPassword: true }); // 最新记录删除跳过密码（且会检查是否最新）
+        await deleteRecordById(record.id, { skipPassword: true });
         updateRecentRecord(type);
     };
 }
@@ -1764,6 +1784,11 @@ function showPage(pageId) {
         if (btn.dataset.page === pageId) btn.classList.add("active");
         else btn.classList.remove("active");
     });
+    // 離開系統設定頁時清除驗證狀態
+    if (pageId !== "settings") {
+        passwordAuth.verified = false;
+        passwordAuth.expireTime = 0;
+    }
     if (pageId === "sales") {
         document.getElementById("salesDate").value = getTodayISO();
         renderProducts();
@@ -1790,7 +1815,6 @@ function showPage(pageId) {
         document.getElementById("consumeRecordsContent").classList.toggle("hidden-content", !toggleConsumeRecords);
         document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
         document.getElementById("buttonsPerRow").value = buttonsPerRow;
-        // 同步滑块显示当前缩放系数
         const currentScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--button-font-scale')) || 1.5;
         document.getElementById("fontScaleSlider").value = currentScale;
         document.getElementById("fontScaleValue").innerText = Math.round(currentScale * 100) + "%";
@@ -1841,7 +1865,6 @@ function initToggles() {
         renderPresetButtons();
         showToast(`按鈕每行數量已改為 ${buttonsPerRow}`);
     });
-    // 导航按钮字体大小调节
     const btnSlider = document.getElementById("fontScaleSlider");
     const btnScaleValue = document.getElementById("fontScaleValue");
     const updateFontScale = (value) => {
@@ -1860,7 +1883,6 @@ function initToggles() {
         updateFontScale(1.5);
         btnSlider.value = 1.5;
     }
-    // 记录表格字体大小调节
     const recordsSlider = document.getElementById("recordsScaleSlider");
     const recordsScaleValue = document.getElementById("recordsScaleValue");
     const updateRecordsScale = (value) => {
@@ -1879,7 +1901,6 @@ function initToggles() {
         updateRecordsScale(1);
         recordsSlider.value = 1;
     }
-    // 主页面按钮文字大小调节
     const buttonTextSlider = document.getElementById("buttonTextSlider");
     const buttonTextValue = document.getElementById("buttonTextValue");
     const updateButtonTextScale = (value) => {
@@ -1925,7 +1946,6 @@ document.getElementById("changePasswordBtn").addEventListener("click", async () 
     document.getElementById("newPassword").value = ""; document.getElementById("confirmPassword").value = "";
 });
 
-// 密码显示/隐藏切换
 document.querySelectorAll('.password-toggle-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const targetId = btn.dataset.target;
@@ -2026,6 +2046,9 @@ document.getElementById("manualSyncBtnConsume").addEventListener("click", async 
     if (!await requirePassword()) return;
     await pullAllRecordsFromSheets();
     renderUI();
+});
+document.getElementById("backToHomeBtn").addEventListener("click", () => {
+    showPage("sales");
 });
 
 function showToast(msg) {
