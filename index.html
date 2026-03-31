@@ -1401,24 +1401,23 @@ function renderRecordsTables() {
         for (const rec of salesRecords) {
             const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
             const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
-            html += `<tr>
-                <td class="record-cell" title="${rec.date}">${rec.displayDate}</td>
-                <td>${rec.staffName}</td>
-                <td>${rec.productName}</td>
-                <td>${rec.payment}</td>
-                <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
+            html += ` transduction
+                <td class="record-cell" title="${rec.date}">${rec.displayDate} transduction
+                <td>${rec.staffName} transduction
+                <td>${rec.productName} transduction
+                <td>${rec.payment} transduction
+                <td><span class="sync-badge ${statusClass}">${statusText}</span> transduction
                 <td class="action-btns">
                     <button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button>
                     <button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button>
-                </td>
-              </tr>`;
+                 </tr>`;
         }
         html += '</tbody></table>';
         salesContainer.innerHTML = html;
     }
     if (consumeRecords.length === 0) consumeContainer.innerHTML = "<div>暫無客人消費記錄</div>";
     else {
-        let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>工號</th><th>金額</th><th>支付方式</th><th>同步狀態</th><th>操作</th> </thead><tbody>';
+        let html = '<table class="records-table"><thead><tr><th>日子</th><th>員工</th><th>工號</th><th>金額</th><th>支付方式</th><th>同步狀態</th><th>操作</th></tr></thead><tbody>';
         for (const rec of consumeRecords) {
             const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
             const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
@@ -1922,6 +1921,11 @@ function initToggles() {
 }
 
 async function openSettingsPage() {
+    // 如果已經在設定頁且驗證過，直接顯示
+    if (isInSettingsPage() && passwordAuth.verified) {
+        showPage("settings");
+        return;
+    }
     const pwd = prompt("請輸入管理密碼");
     if (pwd === settingsPassword) {
         passwordAuth.verified = true;
