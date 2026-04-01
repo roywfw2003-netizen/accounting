@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Hair World系統</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -921,26 +923,21 @@ let toggleStaff = false, toggleProduct = false, togglePreset = false;
 let toggleSalesRecords = false, toggleConsumeRecords = false;
 let buttonsPerRow = 3;
 
-// 密碼驗證
-let passwordAuth = { verified: false, expireTime: 0 };
+// 密碼驗證（全局，只要驗證成功就一直有效，直到點擊返回主頁）
+let passwordAuth = { verified: false };
 let lastQuickDeleteTime = 0; // 記錄最後一次免密刪除的時間戳
 
-// 檢查當前是否在系統設定頁面
 function isInSettingsPage() {
     const settingsPage = document.getElementById("settingsPage");
     return settingsPage && settingsPage.classList.contains("active");
 }
 
 async function requirePassword() {
-    // 如果在系統設定頁面且已經驗證，直接通過
-    if (isInSettingsPage() && passwordAuth.verified) {
-        return true;
-    }
-    // 否則彈出密碼框
+    // 如果已經驗證過，直接通過
+    if (passwordAuth.verified) return true;
     const pwd = prompt("請輸入管理密碼");
     if (pwd === settingsPassword) {
         passwordAuth.verified = true;
-        passwordAuth.expireTime = Date.now() + 60 * 1000; // 保留一分鐘，但實際只在設定頁面內有效
         return true;
     } else {
         if (pwd !== null) alert("密碼錯誤");
@@ -1399,28 +1396,37 @@ function renderRecordsTables() {
     else {
         let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>產品</th><th>支付方式</th><th>同步狀態</th><th>操作</th> </thead><tbody>';
         for (const rec of salesRecords) {
-            const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
-            const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
-            html += ` transduction
-                <td class="record-cell" title="${rec.date}">${rec.displayDate} transduction
-                <td>${rec.staffName} transduction
-                <td>${rec.productName} transduction
-                <td>${rec.payment} transduction
-                <td><span class="sync-badge ${statusClass}">${statusText}</span> transduction
+            let statusClass = 'sync-pending';
+            let statusText = '待同步';
+            if (rec.syncStatus === 'success') { statusClass = 'sync-success'; statusText = '已同步'; }
+            else if (rec.syncStatus === 'failed') { statusClass = 'sync-failed'; statusText = '同步失敗'; }
+            else if (rec.syncStatus === 'pending') { statusClass = 'sync-pending'; statusText = '待同步'; }
+            else { statusClass = 'sync-pending'; statusText = '未知'; } // 避免出現異常文字
+            html += ` money
+                <td class="record-cell" title="${rec.date}">${rec.displayDate}</td>
+                <td>${rec.staffName}</td>
+                <td>${rec.productName}</td>
+                <td>${rec.payment}</td>
+                <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
                 <td class="action-btns">
                     <button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button>
                     <button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button>
-                 </tr>`;
+                </td>
+              </tr>`;
         }
         html += '</tbody></table>';
         salesContainer.innerHTML = html;
     }
     if (consumeRecords.length === 0) consumeContainer.innerHTML = "<div>暫無客人消費記錄</div>";
     else {
-        let html = '<table class="records-table"><thead><tr><th>日子</th><th>員工</th><th>工號</th><th>金額</th><th>支付方式</th><th>同步狀態</th><th>操作</th></tr></thead><tbody>';
+        let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>工號</th><th>金額</th><th>支付方式</th><th>同步狀態</th><th>操作</th> </thead><tbody>';
         for (const rec of consumeRecords) {
-            const statusClass = rec.syncStatus === 'success' ? 'sync-success' : (rec.syncStatus === 'failed' ? 'sync-failed' : 'sync-pending');
-            const statusText = rec.syncStatus === 'success' ? '已同步' : (rec.syncStatus === 'failed' ? '同步失敗' : '待同步');
+            let statusClass = 'sync-pending';
+            let statusText = '待同步';
+            if (rec.syncStatus === 'success') { statusClass = 'sync-success'; statusText = '已同步'; }
+            else if (rec.syncStatus === 'failed') { statusClass = 'sync-failed'; statusText = '同步失敗'; }
+            else if (rec.syncStatus === 'pending') { statusClass = 'sync-pending'; statusText = '待同步'; }
+            else { statusClass = 'sync-pending'; statusText = '未知'; }
             html += `<tr>
                 <td class="record-cell" title="${rec.date}">${rec.displayDate}</td>
                 <td>${rec.staffName}</td>
@@ -1783,11 +1789,6 @@ function showPage(pageId) {
         if (btn.dataset.page === pageId) btn.classList.add("active");
         else btn.classList.remove("active");
     });
-    // 離開系統設定頁時清除驗證狀態
-    if (pageId !== "settings") {
-        passwordAuth.verified = false;
-        passwordAuth.expireTime = 0;
-    }
     if (pageId === "sales") {
         document.getElementById("salesDate").value = getTodayISO();
         renderProducts();
@@ -1921,15 +1922,18 @@ function initToggles() {
 }
 
 async function openSettingsPage() {
-    // 如果已經在設定頁且驗證過，直接顯示
-    if (isInSettingsPage() && passwordAuth.verified) {
+    // 如果已經驗證過，直接顯示設定頁
+    if (passwordAuth.verified) {
+        if (gapiReady) {
+            await loadConfigFromSheet();
+            await pullAllRecordsFromSheets();
+        }
         showPage("settings");
         return;
     }
     const pwd = prompt("請輸入管理密碼");
     if (pwd === settingsPassword) {
         passwordAuth.verified = true;
-        passwordAuth.expireTime = Date.now() + 60 * 1000;
         if (gapiReady) {
             await loadConfigFromSheet();
             await pullAllRecordsFromSheets();
@@ -2052,6 +2056,7 @@ document.getElementById("manualSyncBtnConsume").addEventListener("click", async 
     renderUI();
 });
 document.getElementById("backToHomeBtn").addEventListener("click", () => {
+    passwordAuth.verified = false; // 清除驗證狀態
     showPage("sales");
 });
 
