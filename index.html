@@ -8,7 +8,6 @@
     <title>Hair World系統</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ========== 全局变量 ========== */
         :root {
             --bg-body: #cfe7ff;
             --bg-card: white;
@@ -61,20 +60,10 @@
         h1, h2, h3, h4, h5, h6, p, span, div, label, button, input, select, .setting-row span, .small-btn, .record-item {
             color: var(--text-primary);
         }
-        .nav-btn, .submit-btn, .settings-icon-small, .small-btn, .danger-btn {
-            color: white;
-        }
-        .settings-icon-small i {
-            color: white;
-        }
-        .danger-btn {
-            color: #b91c1c !important;
-        }
-        body.dark .danger-btn {
-            color: #ff7b72 !important;
-        }
-
-        /* 登录面板 */
+        .nav-btn, .submit-btn, .settings-icon-small, .small-btn, .danger-btn { color: white; }
+        .settings-icon-small i { color: white; }
+        .danger-btn { color: #b91c1c !important; }
+        body.dark .danger-btn { color: #ff7b72 !important; }
         #loginPanel {
             position: fixed;
             top: 0;
@@ -97,19 +86,9 @@
             width: 90%;
             max-width: 360px;
         }
-        .login-card i {
-            font-size: 4rem;
-            color: var(--accent-orange);
-            margin-bottom: 16px;
-        }
-        .login-card h2 {
-            margin: 0 0 8px 0;
-        }
-        .login-card p {
-            margin-bottom: 24px;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
+        .login-card i { font-size: 4rem; color: var(--accent-orange); margin-bottom: 16px; }
+        .login-card h2 { margin: 0 0 8px 0; }
+        .login-card p { margin-bottom: 24px; font-size: 0.9rem; color: var(--text-secondary); }
         #googleLoginBtn {
             background: var(--btn-primary-bg);
             border: none;
@@ -123,11 +102,7 @@
             box-shadow: 0 4px 0 var(--btn-primary-shadow);
             transition: 0.05s linear;
         }
-        #googleLoginBtn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 var(--btn-primary-shadow);
-        }
-
+        #googleLoginBtn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--btn-primary-shadow); }
         .app-container {
             width: 100%;
             max-width: 100%;
@@ -142,86 +117,23 @@
             display: none;
             flex-direction: column;
         }
-
-        /* 按钮字体缩放 */
-        .nav-btn, .staff-btn, .payment-btn, .preset-btn, .product-btn, .small-btn, .submit-btn, #submitConsume, .settings-icon-small {
-            font-size: calc(0.9rem * var(--button-font-scale));
+        @media (orientation: landscape) and (min-width: 900px) {
+            .app-container { flex-direction: row; padding: 12px; gap: 16px; }
+            .btn-group { flex-direction: column; width: 120px; gap: 12px; margin-bottom: 0; }
+            .nav-btn { width: 100%; padding: 16px 8px; }
+            .page { flex: 1; overflow-y: auto; }
         }
-        .staff-btn, .payment-btn, .preset-btn, .product-btn {
-            font-size: calc(0.9rem * var(--button-text-scale));
+        @media (orientation: portrait), (max-width: 899px) {
+            .btn-group { flex-direction: row; flex-wrap: wrap; margin-bottom: 12px; }
+            .nav-btn { flex: 1; min-width: 100px; }
         }
-        .staff-name, .product-name {
-            font-size: calc(1rem * var(--button-text-scale));
-        }
-        .staff-code, .product-price {
-            font-size: calc(0.75rem * var(--button-text-scale));
-        }
-        .record-item {
-            font-size: calc(0.85rem * var(--button-font-scale));
-        }
-
-        /* 记录表格独立字体缩放 */
-        .records-table, .records-table th, .records-table td, .sync-badge {
-            font-size: calc(0.8rem * var(--records-font-scale));
-        }
-        .records-table th, .records-table td {
-            font-size: calc(0.8rem * var(--records-font-scale));
-        }
-        .sync-badge {
-            font-size: calc(0.7rem * var(--records-font-scale));
-        }
-
-        @media (orientation: landscape) {
-            .app-container {
-                padding: 8px 12px;
-            }
-            .nav-btn {
-                padding: 10px 4px;
-            }
-            .nav-btn i {
-                font-size: calc(1.5rem * var(--button-font-scale));
-            }
-            .product-btn, .preset-btn {
-                padding: 8px 4px;
-            }
-            .staff-btn, .payment-btn {
-                padding: 8px 4px;
-            }
-            .total, .recent-record {
-                font-size: calc(0.9rem * var(--button-font-scale));
-                margin-top: 4px;
-                padding-top: 4px;
-            }
-            .submit-btn, #submitConsume {
-                padding: 10px;
-                font-size: calc(1rem * var(--button-font-scale));
-                margin-top: 8px;
-            }
-            .settings-section {
-                margin-bottom: 8px;
-                padding: 6px;
-            }
-            .record-item {
-                padding: 6px;
-            }
-            .small-btn {
-                padding: 4px 8px;
-            }
-        }
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
+        .btn-group { display: flex; gap: 12px; margin-bottom: 12px; }
         .nav-btn {
             background: var(--btn-gray-bg);
             border: none;
             border-radius: 32px;
             font-weight: bold;
             cursor: pointer;
-            flex: 1;
-            min-width: 100px;
             padding: 12px 8px;
             text-align: center;
             transition: 0.05s linear;
@@ -234,35 +146,14 @@
         .nav-btn i { font-size: calc(1.8rem * var(--button-font-scale)); }
         .nav-btn span { font-size: calc(0.85rem * var(--button-font-scale)); }
         .nav-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-gray-shadow); }
-        .nav-btn.active {
-            background: var(--accent-orange);
-            color: white;
-            box-shadow: 0 5px 0 var(--accent-orange-shadow);
-        }
-        .nav-btn.active:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 var(--accent-orange-shadow);
-        }
+        .nav-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 5px 0 var(--accent-orange-shadow); }
         .page { display: none; }
         .active { display: block; }
         .form-group { margin-bottom: 10px; }
         label { display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-primary); }
-        select, input {
-            width: 100%;
-            padding: 8px 12px;
-            border-radius: 40px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-card);
-            color: var(--text-primary);
-        }
-        .date-with-settings {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .date-with-settings input {
-            flex: 1;
-        }
+        select, input { width: 100%; padding: 8px 12px; border-radius: 40px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); }
+        .date-with-settings { display: flex; gap: 10px; align-items: center; }
+        .date-with-settings input { flex: 1; }
         .settings-icon-small {
             background: var(--btn-primary-bg);
             border: none;
@@ -276,15 +167,8 @@
             box-shadow: 0 3px 0 var(--btn-primary-shadow);
             transition: 0.05s linear;
         }
-        .settings-icon-small:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 var(--btn-primary-shadow);
-        }
-        .staff-group, .payment-group, .product-grid, .preset-grid {
-            display: grid;
-            gap: 8px;
-            margin: 6px 0;
-        }
+        .settings-icon-small:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-primary-shadow); }
+        .staff-group, .payment-group, .product-grid, .preset-grid { display: grid; gap: 8px; margin: 6px 0; }
         .staff-btn, .payment-btn, .preset-btn, .product-btn {
             padding: 12px 8px;
             min-height: 52px;
@@ -303,86 +187,26 @@
             color: var(--text-primary);
             flex-direction: column;
         }
-        .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 var(--btn-gray-shadow);
-        }
-        .staff-btn.active, .product-btn.selected {
-            background: var(--accent-orange);
-            color: white;
-            box-shadow: 0 3px 0 var(--accent-orange-shadow);
-        }
-        .payment-btn.active {
-            background: var(--accent-orange);
-            color: white;
-            box-shadow: 0 3px 0 var(--accent-orange-shadow);
-        }
-        .preset-btn.active {
-            background: var(--accent-orange);
-            color: white;
-            box-shadow: 0 3px 0 var(--accent-orange-shadow);
-        }
+        .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
+        .staff-btn.active, .product-btn.selected { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
+        .payment-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
+        .preset-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
         .staff-name { font-weight: bold; }
         .staff-code { opacity: 0.8; }
         .product-price { font-weight: bold; }
         .product-btn.selected .product-price { color: white; }
-        .total {
-            font-weight: bold;
-            text-align: right;
-            margin-top: 6px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 6px;
-            color: var(--accent-orange);
-        }
-        .record-item {
-            background: var(--btn-gray-bg);
-            border-radius: 20px;
-            padding: 8px;
-            margin-bottom: 6px;
-            color: var(--text-primary);
-        }
-        .sync-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 20px;
-        }
+        .total { font-weight: bold; text-align: right; margin-top: 6px; border-top: 1px solid var(--border-color); padding-top: 6px; color: var(--accent-orange); }
+        .record-item { background: var(--btn-gray-bg); border-radius: 20px; padding: 8px; margin-bottom: 6px; color: var(--text-primary); }
+        .sync-badge { display: inline-block; padding: 2px 6px; border-radius: 20px; }
         .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
         .sync-pending { background: #fef9c3; color: #854d0e; }
-        .setting-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 8px;
-        }
-        .small-btn {
-            background: var(--btn-gray-bg);
-            border: none;
-            padding: 4px 10px;
-            border-radius: 40px;
-            cursor: pointer;
-            box-shadow: 0 3px 0 var(--btn-gray-shadow);
-            transition: 0.05s linear;
-            color: var(--text-primary);
-        }
-        .small-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 var(--btn-gray-shadow);
-        }
-        .danger-btn {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-        .edit-btn {
-            background: var(--btn-gray-bg);
-            color: var(--text-primary);
-            margin-left: 6px;
-        }
-        hr {
-            margin: 12px 0;
-            border-color: var(--border-color);
-        }
+        .setting-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+        .small-btn { background: var(--btn-gray-bg); border: none; padding: 4px 10px; border-radius: 40px; cursor: pointer; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; color: var(--text-primary); }
+        .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
+        .danger-btn { background: #fee2e2; color: #b91c1c; }
+        .edit-btn { background: var(--btn-gray-bg); color: var(--text-primary); margin-left: 6px; }
+        hr { margin: 12px 0; border-color: var(--border-color); }
         .toast {
             position: fixed;
             bottom: 30px;
@@ -411,14 +235,7 @@
             z-index: 1000;
             display: none;
         }
-        .iframe-container iframe {
-            width: 90%;
-            height: 90%;
-            margin: 5% auto;
-            display: block;
-            background: white;
-            border-radius: 20px;
-        }
+        .iframe-container iframe { width: 90%; height: 90%; margin: 5% auto; display: block; background: white; border-radius: 20px; }
         .close-iframe {
             position: absolute;
             top: 20px;
@@ -432,10 +249,7 @@
             box-shadow: 0 3px 0 var(--accent-orange-shadow);
             font-size: calc(0.9rem * var(--button-font-scale));
         }
-        .close-iframe:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 var(--accent-orange-shadow);
-        }
+        .close-iframe:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
         .recent-record {
             background: var(--btn-gray-bg);
             border-radius: 20px;
@@ -450,153 +264,32 @@
             flex-wrap: wrap;
             gap: 8px;
         }
-        .recent-record span {
-            flex: 1;
-            word-break: break-word;
-        }
-        .recent-record .action-btns {
-            display: flex;
-            gap: 8px;
-        }
-        .settings-section {
-            margin-bottom: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 8px;
-        }
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-        .settings-content {
-            margin-top: 8px;
-        }
-        .toggle-switch {
-            width: 44px;
-            height: 24px;
-            background: #ccc;
-            border-radius: 24px;
-            position: relative;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .toggle-switch.active {
-            background: var(--accent-orange);
-        }
-        .toggle-switch::after {
-            content: '';
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            transition: 0.2s;
-        }
-        .toggle-switch.active::after {
-            left: 22px;
-        }
-        .hidden-content {
-            display: none;
-        }
-        .submit-btn, #submitConsume {
-            background: var(--btn-success-bg);
-            color: white;
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 40px;
-            font-weight: bold;
-            margin-top: 10px;
-            cursor: pointer;
-            box-shadow: 0 5px 0 var(--btn-success-shadow);
-            transition: 0.05s linear;
-            text-align: center;
-        }
-        .submit-btn:active, #submitConsume:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 var(--btn-success-shadow);
-        }
-        .records-action-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-        .records-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 16px;
-        }
-        .records-table th, .records-table td {
-            border: 1px solid var(--border-color);
-            padding: 6px;
-            text-align: left;
-        }
-        .records-table th {
-            background: var(--btn-gray-bg);
-        }
-        .record-cell {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            cursor: pointer;
-            max-width: 120px;
-        }
-        .action-btns {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-        @media (max-width: 600px) {
-            .records-table th, .records-table td {
-                padding: 4px;
-            }
-        }
-
-        /* 标题横线装饰 */
-        .section-title {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        .section-title::before,
-        .section-title::after {
-            content: "==========";
-            font-weight: normal;
-            color: var(--border-color);
-            flex: 1;
-            text-align: center;
-            white-space: nowrap;
-            overflow-x: auto;
-        }
-        .section-title::before {
-            margin-right: 8px;
-        }
-        .section-title::after {
-            margin-left: 8px;
-        }
-
-        .font-scale-slider, .records-scale-slider, .button-text-slider {
-            width: 100%;
-            margin: 8px 0;
-        }
-        .scale-value {
-            font-weight: bold;
-            margin-left: 10px;
-        }
-        .disabled-btn {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        /* 自定义模态框样式 */
+        .recent-record span { flex: 1; word-break: break-word; }
+        .recent-record .action-btns { display: flex; gap: 8px; }
+        .settings-section { margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 24px; padding: 8px; }
+        .settings-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .settings-content { margin-top: 8px; }
+        .toggle-switch { width: 44px; height: 24px; background: #ccc; border-radius: 24px; position: relative; cursor: pointer; transition: 0.2s; }
+        .toggle-switch.active { background: var(--accent-orange); }
+        .toggle-switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
+        .toggle-switch.active::after { left: 22px; }
+        .hidden-content { display: none; }
+        .submit-btn, #submitConsume { background: var(--btn-success-bg); color: white; width: 100%; padding: 12px; border: none; border-radius: 40px; font-weight: bold; margin-top: 10px; cursor: pointer; box-shadow: 0 5px 0 var(--btn-success-shadow); transition: 0.05s linear; text-align: center; }
+        .submit-btn:active, #submitConsume:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-success-shadow); }
+        .records-action-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+        .records-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        .records-table th, .records-table td { border: 1px solid var(--border-color); padding: 6px; text-align: left; }
+        .records-table th { background: var(--btn-gray-bg); }
+        .record-cell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; max-width: 120px; }
+        .action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+        @media (max-width: 600px) { .records-table th, .records-table td { padding: 4px; } }
+        .section-title { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: bold; margin-bottom: 8px; }
+        .section-title::before, .section-title::after { content: "=========="; font-weight: normal; color: var(--border-color); flex: 1; text-align: center; white-space: nowrap; overflow-x: auto; }
+        .section-title::before { margin-right: 8px; }
+        .section-title::after { margin-left: 8px; }
+        .font-scale-slider, .records-scale-slider, .button-text-slider { width: 100%; margin: 8px 0; }
+        .scale-value { font-weight: bold; margin-left: 10px; }
+        .disabled-btn { opacity: 0.6; pointer-events: none; }
         .edit-modal {
             position: fixed;
             top: 0;
@@ -609,42 +302,11 @@
             justify-content: center;
             z-index: 3000;
         }
-        .edit-modal-content {
-            background: var(--bg-card);
-            border-radius: 24px;
-            padding: 20px;
-            width: 90%;
-            max-width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        .edit-modal-content h3 {
-            margin-top: 0;
-            text-align: center;
-        }
-        .edit-option-grid {
-            display: grid;
-            gap: 8px;
-            margin: 16px 0;
-        }
-        .edit-option-btn {
-            background: var(--btn-gray-bg);
-            padding: 12px;
-            border-radius: 40px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.05s linear;
-            font-weight: bold;
-        }
-        .edit-option-btn:active {
-            transform: scale(0.98);
-        }
-        .edit-modal-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin-top: 16px;
-        }
+        .edit-modal-content { background: var(--bg-card); border-radius: 24px; padding: 20px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; }
+        .edit-modal-content h3 { margin-top: 0; text-align: center; }
+        .edit-option-grid { display: grid; gap: 8px; margin: 16px 0; }
+        .edit-option-btn { background: var(--btn-gray-bg); padding: 12px; border-radius: 40px; text-align: center; cursor: pointer; transition: 0.05s linear; font-weight: bold; }
+        .edit-option-btn:active { transform: scale(0.98); }
         .password-toggle-btn {
             background: var(--btn-gray-bg);
             border: none;
@@ -659,29 +321,11 @@
             box-shadow: 0 2px 0 var(--btn-gray-shadow);
             transition: 0.05s linear;
         }
-        .password-toggle-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 0px 0 var(--btn-gray-shadow);
-        }
-        .password-input-wrapper {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex: 1;
-        }
-        .password-input-wrapper input {
-            flex: 1;
-        }
-        .back-home-btn {
-            margin-bottom: 12px;
-            background: var(--accent-orange);
-            color: white;
-            box-shadow: 0 3px 0 var(--accent-orange-shadow);
-        }
-        .back-home-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 var(--accent-orange-shadow);
-        }
+        .password-toggle-btn:active { transform: translateY(2px); box-shadow: 0 0px 0 var(--btn-gray-shadow); }
+        .password-input-wrapper { display: flex; gap: 8px; align-items: center; flex: 1; }
+        .password-input-wrapper input { flex: 1; }
+        .back-home-btn { margin-bottom: 12px; background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
+        .back-home-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
     </style>
 </head>
 <body>
@@ -695,225 +339,53 @@
 </div>
 
 <div class="app-container">
-    <div class="btn-group">
-        <button class="nav-btn" data-page="sales"><i class="fa-solid fa-cube"></i><span>產品銷售</span></button>
-        <button class="nav-btn" data-page="consumption"><i class="fa-solid fa-user-group"></i><span>客人消費</span></button>
-        <button class="nav-btn" id="studentBookingBtn"><i class="fa-solid fa-school"></i><span>學生預約</span></button>
-    </div>
-
+    <div class="btn-group" id="navButtons"></div>
     <!-- 產品銷售頁 -->
     <div id="salesPage" class="page">
-        <div class="form-group">
-            <label>📅 日期</label>
-            <div class="date-with-settings">
-                <input type="date" id="salesDate">
-                <button class="settings-icon-small" id="settingsIconSales"><i class="fa-solid fa-gear"></i></button>
-            </div>
-        </div>
+        <div class="form-group"><label>📅 日期</label><div class="date-with-settings"><input type="date" id="salesDate"><button class="settings-icon-small" id="settingsIconSales"><i class="fa-solid fa-gear"></i></button></div></div>
         <div class="form-group"><label class="section-title">👤 員工</label><div class="staff-group" id="salesStaff"></div></div>
         <div class="form-group"><label class="section-title">📦 產品</label><div id="productList" class="product-grid"></div><div class="total">總金額: <span id="totalAmount">0</span> 元</div></div>
         <div class="form-group"><label class="section-title">💳 支付方式</label><div class="payment-group" id="salesPayment"></div></div>
         <button id="submitSales" class="submit-btn">提交銷售</button>
         <div id="salesRecent" class="recent-record" style="display:none;"></div>
     </div>
-
     <!-- 客人消費頁 -->
     <div id="consumptionPage" class="page">
-        <div class="form-group">
-            <label>📅 日期</label>
-            <div class="date-with-settings">
-                <input type="date" id="consumeDate">
-                <button class="settings-icon-small" id="settingsIconConsume"><i class="fa-solid fa-gear"></i></button>
-            </div>
-        </div>
+        <div class="form-group"><label>📅 日期</label><div class="date-with-settings"><input type="date" id="consumeDate"><button class="settings-icon-small" id="settingsIconConsume"><i class="fa-solid fa-gear"></i></button></div></div>
         <div class="form-group"><label class="section-title">👤 員工</label><div class="staff-group" id="consumeStaff"></div></div>
         <div class="form-group"><label class="section-title">💰 金額</label><div id="presetAmounts" class="preset-grid"></div><input type="number" id="consumeAmount" placeholder="或手動輸入" step="1"></div>
         <div class="form-group"><label class="section-title">💳 支付方式</label><div class="payment-group" id="consumePayment"></div></div>
         <button id="submitConsume" class="submit-btn">提交消費</button>
         <div id="consumeRecent" class="recent-record" style="display:none;"></div>
     </div>
-
     <!-- 庫存管理頁 -->
     <div id="inventoryPage" class="page">
         <h3>📦 庫存管理 <button class="settings-icon-small" id="settingsIconInventory"><i class="fa-solid fa-gear"></i></button></h3>
         <div id="inventoryTable"></div>
         <div style="margin-top:16px;"><button id="refreshInventoryBtn" class="small-btn">🔄 重新整理庫存</button></div>
     </div>
-
     <!-- 系統設定頁 -->
     <div id="settingsPage" class="page">
         <button id="backToHomeBtn" class="small-btn back-home-btn" style="width:100%; margin-bottom:12px;">🏠 返回主頁</button>
-        <h3>⚙️ 系統設定</h3>
-        <hr>
-        <div class="settings-section">
-            <div class="settings-header">
-                <h4>🌙 夜間模式</h4>
-                <div class="toggle-switch" id="toggleDarkMode"></div>
-            </div>
-        </div>
-        <div class="settings-section">
-            <div class="settings-header">
-                <h4>🔘 按鈕字體大小（主頁面）</h4>
-            </div>
-            <div>
-                <input type="range" id="buttonTextSlider" class="button-text-slider" min="0.5" max="2.0" step="0.01" value="1.0">
-                <span id="buttonTextValue" class="scale-value">100%</span>
-                <div style="font-size:0.7rem; color:var(--text-secondary);">僅影響「員工、產品、支付方式、預設金額」按鈕上的文字大小</div>
-            </div>
-        </div>
-        <div class="settings-section">
-            <div class="settings-header">
-                <h4>🔘 導航按鈕字體大小</h4>
-            </div>
-            <div>
-                <input type="range" id="fontScaleSlider" class="font-scale-slider" min="0.5" max="2.5" step="0.01" value="1.5">
-                <span id="fontScaleValue" class="scale-value">150%</span>
-                <div style="font-size:0.7rem; color:var(--text-secondary);">影響頂部「產品銷售、客人消費、學生預約」按鈕</div>
-            </div>
-        </div>
-        <div class="settings-section">
-            <div class="settings-header">
-                <h4>📋 記錄表格字體大小</h4>
-            </div>
-            <div>
-                <input type="range" id="recordsScaleSlider" class="records-scale-slider" min="0.5" max="2.0" step="0.01" value="1">
-                <span id="recordsScaleValue" class="scale-value">100%</span>
-                <div style="font-size:0.7rem; color:var(--text-secondary);">僅影響「產品銷售記錄」與「客人消費記錄」表格</div>
-            </div>
-        </div>
-        <div class="settings-section">
-            <div class="settings-header">
-                <h4>🔴🟡🟢 庫存燈號閾值</h4>
-            </div>
-            <div>
-                <label>紅色上限 (≤): <input type="number" id="redThreshold" value="3" step="1" style="width:80px;"></label>
-                <label style="margin-left:12px;">綠色下限 (≥): <input type="number" id="greenThreshold" value="8" step="1" style="width:80px;"></label>
-                <button id="saveThresholdBtn" class="small-btn">儲存</button>
-                <div style="font-size:0.7rem; color:var(--text-secondary);">庫存 ≤ 紅 = 紅色燈；介於之間 = 黃色燈；≥ 綠 = 綠色燈</div>
-            </div>
-        </div>
-        <div class="settings-section">
-            <div class="settings-header">
-                <h4>👥 員工管理</h4>
-                <div class="toggle-switch" id="toggleStaff"></div>
-            </div>
-            <div id="staffContent" class="settings-content hidden-content">
-                <div id="staffManageList"></div>
-                <div class="setting-row">
-                    <input type="text" id="newStaffName" placeholder="員工姓名" style="flex:2;">
-                    <input type="text" id="newStaffCode" placeholder="工號" style="flex:1;">
-                    <button class="small-btn" id="addStaffBtn">➕ 新增</button>
-                </div>
-            </div>
-        </div>
-        <div class="settings-section">
-            <div class="settings-header">
-                <h4>📦 產品管理</h4>
-                <div class="toggle-switch" id="toggleProduct"></div>
-            </div>
-            <div id="productContent" class="settings-content hidden-content">
-                <div id="productManageList"></div>
-                <div class="setting-row">
-                    <input type="text" id="newProductName" placeholder="產品名稱" style="flex:2;">
-                    <input type="number" id="newProductPrice" placeholder="價格" style="flex:1;">
-                    <select id="newProductType">
-                        <option value="普通">普通</option>
-                        <option value="消耗品">消耗品</option>
-                    </select>
-                    <button class="small-btn" id="addProductBtn">➕ 新增</button>
-                </div>
-            </div>
-        </div>
-        <div class="settings-section">
-            <div class="settings-header">
-                <h4>💰 預設金額管理</h4>
-                <div class="toggle-switch" id="togglePreset"></div>
-            </div>
-            <div id="presetContent" class="settings-content hidden-content">
-                <div id="presetManageList"></div>
-                <div class="setting-row">
-                    <input type="number" id="newPresetAmount" placeholder="金額" style="flex:1;">
-                    <button class="small-btn" id="addPresetBtn">➕ 新增</button>
-                </div>
-            </div>
-        </div>
-        <div class="settings-section">
-            <div class="settings-header">
-                <h4>🔘 按鈕每行數量</h4>
-            </div>
-            <div>
-                <div class="setting-row">
-                    <span>員工/產品/支付方式按鈕每行顯示個數：</span>
-                    <input type="number" id="buttonsPerRow" min="1" max="6" value="3" style="width:80px;">
-                    <button class="small-btn" id="applyButtonsPerRow">套用</button>
-                </div>
-                <div style="font-size:0.7rem; color:var(--text-secondary);">數字越大按鈕越窄，會自動縮放文字以充分利用高度</div>
-            </div>
-        </div>
-
-        <div class="settings-section">
-            <div class="settings-header">
-                <h4>🛍️ 產品銷售記錄</h4>
-                <div class="toggle-switch" id="toggleSalesRecords"></div>
-            </div>
-            <div id="salesRecordsContent" class="settings-content hidden-content">
-                <div class="records-action-row">
-                    <button class="small-btn danger-btn" id="clearSalesRecordsBtn">🗑️ 清除所有產品銷售記錄</button>
-                    <button class="small-btn" id="retrySalesFailedSyncBtn">🔄 重試銷售同步失敗</button>
-                    <button class="small-btn" id="manualSyncBtn">📡 手動同步（從雲端拉取）</button>
-                </div>
-                <div id="salesRecordsTable"></div>
-            </div>
-        </div>
-
-        <div class="settings-section">
-            <div class="settings-header">
-                <h4>👥 客人消費記錄</h4>
-                <div class="toggle-switch" id="toggleConsumeRecords"></div>
-            </div>
-            <div id="consumeRecordsContent" class="settings-content hidden-content">
-                <div class="records-action-row">
-                    <button class="small-btn danger-btn" id="clearConsumeRecordsBtn">🗑️ 清除所有客人消費記錄</button>
-                    <button class="small-btn" id="retryConsumeFailedSyncBtn">🔄 重試消費同步失敗</button>
-                    <button class="small-btn" id="manualSyncBtnConsume">📡 手動同步（從雲端拉取）</button>
-                </div>
-                <div id="consumeRecordsTable"></div>
-            </div>
-        </div>
-
-        <div class="settings-section">
-            <div class="settings-header">
-                <h4>🔧 工作表修復</h4>
-            </div>
-            <div>
-                <button class="small-btn" id="repairSheetsBtn">🔄 修復工作表格式（全量同步）</button>
-                <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:5px;">若寫入位置錯亂，請點此按鈕修復（僅推送本地記錄到雲端）</div>
-            </div>
-        </div>
-
-        <hr>
-        <h4>🔐 修改管理密碼</h4>
-        <div class="setting-row">
-            <div class="password-input-wrapper">
-                <input type="password" id="newPassword" placeholder="新密碼" style="flex:1;">
-                <button class="password-toggle-btn" data-target="newPassword">👁️</button>
-            </div>
-            <div class="password-input-wrapper">
-                <input type="password" id="confirmPassword" placeholder="確認新密碼" style="flex:1;">
-                <button class="password-toggle-btn" data-target="confirmPassword">👁️</button>
-            </div>
-            <button class="small-btn" id="changePasswordBtn">更新密碼</button>
-        </div>
+        <h3>⚙️ 系統設定</h3><hr>
+        <div class="settings-section"><div class="settings-header"><h4>🌙 夜間模式</h4><div class="toggle-switch" id="toggleDarkMode"></div></div></div>
+        <div class="settings-section"><div class="settings-header"><h4>🔘 按鈕字體大小（主頁面）</h4></div><div><input type="range" id="buttonTextSlider" class="button-text-slider" min="0.5" max="2.0" step="0.01" value="1.0"><span id="buttonTextValue" class="scale-value">100%</span></div></div>
+        <div class="settings-section"><div class="settings-header"><h4>🔘 導航按鈕字體大小</h4></div><div><input type="range" id="fontScaleSlider" class="font-scale-slider" min="0.5" max="2.5" step="0.01" value="1.5"><span id="fontScaleValue" class="scale-value">150%</span></div></div>
+        <div class="settings-section"><div class="settings-header"><h4>📋 記錄表格字體大小</h4></div><div><input type="range" id="recordsScaleSlider" class="records-scale-slider" min="0.5" max="2.0" step="0.01" value="1"><span id="recordsScaleValue" class="scale-value">100%</span></div></div>
+        <div class="settings-section"><div class="settings-header"><h4>🔴🟡🟢 庫存燈號閾值</h4></div><div><label>紅色上限 (≤): <input type="number" id="redThreshold" value="3" step="1" style="width:80px;"></label><label style="margin-left:12px;">綠色下限 (≥): <input type="number" id="greenThreshold" value="8" step="1" style="width:80px;"></label><button id="saveThresholdBtn" class="small-btn">儲存</button><div style="font-size:0.7rem;">庫存 ≤ 紅 = 紅色燈；介於之間 = 黃色燈；≥ 綠 = 綠色燈</div></div></div>
+        <div class="settings-section"><div class="settings-header"><h4>👥 員工管理</h4><div class="toggle-switch" id="toggleStaff"></div></div><div id="staffContent" class="settings-content hidden-content"><div id="staffManageList"></div><div class="setting-row"><input type="text" id="newStaffName" placeholder="員工姓名" style="flex:2;"><input type="text" id="newStaffCode" placeholder="工號" style="flex:1;"><button class="small-btn" id="addStaffBtn">➕ 新增</button></div></div></div>
+        <div class="settings-section"><div class="settings-header"><h4>📦 產品管理</h4><div class="toggle-switch" id="toggleProduct"></div></div><div id="productContent" class="settings-content hidden-content"><div id="productManageList"></div><div class="setting-row"><input type="text" id="newProductName" placeholder="產品名稱" style="flex:2;"><input type="number" id="newProductPrice" placeholder="價格" style="flex:1;"><select id="newProductType"><option value="普通">普通</option><option value="消耗品">消耗品</option></select><button class="small-btn" id="addProductBtn">➕ 新增</button></div></div></div>
+        <div class="settings-section"><div class="settings-header"><h4>💰 預設金額管理</h4><div class="toggle-switch" id="togglePreset"></div></div><div id="presetContent" class="settings-content hidden-content"><div id="presetManageList"></div><div class="setting-row"><input type="number" id="newPresetAmount" placeholder="金額" style="flex:1;"><button class="small-btn" id="addPresetBtn">➕ 新增</button></div></div></div>
+        <div class="settings-section"><div class="settings-header"><h4>🔘 按鈕每行數量</h4></div><div><div class="setting-row"><span>每行顯示個數：</span><input type="number" id="buttonsPerRow" min="1" max="6" value="3" style="width:80px;"><button class="small-btn" id="applyButtonsPerRow">套用</button></div></div></div>
+        <div class="settings-section"><div class="settings-header"><h4>🛍️ 產品銷售記錄</h4><div class="toggle-switch" id="toggleSalesRecords"></div></div><div id="salesRecordsContent" class="settings-content hidden-content"><div class="records-action-row"><button class="small-btn danger-btn" id="clearSalesRecordsBtn">🗑️ 清除所有產品銷售記錄</button><button class="small-btn" id="retrySalesFailedSyncBtn">🔄 重試銷售同步失敗</button><button class="small-btn" id="manualSyncBtn">📡 手動同步（從雲端拉取）</button></div><div id="salesRecordsTable"></div></div></div>
+        <div class="settings-section"><div class="settings-header"><h4>👥 客人消費記錄</h4><div class="toggle-switch" id="toggleConsumeRecords"></div></div><div id="consumeRecordsContent" class="settings-content hidden-content"><div class="records-action-row"><button class="small-btn danger-btn" id="clearConsumeRecordsBtn">🗑️ 清除所有客人消費記錄</button><button class="small-btn" id="retryConsumeFailedSyncBtn">🔄 重試消費同步失敗</button><button class="small-btn" id="manualSyncBtnConsume">📡 手動同步（從雲端拉取）</button></div><div id="consumeRecordsTable"></div></div></div>
+        <div class="settings-section"><div class="settings-header"><h4>🔧 工作表修復</h4></div><div><button class="small-btn" id="repairSheetsBtn">🔄 修復工作表格式（全量同步）</button></div></div>
+        <hr><h4>🔐 修改管理密碼</h4><div class="setting-row"><div class="password-input-wrapper"><input type="password" id="newPassword" placeholder="新密碼" style="flex:1;"><button class="password-toggle-btn" data-target="newPassword">👁️</button></div><div class="password-input-wrapper"><input type="password" id="confirmPassword" placeholder="確認新密碼" style="flex:1;"><button class="password-toggle-btn" data-target="confirmPassword">👁️</button></div><button class="small-btn" id="changePasswordBtn">更新密碼</button></div>
     </div>
 </div>
-
-<div id="iframeModal" class="iframe-container">
-    <button class="close-iframe" id="closeIframeBtn">✖ 關閉</button>
-    <iframe id="bookingIframe" src=""></iframe>
-</div>
-
+<div id="iframeModal" class="iframe-container"><button class="close-iframe" id="closeIframeBtn">✖ 關閉</button><iframe id="bookingIframe" src=""></iframe></div>
 <script>
-// ========== OAuth 設定（完全保留原始可登入版本） ==========
+// ========== OAuth 設定（完全保留 V1 可登入版本） ==========
 const CLIENT_ID = '448045465424-kg6sd2dhp0nu8bl4afnafhpmd9f8bhj2.apps.googleusercontent.com';
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
@@ -1287,6 +759,7 @@ async function syncProductTypesToInventory() {
     }
     await saveInventory(inventory);
 }
+
 // 渲染庫存頁面
 async function renderInventoryPage() {
     const container = document.getElementById("inventoryTable");
@@ -1315,7 +788,6 @@ async function renderInventoryPage() {
     }
     html += '</tbody></table>';
     container.innerHTML = html;
-    // 補貨按鈕：需要密碼，且可輸入日期
     document.querySelectorAll('.replenish-btn').forEach(btn => btn.addEventListener('click', async () => {
         if (!await requirePassword()) return;
         const product = btn.dataset.product;
@@ -1355,8 +827,7 @@ async function renderInventoryPage() {
         }
     }));
 }
-
-// 渲染產品按鈕（燈號在左側圓圈內顯示數字，產品名稱和價格保持白色）
+// 渲染產品按鈕（符合要求：名稱在上，價格在下，左側圓內數字，產品文字白色）
 async function renderProducts() {
     const container = document.getElementById("productList");
     if (!container) return;
@@ -1366,7 +837,6 @@ async function renderProducts() {
         const inv = inventory.find(i => i.product === p.name);
         const stock = inv ? inv.stock : 0;
         let bgColor = 'var(--stock-green)';
-        let textColor = 'white'; // 產品名稱和價格固定白色
         let circleTextColor = 'black';
         if (stock <= redThreshold) { bgColor = 'var(--stock-red)'; circleTextColor = 'white'; }
         else if (stock >= greenThreshold) { bgColor = 'var(--stock-green)'; circleTextColor = 'black'; }
@@ -1378,6 +848,7 @@ async function renderProducts() {
         btn.style.alignItems = "center";
         btn.style.justifyContent = "center";
         btn.style.position = "relative";
+        btn.style.padding = "12px 8px";
         // 左側圓圈
         const circleSpan = document.createElement("span");
         circleSpan.style.position = "absolute";
@@ -1398,6 +869,7 @@ async function renderProducts() {
         const nameSpan = document.createElement("span");
         nameSpan.className = "product-name";
         nameSpan.style.color = "white";
+        nameSpan.style.marginBottom = "4px";
         nameSpan.innerText = p.name;
         const priceSpan = document.createElement("span");
         priceSpan.className = "product-price";
@@ -1424,12 +896,13 @@ function calcTotal() {
     return total;
 }
 
-// 導航按鈕初始化（只保留三個：銷售、消費、學生預約）
+// 導航按鈕初始化（移除系統設定按鈕，只留四個）
 function initNavButtons() {
     const container = document.getElementById("navButtons");
     const buttons = [
-        { page: "sales", icon: "fa-cube", label: "產品銷售" },
         { page: "consumption", icon: "fa-user-group", label: "客人消費" },
+        { page: "sales", icon: "fa-cube", label: "產品銷售" },
+        { page: "inventory", icon: "fa-boxes", label: "庫存管理" },
         { page: "booking", icon: "fa-school", label: "學生預約" }
     ];
     container.innerHTML = "";
@@ -1442,13 +915,13 @@ function initNavButtons() {
         container.appendChild(btnEl);
     });
     const bookingBtn = document.querySelector("[data-page='booking']");
-    if (bookingBtn) bookingBtn.onclick = () => { 
-        document.getElementById("bookingIframe").src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html"; 
-        document.getElementById("iframeModal").style.display = "block"; 
+    if (bookingBtn) bookingBtn.onclick = () => {
+        document.getElementById("bookingIframe").src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html";
+        document.getElementById("iframeModal").style.display = "block";
     };
 }
 
-// 頁面切換（新增庫存頁面）
+// 頁面切換
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     const targetPage = document.getElementById(pageId + "Page");
@@ -1499,7 +972,6 @@ function showPage(pageId) {
         document.getElementById("buttonTextValue").innerText = Math.round(currentButtonTextScale * 100) + "%";
     }
 }
-
 // 原有渲染函數（保留完整）
 function renderStaff(containerId, selectedCode, onChange) {
     const container = document.getElementById(containerId);
@@ -1732,9 +1204,8 @@ async function renderRecordsTables() {
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
             </tr>`;
         }
-        html += '</tbody></table>';
+        html += '</tbody></tr>';
         salesContainer.innerHTML = html;
-        // 綁定排序事件
         document.querySelectorAll('#salesTable .sortable').forEach(th => {
             th.style.cursor = 'pointer';
             th.addEventListener('click', () => {
@@ -2215,7 +1686,7 @@ async function submitConsumption() {
     }
 }
 
-// 事件綁定
+// 事件綁定（三個齒輪 + 其他）
 document.getElementById("settingsIconSales").addEventListener("click", openSettingsPage);
 document.getElementById("settingsIconConsume").addEventListener("click", openSettingsPage);
 document.getElementById("settingsIconInventory").addEventListener("click", openSettingsPage);
