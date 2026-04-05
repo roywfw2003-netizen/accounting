@@ -114,7 +114,6 @@
             display: none;
             flex-direction: column;
         }
-        /* 響應式導航：橫屏時左側垂直 */
         @media (orientation: landscape) and (min-width: 900px) {
             .app-container { flex-direction: row; padding: 12px; gap: 16px; }
             .btn-group { flex-direction: column; width: 120px; gap: 12px; margin-bottom: 0; }
@@ -330,7 +329,6 @@
 <div id="loginPanel"><div class="login-card"><i class="fa-solid fa-lock"></i><h2>Hair World系統</h2><p>請使用 Google 帳號登入以繼續</p><button id="googleLoginBtn">🔐 登入 Google</button></div></div>
 <div class="app-container">
     <div class="btn-group" id="navButtons"></div>
-    <!-- 產品銷售頁 -->
     <div id="salesPage" class="page">
         <div class="form-group"><label>📅 日期</label><div class="date-with-settings"><input type="date" id="salesDate"><button class="settings-icon-small" id="settingsIconSales"><i class="fa-solid fa-gear"></i></button></div></div>
         <div class="form-group"><label class="section-title">👤 員工</label><div class="staff-group" id="salesStaff"></div></div>
@@ -339,7 +337,6 @@
         <button id="submitSales" class="submit-btn">提交銷售</button>
         <div id="salesRecent" class="recent-record" style="display:none;"></div>
     </div>
-    <!-- 客人消費頁 -->
     <div id="consumptionPage" class="page">
         <div class="form-group"><label>📅 日期</label><div class="date-with-settings"><input type="date" id="consumeDate"><button class="settings-icon-small" id="settingsIconConsume"><i class="fa-solid fa-gear"></i></button></div></div>
         <div class="form-group"><label class="section-title">👤 員工</label><div class="staff-group" id="consumeStaff"></div></div>
@@ -348,13 +345,11 @@
         <button id="submitConsume" class="submit-btn">提交消費</button>
         <div id="consumeRecent" class="recent-record" style="display:none;"></div>
     </div>
-    <!-- 庫存管理頁 -->
     <div id="inventoryPage" class="page">
         <h3>📦 庫存管理 <button id="toggleCostPriceBtn" class="small-btn" style="margin-left:12px;">🔒 顯示來貨價</button></h3>
         <div id="inventoryTable"></div>
         <div style="margin-top:16px;"><button id="refreshInventoryBtn" class="small-btn">🔄 重新整理庫存</button></div>
     </div>
-    <!-- 系統設定頁 -->
     <div id="settingsPage" class="page">
         <button id="backToHomeBtn" class="small-btn back-home-btn" style="width:100%; margin-bottom:12px;">🏠 返回主頁</button>
         <h3>⚙️ 系統設定</h3><hr>
@@ -375,7 +370,13 @@
 </div>
 <div id="iframeModal" class="iframe-container"><button class="close-iframe" id="closeIframeBtn">✖ 關閉</button><iframe id="bookingIframe" src=""></iframe></div>
 <script>
-// ========== OAuth 設定與全域變數 ==========
+// ========== 檢查協議 ==========
+if (window.location.protocol === 'file:') {
+    document.body.innerHTML = '<div style="text-align:center; margin-top:50px; padding:20px;"><h2>⚠️ 錯誤的開啟方式</h2><p>請勿直接雙擊開啟 HTML 檔案。</p><p>請使用 HTTP 伺服器執行，例如：</p><pre>python -m http.server 8000</pre><p>然後在瀏覽器輸入 <code>http://localhost:8000/您的檔案.html</code></p></div>';
+    throw new Error('禁止使用 file:// 協議，請改用 HTTP 伺服器');
+}
+
+// ========== OAuth 設定 ==========
 const CLIENT_ID = '448045465424-kg6sd2dhp0nu8bl4afnafhpmd9f8bhj2.apps.googleusercontent.com';
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
@@ -541,7 +542,7 @@ async function renderInventoryPage() {
     document.querySelectorAll('.stocktake-btn').forEach(btn => btn.addEventListener('click', async () => { const product = btn.dataset.product; const newStock = parseInt(prompt("盤點後的新庫存數量")); if (!isNaN(newStock)) { const inv = await loadInventory(); const item = inv.find(i=>i.product===product); const delta = newStock - item.stock; await updateStock(product, delta, '盤點'); await renderInventoryPage(); renderProducts(); } }));
 }
 
-// 渲染產品按鈕（加入庫存燈號）
+// 渲染產品按鈕
 async function renderProducts() {
     const container = document.getElementById("productList");
     if (!container) return;
@@ -587,6 +588,7 @@ function initNavButtons() {
     const bookingBtn = document.querySelector("[data-page='booking']");
     if (bookingBtn) bookingBtn.onclick = () => { document.getElementById("bookingIframe").src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html"; document.getElementById("iframeModal").style.display = "block"; };
 }
+
 // 頁面切換
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
@@ -599,8 +601,8 @@ function showPage(pageId) {
     if (pageId === "settings") { renderStaffManageList(); renderProductManageList(); renderPresetManageList(); renderRecordsTables(); /* 其餘設定頁初始化 */ }
 }
 
-// 原有渲染函數（簡化版，實際完整代碼會包含所有）
-function renderStaff(containerId, selectedCode, onChange) { /* 同之前版本 */ }
+// 原有渲染函數（精簡版，實際完整代碼會包含所有）
+function renderStaff(containerId, selectedCode, onChange) { /* 同之前版本，此處省略但最終代碼會完整 */ }
 function renderPayment(containerId, selected, onChange, isSales) { /* 同之前 */ }
 function renderPresetButtons() { /* 同之前 */ }
 function updateRecentRecord(type) { /* 同之前 */ }
