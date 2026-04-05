@@ -8,6 +8,7 @@
     <title>Hair World系統</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* ========== 全局变量 ========== */
         :root {
             --bg-body: #cfe7ff;
             --bg-card: white;
@@ -57,9 +58,23 @@
             justify-content: center;
             color: var(--text-primary);
         }
-        .nav-btn, .submit-btn, .small-btn, .danger-btn { color: white; }
-        .danger-btn { color: #b91c1c !important; }
-        body.dark .danger-btn { color: #ff7b72 !important; }
+        h1, h2, h3, h4, h5, h6, p, span, div, label, button, input, select, .setting-row span, .small-btn, .record-item {
+            color: var(--text-primary);
+        }
+        .nav-btn, .submit-btn, .settings-icon-small, .small-btn, .danger-btn {
+            color: white;
+        }
+        .settings-icon-small i {
+            color: white;
+        }
+        .danger-btn {
+            color: #b91c1c !important;
+        }
+        body.dark .danger-btn {
+            color: #ff7b72 !important;
+        }
+
+        /* 登录面板 */
         #loginPanel {
             position: fixed;
             top: 0;
@@ -82,9 +97,19 @@
             width: 90%;
             max-width: 360px;
         }
-        .login-card i { font-size: 4rem; color: var(--accent-orange); margin-bottom: 16px; }
-        .login-card h2 { margin: 0 0 8px 0; }
-        .login-card p { margin-bottom: 24px; font-size: 0.9rem; color: var(--text-secondary); }
+        .login-card i {
+            font-size: 4rem;
+            color: var(--accent-orange);
+            margin-bottom: 16px;
+        }
+        .login-card h2 {
+            margin: 0 0 8px 0;
+        }
+        .login-card p {
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
         #googleLoginBtn {
             background: var(--btn-primary-bg);
             border: none;
@@ -98,7 +123,11 @@
             box-shadow: 0 4px 0 var(--btn-primary-shadow);
             transition: 0.05s linear;
         }
-        #googleLoginBtn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--btn-primary-shadow); }
+        #googleLoginBtn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--btn-primary-shadow);
+        }
+
         .app-container {
             width: 100%;
             max-width: 100%;
@@ -113,23 +142,86 @@
             display: none;
             flex-direction: column;
         }
-        @media (orientation: landscape) and (min-width: 900px) {
-            .app-container { flex-direction: row; padding: 12px; gap: 16px; }
-            .btn-group { flex-direction: column; width: 120px; gap: 12px; margin-bottom: 0; }
-            .nav-btn { width: 100%; padding: 16px 8px; }
-            .page { flex: 1; overflow-y: auto; }
+
+        /* 按钮字体缩放 */
+        .nav-btn, .staff-btn, .payment-btn, .preset-btn, .product-btn, .small-btn, .submit-btn, #submitConsume, .settings-icon-small {
+            font-size: calc(0.9rem * var(--button-font-scale));
         }
-        @media (orientation: portrait), (max-width: 899px) {
-            .btn-group { flex-direction: row; flex-wrap: wrap; margin-bottom: 12px; }
-            .nav-btn { flex: 1; min-width: 100px; }
+        .staff-btn, .payment-btn, .preset-btn, .product-btn {
+            font-size: calc(0.9rem * var(--button-text-scale));
         }
-        .btn-group { display: flex; gap: 12px; margin-bottom: 12px; }
+        .staff-name, .product-name {
+            font-size: calc(1rem * var(--button-text-scale));
+        }
+        .staff-code, .product-price {
+            font-size: calc(0.75rem * var(--button-text-scale));
+        }
+        .record-item {
+            font-size: calc(0.85rem * var(--button-font-scale));
+        }
+
+        /* 记录表格独立字体缩放 */
+        .records-table, .records-table th, .records-table td, .sync-badge {
+            font-size: calc(0.8rem * var(--records-font-scale));
+        }
+        .records-table th, .records-table td {
+            font-size: calc(0.8rem * var(--records-font-scale));
+        }
+        .sync-badge {
+            font-size: calc(0.7rem * var(--records-font-scale));
+        }
+
+        @media (orientation: landscape) {
+            .app-container {
+                padding: 8px 12px;
+            }
+            .nav-btn {
+                padding: 10px 4px;
+            }
+            .nav-btn i {
+                font-size: calc(1.5rem * var(--button-font-scale));
+            }
+            .product-btn, .preset-btn {
+                padding: 8px 4px;
+            }
+            .staff-btn, .payment-btn {
+                padding: 8px 4px;
+            }
+            .total, .recent-record {
+                font-size: calc(0.9rem * var(--button-font-scale));
+                margin-top: 4px;
+                padding-top: 4px;
+            }
+            .submit-btn, #submitConsume {
+                padding: 10px;
+                font-size: calc(1rem * var(--button-font-scale));
+                margin-top: 8px;
+            }
+            .settings-section {
+                margin-bottom: 8px;
+                padding: 6px;
+            }
+            .record-item {
+                padding: 6px;
+            }
+            .small-btn {
+                padding: 4px 8px;
+            }
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
         .nav-btn {
             background: var(--btn-gray-bg);
             border: none;
             border-radius: 32px;
             font-weight: bold;
             cursor: pointer;
+            flex: 1;
+            min-width: 100px;
             padding: 12px 8px;
             text-align: center;
             transition: 0.05s linear;
@@ -142,14 +234,57 @@
         .nav-btn i { font-size: calc(1.8rem * var(--button-font-scale)); }
         .nav-btn span { font-size: calc(0.85rem * var(--button-font-scale)); }
         .nav-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-gray-shadow); }
-        .nav-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 5px 0 var(--accent-orange-shadow); }
+        .nav-btn.active {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 5px 0 var(--accent-orange-shadow);
+        }
+        .nav-btn.active:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--accent-orange-shadow);
+        }
         .page { display: none; }
         .active { display: block; }
         .form-group { margin-bottom: 10px; }
         label { display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-primary); }
-        select, input { width: 100%; padding: 8px 12px; border-radius: 40px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); }
-        .date-with-settings { display: flex; gap: 10px; align-items: center; }
-        .staff-group, .payment-group, .product-grid, .preset-grid { display: grid; gap: 8px; margin: 6px 0; }
+        select, input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 40px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+        .date-with-settings {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .date-with-settings input {
+            flex: 1;
+        }
+        .settings-icon-small {
+            background: var(--btn-primary-bg);
+            border: none;
+            border-radius: 40px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--btn-primary-shadow);
+            transition: 0.05s linear;
+        }
+        .settings-icon-small:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--btn-primary-shadow);
+        }
+        .staff-group, .payment-group, .product-grid, .preset-grid {
+            display: grid;
+            gap: 8px;
+            margin: 6px 0;
+        }
         .staff-btn, .payment-btn, .preset-btn, .product-btn {
             padding: 12px 8px;
             min-height: 52px;
@@ -168,26 +303,86 @@
             color: var(--text-primary);
             flex-direction: column;
         }
-        .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
-        .staff-btn.active, .product-btn.selected { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
-        .payment-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
-        .preset-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
+        .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--btn-gray-shadow);
+        }
+        .staff-btn.active, .product-btn.selected {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .payment-btn.active {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .preset-btn.active {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
         .staff-name { font-weight: bold; }
         .staff-code { opacity: 0.8; }
         .product-price { font-weight: bold; }
         .product-btn.selected .product-price { color: white; }
-        .total { font-weight: bold; text-align: right; margin-top: 6px; border-top: 1px solid var(--border-color); padding-top: 6px; color: var(--accent-orange); }
-        .record-item { background: var(--btn-gray-bg); border-radius: 20px; padding: 8px; margin-bottom: 6px; color: var(--text-primary); }
-        .sync-badge { display: inline-block; padding: 2px 6px; border-radius: 20px; }
+        .total {
+            font-weight: bold;
+            text-align: right;
+            margin-top: 6px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 6px;
+            color: var(--accent-orange);
+        }
+        .record-item {
+            background: var(--btn-gray-bg);
+            border-radius: 20px;
+            padding: 8px;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+        .sync-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 20px;
+        }
         .sync-success { background: #d1fae5; color: #15803d; }
         .sync-failed { background: #ffe4e2; color: #b91c1c; }
         .sync-pending { background: #fef9c3; color: #854d0e; }
-        .setting-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
-        .small-btn { background: var(--btn-gray-bg); border: none; padding: 4px 10px; border-radius: 40px; cursor: pointer; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; color: var(--text-primary); }
-        .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
-        .danger-btn { background: #fee2e2; color: #b91c1c; }
-        .edit-btn { background: var(--btn-gray-bg); color: var(--text-primary); margin-left: 6px; }
-        hr { margin: 12px 0; border-color: var(--border-color); }
+        .setting-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .small-btn {
+            background: var(--btn-gray-bg);
+            border: none;
+            padding: 4px 10px;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--btn-gray-shadow);
+            transition: 0.05s linear;
+            color: var(--text-primary);
+        }
+        .small-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--btn-gray-shadow);
+        }
+        .danger-btn {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .edit-btn {
+            background: var(--btn-gray-bg);
+            color: var(--text-primary);
+            margin-left: 6px;
+        }
+        hr {
+            margin: 12px 0;
+            border-color: var(--border-color);
+        }
         .toast {
             position: fixed;
             bottom: 30px;
@@ -216,7 +411,14 @@
             z-index: 1000;
             display: none;
         }
-        .iframe-container iframe { width: 90%; height: 90%; margin: 5% auto; display: block; background: white; border-radius: 20px; }
+        .iframe-container iframe {
+            width: 90%;
+            height: 90%;
+            margin: 5% auto;
+            display: block;
+            background: white;
+            border-radius: 20px;
+        }
         .close-iframe {
             position: absolute;
             top: 20px;
@@ -230,7 +432,10 @@
             box-shadow: 0 3px 0 var(--accent-orange-shadow);
             font-size: calc(0.9rem * var(--button-font-scale));
         }
-        .close-iframe:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
+        .close-iframe:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--accent-orange-shadow);
+        }
         .recent-record {
             background: var(--btn-gray-bg);
             border-radius: 20px;
@@ -245,32 +450,153 @@
             flex-wrap: wrap;
             gap: 8px;
         }
-        .recent-record span { flex: 1; word-break: break-word; }
-        .recent-record .action-btns { display: flex; gap: 8px; }
-        .settings-section { margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 24px; padding: 8px; }
-        .settings-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .settings-content { margin-top: 8px; }
-        .toggle-switch { width: 44px; height: 24px; background: #ccc; border-radius: 24px; position: relative; cursor: pointer; transition: 0.2s; }
-        .toggle-switch.active { background: var(--accent-orange); }
-        .toggle-switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
-        .toggle-switch.active::after { left: 22px; }
-        .hidden-content { display: none; }
-        .submit-btn, #submitConsume { background: var(--btn-success-bg); color: white; width: 100%; padding: 12px; border: none; border-radius: 40px; font-weight: bold; margin-top: 10px; cursor: pointer; box-shadow: 0 5px 0 var(--btn-success-shadow); transition: 0.05s linear; text-align: center; }
-        .submit-btn:active, #submitConsume:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-success-shadow); }
-        .records-action-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
-        .records-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-        .records-table th, .records-table td { border: 1px solid var(--border-color); padding: 6px; text-align: left; }
-        .records-table th { background: var(--btn-gray-bg); cursor: pointer; user-select: none; }
-        .record-cell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; max-width: 120px; }
-        .action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-        @media (max-width: 600px) { .records-table th, .records-table td { padding: 4px; } }
-        .section-title { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: bold; margin-bottom: 8px; }
-        .section-title::before, .section-title::after { content: "=========="; font-weight: normal; color: var(--border-color); flex: 1; text-align: center; white-space: nowrap; overflow-x: auto; }
-        .section-title::before { margin-right: 8px; }
-        .section-title::after { margin-left: 8px; }
-        .font-scale-slider, .records-scale-slider, .button-text-slider { width: 100%; margin: 8px 0; }
-        .scale-value { font-weight: bold; margin-left: 10px; }
-        .disabled-btn { opacity: 0.6; pointer-events: none; }
+        .recent-record span {
+            flex: 1;
+            word-break: break-word;
+        }
+        .recent-record .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+        .settings-section {
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 8px;
+        }
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .settings-content {
+            margin-top: 8px;
+        }
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 24px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .toggle-switch.active {
+            background: var(--accent-orange);
+        }
+        .toggle-switch::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: 0.2s;
+        }
+        .toggle-switch.active::after {
+            left: 22px;
+        }
+        .hidden-content {
+            display: none;
+        }
+        .submit-btn, #submitConsume {
+            background: var(--btn-success-bg);
+            color: white;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 40px;
+            font-weight: bold;
+            margin-top: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 var(--btn-success-shadow);
+            transition: 0.05s linear;
+            text-align: center;
+        }
+        .submit-btn:active, #submitConsume:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--btn-success-shadow);
+        }
+        .records-action-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        .records-table th, .records-table td {
+            border: 1px solid var(--border-color);
+            padding: 6px;
+            text-align: left;
+        }
+        .records-table th {
+            background: var(--btn-gray-bg);
+        }
+        .record-cell {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+            max-width: 120px;
+        }
+        .action-btns {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 600px) {
+            .records-table th, .records-table td {
+                padding: 4px;
+            }
+        }
+
+        /* 标题横线装饰 */
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .section-title::before,
+        .section-title::after {
+            content: "==========";
+            font-weight: normal;
+            color: var(--border-color);
+            flex: 1;
+            text-align: center;
+            white-space: nowrap;
+            overflow-x: auto;
+        }
+        .section-title::before {
+            margin-right: 8px;
+        }
+        .section-title::after {
+            margin-left: 8px;
+        }
+
+        .font-scale-slider, .records-scale-slider, .button-text-slider {
+            width: 100%;
+            margin: 8px 0;
+        }
+        .scale-value {
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .disabled-btn {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* 自定义模态框样式 */
         .edit-modal {
             position: fixed;
             top: 0;
@@ -283,11 +609,42 @@
             justify-content: center;
             z-index: 3000;
         }
-        .edit-modal-content { background: var(--bg-card); border-radius: 24px; padding: 20px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; }
-        .edit-modal-content h3 { margin-top: 0; text-align: center; }
-        .edit-option-grid { display: grid; gap: 8px; margin: 16px 0; }
-        .edit-option-btn { background: var(--btn-gray-bg); padding: 12px; border-radius: 40px; text-align: center; cursor: pointer; transition: 0.05s linear; font-weight: bold; }
-        .edit-option-btn:active { transform: scale(0.98); }
+        .edit-modal-content {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .edit-modal-content h3 {
+            margin-top: 0;
+            text-align: center;
+        }
+        .edit-option-grid {
+            display: grid;
+            gap: 8px;
+            margin: 16px 0;
+        }
+        .edit-option-btn {
+            background: var(--btn-gray-bg);
+            padding: 12px;
+            border-radius: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.05s linear;
+            font-weight: bold;
+        }
+        .edit-option-btn:active {
+            transform: scale(0.98);
+        }
+        .edit-modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 16px;
+        }
         .password-toggle-btn {
             background: var(--btn-gray-bg);
             border: none;
@@ -302,11 +659,29 @@
             box-shadow: 0 2px 0 var(--btn-gray-shadow);
             transition: 0.05s linear;
         }
-        .password-toggle-btn:active { transform: translateY(2px); box-shadow: 0 0px 0 var(--btn-gray-shadow); }
-        .password-input-wrapper { display: flex; gap: 8px; align-items: center; flex: 1; }
-        .password-input-wrapper input { flex: 1; }
-        .back-home-btn { margin-bottom: 12px; background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
-        .back-home-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
+        .password-toggle-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 0px 0 var(--btn-gray-shadow);
+        }
+        .password-input-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex: 1;
+        }
+        .password-input-wrapper input {
+            flex: 1;
+        }
+        .back-home-btn {
+            margin-bottom: 12px;
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+        }
+        .back-home-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--accent-orange-shadow);
+        }
     </style>
 </head>
 <body>
@@ -320,8 +695,11 @@
 </div>
 
 <div class="app-container">
-    <!-- 導航按鈕：只有客人消費、產品銷售、庫存管理、學生預約（無系統設定） -->
-    <div class="btn-group" id="navButtons"></div>
+    <div class="btn-group">
+        <button class="nav-btn" data-page="sales"><i class="fa-solid fa-cube"></i><span>產品銷售</span></button>
+        <button class="nav-btn" data-page="consumption"><i class="fa-solid fa-user-group"></i><span>客人消費</span></button>
+        <button class="nav-btn" id="studentBookingBtn"><i class="fa-solid fa-school"></i><span>學生預約</span></button>
+    </div>
 
     <!-- 產品銷售頁 -->
     <div id="salesPage" class="page">
@@ -357,10 +735,7 @@
 
     <!-- 庫存管理頁 -->
     <div id="inventoryPage" class="page">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3>📦 庫存管理</h3>
-            <button class="settings-icon-small" id="settingsIconInventory"><i class="fa-solid fa-gear"></i></button>
-        </div>
+        <h3>📦 庫存管理 <button class="settings-icon-small" id="settingsIconInventory"><i class="fa-solid fa-gear"></i></button></h3>
         <div id="inventoryTable"></div>
         <div style="margin-top:16px;"><button id="refreshInventoryBtn" class="small-btn">🔄 重新整理庫存</button></div>
     </div>
@@ -368,27 +743,177 @@
     <!-- 系統設定頁 -->
     <div id="settingsPage" class="page">
         <button id="backToHomeBtn" class="small-btn back-home-btn" style="width:100%; margin-bottom:12px;">🏠 返回主頁</button>
-        <h3>⚙️ 系統設定</h3><hr>
-        <div class="settings-section"><div class="settings-header"><h4>🌙 夜間模式</h4><div class="toggle-switch" id="toggleDarkMode"></div></div></div>
-        <div class="settings-section"><div class="settings-header"><h4>🔘 按鈕字體大小（主頁面）</h4></div><div><input type="range" id="buttonTextSlider" class="button-text-slider" min="0.5" max="2.0" step="0.01" value="1.0"><span id="buttonTextValue" class="scale-value">100%</span><div style="font-size:0.7rem;">影響員工、產品、支付方式、預設金額按鈕上的文字</div></div></div>
-        <div class="settings-section"><div class="settings-header"><h4>🔘 導航按鈕字體大小</h4></div><div><input type="range" id="fontScaleSlider" class="font-scale-slider" min="0.5" max="2.5" step="0.01" value="1.5"><span id="fontScaleValue" class="scale-value">150%</span><div style="font-size:0.7rem;">影響頂部導航按鈕</div></div></div>
-        <div class="settings-section"><div class="settings-header"><h4>📋 記錄表格字體大小</h4></div><div><input type="range" id="recordsScaleSlider" class="records-scale-slider" min="0.5" max="2.0" step="0.01" value="1"><span id="recordsScaleValue" class="scale-value">100%</span><div style="font-size:0.7rem;">僅影響記錄表格</div></div></div>
-        <div class="settings-section"><div class="settings-header"><h4>🔴🟡🟢 庫存燈號閾值</h4></div><div><label>紅色上限 (≤): <input type="number" id="redThreshold" value="3" step="1" style="width:80px;"></label><label style="margin-left:12px;">綠色下限 (≥): <input type="number" id="greenThreshold" value="8" step="1" style="width:80px;"></label><button id="saveThresholdBtn" class="small-btn">儲存</button><div style="font-size:0.7rem;">庫存 ≤ 紅 = 紅色燈；介於之間 = 黃色燈；≥ 綠 = 綠色燈</div></div></div>
-        <div class="settings-section"><div class="settings-header"><h4>👥 員工管理</h4><div class="toggle-switch" id="toggleStaff"></div></div><div id="staffContent" class="settings-content hidden-content"><div id="staffManageList"></div><div class="setting-row"><input type="text" id="newStaffName" placeholder="員工姓名" style="flex:2;"><input type="text" id="newStaffCode" placeholder="工號" style="flex:1;"><button class="small-btn" id="addStaffBtn">➕ 新增</button></div></div></div>
-        <div class="settings-section"><div class="settings-header"><h4>📦 產品管理</h4><div class="toggle-switch" id="toggleProduct"></div></div><div id="productContent" class="settings-content hidden-content"><div id="productManageList"></div><div class="setting-row"><input type="text" id="newProductName" placeholder="產品名稱" style="flex:2;"><input type="number" id="newProductPrice" placeholder="價格" style="flex:1;"><select id="newProductType"><option value="普通">普通</option><option value="消耗品">消耗品</option></select><button class="small-btn" id="addProductBtn">➕ 新增</button></div></div></div>
-        <div class="settings-section"><div class="settings-header"><h4>💰 預設金額管理</h4><div class="toggle-switch" id="togglePreset"></div></div><div id="presetContent" class="settings-content hidden-content"><div id="presetManageList"></div><div class="setting-row"><input type="number" id="newPresetAmount" placeholder="金額" style="flex:1;"><button class="small-btn" id="addPresetBtn">➕ 新增</button></div></div></div>
-        <div class="settings-section"><div class="settings-header"><h4>🔘 按鈕每行數量</h4></div><div><div class="setting-row"><span>每行顯示個數：</span><input type="number" id="buttonsPerRow" min="1" max="6" value="3" style="width:80px;"><button class="small-btn" id="applyButtonsPerRow">套用</button></div></div></div>
-        <div class="settings-section"><div class="settings-header"><h4>🛍️ 產品銷售記錄</h4><div class="toggle-switch" id="toggleSalesRecords"></div></div><div id="salesRecordsContent" class="settings-content hidden-content"><div class="records-action-row"><button class="small-btn danger-btn" id="clearSalesRecordsBtn">🗑️ 清除所有產品銷售記錄</button><button class="small-btn" id="retrySalesFailedSyncBtn">🔄 重試銷售同步失敗</button><button class="small-btn" id="manualSyncBtn">📡 手動同步（從雲端拉取）</button></div><div id="salesRecordsTable"></div></div></div>
-        <div class="settings-section"><div class="settings-header"><h4>👥 客人消費記錄</h4><div class="toggle-switch" id="toggleConsumeRecords"></div></div><div id="consumeRecordsContent" class="settings-content hidden-content"><div class="records-action-row"><button class="small-btn danger-btn" id="clearConsumeRecordsBtn">🗑️ 清除所有客人消費記錄</button><button class="small-btn" id="retryConsumeFailedSyncBtn">🔄 重試消費同步失敗</button><button class="small-btn" id="manualSyncBtnConsume">📡 手動同步（從雲端拉取）</button></div><div id="consumeRecordsTable"></div></div></div>
-        <div class="settings-section"><div class="settings-header"><h4>🔧 工作表修復</h4></div><div><button class="small-btn" id="repairSheetsBtn">🔄 修復工作表格式（全量同步）</button></div></div>
-        <hr><h4>🔐 修改管理密碼</h4><div class="setting-row"><div class="password-input-wrapper"><input type="password" id="newPassword" placeholder="新密碼" style="flex:1;"><button class="password-toggle-btn" data-target="newPassword">👁️</button></div><div class="password-input-wrapper"><input type="password" id="confirmPassword" placeholder="確認新密碼" style="flex:1;"><button class="password-toggle-btn" data-target="confirmPassword">👁️</button></div><button class="small-btn" id="changePasswordBtn">更新密碼</button></div>
+        <h3>⚙️ 系統設定</h3>
+        <hr>
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>🌙 夜間模式</h4>
+                <div class="toggle-switch" id="toggleDarkMode"></div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>🔘 按鈕字體大小（主頁面）</h4>
+            </div>
+            <div>
+                <input type="range" id="buttonTextSlider" class="button-text-slider" min="0.5" max="2.0" step="0.01" value="1.0">
+                <span id="buttonTextValue" class="scale-value">100%</span>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">僅影響「員工、產品、支付方式、預設金額」按鈕上的文字大小</div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>🔘 導航按鈕字體大小</h4>
+            </div>
+            <div>
+                <input type="range" id="fontScaleSlider" class="font-scale-slider" min="0.5" max="2.5" step="0.01" value="1.5">
+                <span id="fontScaleValue" class="scale-value">150%</span>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">影響頂部「產品銷售、客人消費、學生預約」按鈕</div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>📋 記錄表格字體大小</h4>
+            </div>
+            <div>
+                <input type="range" id="recordsScaleSlider" class="records-scale-slider" min="0.5" max="2.0" step="0.01" value="1">
+                <span id="recordsScaleValue" class="scale-value">100%</span>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">僅影響「產品銷售記錄」與「客人消費記錄」表格</div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>🔴🟡🟢 庫存燈號閾值</h4>
+            </div>
+            <div>
+                <label>紅色上限 (≤): <input type="number" id="redThreshold" value="3" step="1" style="width:80px;"></label>
+                <label style="margin-left:12px;">綠色下限 (≥): <input type="number" id="greenThreshold" value="8" step="1" style="width:80px;"></label>
+                <button id="saveThresholdBtn" class="small-btn">儲存</button>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">庫存 ≤ 紅 = 紅色燈；介於之間 = 黃色燈；≥ 綠 = 綠色燈</div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>👥 員工管理</h4>
+                <div class="toggle-switch" id="toggleStaff"></div>
+            </div>
+            <div id="staffContent" class="settings-content hidden-content">
+                <div id="staffManageList"></div>
+                <div class="setting-row">
+                    <input type="text" id="newStaffName" placeholder="員工姓名" style="flex:2;">
+                    <input type="text" id="newStaffCode" placeholder="工號" style="flex:1;">
+                    <button class="small-btn" id="addStaffBtn">➕ 新增</button>
+                </div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>📦 產品管理</h4>
+                <div class="toggle-switch" id="toggleProduct"></div>
+            </div>
+            <div id="productContent" class="settings-content hidden-content">
+                <div id="productManageList"></div>
+                <div class="setting-row">
+                    <input type="text" id="newProductName" placeholder="產品名稱" style="flex:2;">
+                    <input type="number" id="newProductPrice" placeholder="價格" style="flex:1;">
+                    <select id="newProductType">
+                        <option value="普通">普通</option>
+                        <option value="消耗品">消耗品</option>
+                    </select>
+                    <button class="small-btn" id="addProductBtn">➕ 新增</button>
+                </div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>💰 預設金額管理</h4>
+                <div class="toggle-switch" id="togglePreset"></div>
+            </div>
+            <div id="presetContent" class="settings-content hidden-content">
+                <div id="presetManageList"></div>
+                <div class="setting-row">
+                    <input type="number" id="newPresetAmount" placeholder="金額" style="flex:1;">
+                    <button class="small-btn" id="addPresetBtn">➕ 新增</button>
+                </div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>🔘 按鈕每行數量</h4>
+            </div>
+            <div>
+                <div class="setting-row">
+                    <span>員工/產品/支付方式按鈕每行顯示個數：</span>
+                    <input type="number" id="buttonsPerRow" min="1" max="6" value="3" style="width:80px;">
+                    <button class="small-btn" id="applyButtonsPerRow">套用</button>
+                </div>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">數字越大按鈕越窄，會自動縮放文字以充分利用高度</div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>🛍️ 產品銷售記錄</h4>
+                <div class="toggle-switch" id="toggleSalesRecords"></div>
+            </div>
+            <div id="salesRecordsContent" class="settings-content hidden-content">
+                <div class="records-action-row">
+                    <button class="small-btn danger-btn" id="clearSalesRecordsBtn">🗑️ 清除所有產品銷售記錄</button>
+                    <button class="small-btn" id="retrySalesFailedSyncBtn">🔄 重試銷售同步失敗</button>
+                    <button class="small-btn" id="manualSyncBtn">📡 手動同步（從雲端拉取）</button>
+                </div>
+                <div id="salesRecordsTable"></div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>👥 客人消費記錄</h4>
+                <div class="toggle-switch" id="toggleConsumeRecords"></div>
+            </div>
+            <div id="consumeRecordsContent" class="settings-content hidden-content">
+                <div class="records-action-row">
+                    <button class="small-btn danger-btn" id="clearConsumeRecordsBtn">🗑️ 清除所有客人消費記錄</button>
+                    <button class="small-btn" id="retryConsumeFailedSyncBtn">🔄 重試消費同步失敗</button>
+                    <button class="small-btn" id="manualSyncBtnConsume">📡 手動同步（從雲端拉取）</button>
+                </div>
+                <div id="consumeRecordsTable"></div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-header">
+                <h4>🔧 工作表修復</h4>
+            </div>
+            <div>
+                <button class="small-btn" id="repairSheetsBtn">🔄 修復工作表格式（全量同步）</button>
+                <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:5px;">若寫入位置錯亂，請點此按鈕修復（僅推送本地記錄到雲端）</div>
+            </div>
+        </div>
+
+        <hr>
+        <h4>🔐 修改管理密碼</h4>
+        <div class="setting-row">
+            <div class="password-input-wrapper">
+                <input type="password" id="newPassword" placeholder="新密碼" style="flex:1;">
+                <button class="password-toggle-btn" data-target="newPassword">👁️</button>
+            </div>
+            <div class="password-input-wrapper">
+                <input type="password" id="confirmPassword" placeholder="確認新密碼" style="flex:1;">
+                <button class="password-toggle-btn" data-target="confirmPassword">👁️</button>
+            </div>
+            <button class="small-btn" id="changePasswordBtn">更新密碼</button>
+        </div>
     </div>
 </div>
 
-<div id="iframeModal" class="iframe-container"><button class="close-iframe" id="closeIframeBtn">✖ 關閉</button><iframe id="bookingIframe" src=""></iframe></div>
-<!-- ========== 第一段結束（HTML結構完畢），請複製以上內容，然後繼續複製第二段 ========== -->
+<div id="iframeModal" class="iframe-container">
+    <button class="close-iframe" id="closeIframeBtn">✖ 關閉</button>
+    <iframe id="bookingIframe" src=""></iframe>
+</div>
+
 <script>
-// ========== OAuth 設定 ==========
+// ========== OAuth 設定（完全保留原始可登入版本） ==========
 const CLIENT_ID = '448045465424-kg6sd2dhp0nu8bl4afnafhpmd9f8bhj2.apps.googleusercontent.com';
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
@@ -399,7 +924,6 @@ let gisInited = false;
 let gapiReady = false;
 let settingsPassword = 'admin123';
 let darkMode = localStorage.getItem('darkMode') === 'true';
-
 let staffList = [
     { code: "1", name: "Roy" },
     { code: "2", name: "Ken" },
@@ -763,8 +1287,6 @@ async function syncProductTypesToInventory() {
     }
     await saveInventory(inventory);
 }
-
-// ========== 第二段結束，請複製以上內容，然後繼續複製第三段 ==========
 // 渲染庫存頁面
 async function renderInventoryPage() {
     const container = document.getElementById("inventoryTable");
@@ -793,6 +1315,7 @@ async function renderInventoryPage() {
     }
     html += '</tbody></table>';
     container.innerHTML = html;
+    // 補貨按鈕：需要密碼，且可輸入日期
     document.querySelectorAll('.replenish-btn').forEach(btn => btn.addEventListener('click', async () => {
         if (!await requirePassword()) return;
         const product = btn.dataset.product;
@@ -833,7 +1356,7 @@ async function renderInventoryPage() {
     }));
 }
 
-// 渲染產品按鈕（保持產品名稱和價格為白色，燈號圓圈內數字根據庫存變色）
+// 渲染產品按鈕（燈號在左側圓圈內顯示數字，產品名稱和價格保持白色）
 async function renderProducts() {
     const container = document.getElementById("productList");
     if (!container) return;
@@ -842,11 +1365,12 @@ async function renderProducts() {
     for (let p of productList) {
         const inv = inventory.find(i => i.product === p.name);
         const stock = inv ? inv.stock : 0;
-        let circleColor = 'var(--stock-green)';
-        let textColor = 'black';
-        if (stock <= redThreshold) { circleColor = 'var(--stock-red)'; textColor = 'white'; }
-        else if (stock >= greenThreshold) { circleColor = 'var(--stock-green)'; textColor = 'black'; }
-        else { circleColor = 'var(--stock-yellow)'; textColor = 'black'; }
+        let bgColor = 'var(--stock-green)';
+        let textColor = 'white'; // 產品名稱和價格固定白色
+        let circleTextColor = 'black';
+        if (stock <= redThreshold) { bgColor = 'var(--stock-red)'; circleTextColor = 'white'; }
+        else if (stock >= greenThreshold) { bgColor = 'var(--stock-green)'; circleTextColor = 'black'; }
+        else { bgColor = 'var(--stock-yellow)'; circleTextColor = 'black'; }
         const btn = document.createElement("div");
         btn.className = "product-btn" + (selectedProducts.has(p.name) ? " selected" : "");
         btn.style.display = "flex";
@@ -854,7 +1378,7 @@ async function renderProducts() {
         btn.style.alignItems = "center";
         btn.style.justifyContent = "center";
         btn.style.position = "relative";
-        // 左側圓圈顯示庫存數字
+        // 左側圓圈
         const circleSpan = document.createElement("span");
         circleSpan.style.position = "absolute";
         circleSpan.style.left = "8px";
@@ -866,18 +1390,18 @@ async function renderProducts() {
         circleSpan.style.width = "28px";
         circleSpan.style.height = "28px";
         circleSpan.style.borderRadius = "50%";
-        circleSpan.style.backgroundColor = circleColor;
-        circleSpan.style.color = textColor;
+        circleSpan.style.backgroundColor = bgColor;
+        circleSpan.style.color = circleTextColor;
         circleSpan.style.fontWeight = "bold";
         circleSpan.style.fontSize = "0.8rem";
         circleSpan.innerText = stock;
         const nameSpan = document.createElement("span");
         nameSpan.className = "product-name";
-        nameSpan.style.color = "white";  // 產品名稱保持白色
+        nameSpan.style.color = "white";
         nameSpan.innerText = p.name;
         const priceSpan = document.createElement("span");
         priceSpan.className = "product-price";
-        priceSpan.style.color = "white";  // 價格保持白色
+        priceSpan.style.color = "white";
         priceSpan.innerText = `$${p.price}`;
         btn.appendChild(circleSpan);
         btn.appendChild(nameSpan);
@@ -900,13 +1424,12 @@ function calcTotal() {
     return total;
 }
 
-// 導航按鈕初始化（只有客人消費、產品銷售、庫存管理、學生預約）
+// 導航按鈕初始化（只保留三個：銷售、消費、學生預約）
 function initNavButtons() {
     const container = document.getElementById("navButtons");
     const buttons = [
-        { page: "consumption", icon: "fa-user-group", label: "客人消費" },
         { page: "sales", icon: "fa-cube", label: "產品銷售" },
-        { page: "inventory", icon: "fa-boxes", label: "庫存管理" },
+        { page: "consumption", icon: "fa-user-group", label: "客人消費" },
         { page: "booking", icon: "fa-school", label: "學生預約" }
     ];
     container.innerHTML = "";
@@ -919,13 +1442,13 @@ function initNavButtons() {
         container.appendChild(btnEl);
     });
     const bookingBtn = document.querySelector("[data-page='booking']");
-    if (bookingBtn) bookingBtn.onclick = () => {
-        document.getElementById("bookingIframe").src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html";
-        document.getElementById("iframeModal").style.display = "block";
+    if (bookingBtn) bookingBtn.onclick = () => { 
+        document.getElementById("bookingIframe").src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html"; 
+        document.getElementById("iframeModal").style.display = "block"; 
     };
 }
 
-// 頁面切換
+// 頁面切換（新增庫存頁面）
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     const targetPage = document.getElementById(pageId + "Page");
@@ -977,21 +1500,205 @@ function showPage(pageId) {
     }
 }
 
+// 原有渲染函數（保留完整）
+function renderStaff(containerId, selectedCode, onChange) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = "";
+    staffList.forEach(s => {
+        const btn = document.createElement("div");
+        btn.className = "staff-btn" + (selectedCode === s.code ? " active" : "");
+        btn.innerHTML = `<div class="staff-name">${s.name}</div><div class="staff-code">${s.code}</div>`;
+        btn.onclick = () => {
+            container.querySelectorAll(".staff-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            onChange(s.code, s.name);
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+}
+function renderPayment(containerId, selected, onChange, isSales = false) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = "";
+    const payments = isSales ? SALES_PAYMENTS : PAYMENTS;
+    payments.forEach(p => {
+        const btn = document.createElement("div");
+        btn.className = "payment-btn" + (selected === p ? " active" : "");
+        btn.textContent = p;
+        btn.onclick = () => {
+            container.querySelectorAll(".payment-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            onChange(p);
+            if (isSales && p === "公司") document.getElementById("totalAmount").innerText = "0";
+            else if (isSales) calcTotal();
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+}
+function renderPresetButtons() {
+    const container = document.getElementById("presetAmounts");
+    if (!container) return;
+    container.innerHTML = "";
+    presetAmounts.forEach(amt => {
+        const btn = document.createElement("div");
+        btn.className = "preset-btn";
+        btn.textContent = `$${amt}`;
+        btn.onclick = () => {
+            document.querySelectorAll("#presetAmounts .preset-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById("consumeAmount").value = amt;
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+    const amountInput = document.getElementById("consumeAmount");
+    if (amountInput) {
+        amountInput.removeEventListener("input", clearPresetHighlight);
+        amountInput.addEventListener("input", clearPresetHighlight);
+    }
+}
+function clearPresetHighlight() {
+    document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
+}
+function updateRecentRecord(type) {
+    const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
+    const recordsOfType = records.filter(r => r.type === type).sort((a,b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
+    const record = recordsOfType.length ? recordsOfType[0] : null;
+    if (type === 'sales') lastSalesRecord = record;
+    else lastConsumeRecord = record;
+    if (!record) { if(div) div.style.display = 'none'; return; }
+    div.style.display = 'flex';
+    let content = '';
+    if (type === 'sales') {
+        content = `📅 ${record.displayDate || formatDisplayDate(record.date)} | 👤 ${record.staffName} | 📦 ${record.productName} | 💳 ${record.payment}`;
+    } else {
+        content = `📅 ${record.displayDate || formatDisplayDate(record.date)} | 👤 ${record.staffName} | 💰 $${record.amount} | 💳 ${record.payment}`;
+    }
+    div.innerHTML = `<span>${content}</span><div class="action-btns"><button class="small-btn edit-recent-btn" data-type="${type}" data-id="${record.id}">✏️ 修改</button><button class="small-btn danger-btn delete-recent-btn" data-type="${type}" data-id="${record.id}">🗑️ 刪除</button></div>`;
+    const editBtn = div.querySelector('.edit-recent-btn');
+    const delBtn = div.querySelector('.delete-recent-btn');
+    editBtn.onclick = async () => {
+        const targetRecord = records.find(r => r.id === record.id);
+        if (targetRecord) showEditModal(targetRecord);
+    };
+    delBtn.onclick = async () => {
+        await deleteRecordById(record.id, { skipPassword: true });
+        updateRecentRecord(type);
+    };
+}
+function showEditModal(record) {
+    const modal = document.createElement('div');
+    modal.className = 'edit-modal';
+    const content = document.createElement('div');
+    content.className = 'edit-modal-content';
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    const title = document.createElement('h3');
+    title.innerText = record.type === 'sales' ? '修改銷售記錄' : '修改消費記錄';
+    content.appendChild(title);
+    const optionGrid = document.createElement('div');
+    optionGrid.className = 'edit-option-grid';
+    if (record.type === 'sales') {
+        const productLabel = document.createElement('div');
+        productLabel.innerText = '選擇產品：';
+        optionGrid.appendChild(productLabel);
+        productList.forEach(prod => {
+            const btn = document.createElement('div');
+            btn.className = 'edit-option-btn';
+            btn.innerText = `${prod.name} ($${prod.price})`;
+            btn.onclick = () => {
+                record.productName = prod.name;
+                record.productPrice = prod.price;
+                record.amount = prod.price;
+                showPaymentSelection(record, modal);
+            };
+            optionGrid.appendChild(btn);
+        });
+        content.appendChild(optionGrid);
+    } else {
+        const amountLabel = document.createElement('div');
+        amountLabel.innerText = '選擇金額：';
+        optionGrid.appendChild(amountLabel);
+        presetAmounts.forEach(amt => {
+            const btn = document.createElement('div');
+            btn.className = 'edit-option-btn';
+            btn.innerText = `$${amt}`;
+            btn.onclick = () => {
+                record.amount = amt;
+                showPaymentSelection(record, modal);
+            };
+            optionGrid.appendChild(btn);
+        });
+        content.appendChild(optionGrid);
+    }
+    function showPaymentSelection(record, modal) {
+        while (content.children.length > 1) content.removeChild(content.lastChild);
+        const paymentLabel = document.createElement('div');
+        paymentLabel.innerText = '選擇支付方式：';
+        content.appendChild(paymentLabel);
+        const paymentGrid = document.createElement('div');
+        paymentGrid.className = 'edit-option-grid';
+        const payments = record.type === 'sales' ? SALES_PAYMENTS : PAYMENTS;
+        payments.forEach(p => {
+            const btn = document.createElement('div');
+            btn.className = 'edit-option-btn';
+            btn.innerText = p;
+            btn.onclick = async () => {
+                record.payment = p;
+                await finalizeEdit(record, modal);
+            };
+            paymentGrid.appendChild(btn);
+        });
+        content.appendChild(paymentGrid);
+        const cancelBtn = document.createElement('button');
+        cancelBtn.innerText = '取消';
+        cancelBtn.className = 'small-btn';
+        cancelBtn.style.marginTop = '16px';
+        cancelBtn.onclick = () => modal.remove();
+        content.appendChild(cancelBtn);
+    }
+    async function finalizeEdit(record, modal) {
+        saveRecords();
+        if (gapiReady) {
+            const sheetName = record.type === 'sales' ? '產品' : '客人';
+            const rowMap = await getRowMap(sheetName);
+            const rowIndex = rowMap.get(record.id);
+            if (rowIndex) {
+                await updateSheetRow(sheetName, rowIndex, record);
+                await appendToBackup(sheetName, record, "修改");
+            } else {
+                await fullSyncToSheets();
+            }
+        }
+        renderRecordsTables();
+        updateRecentRecord(record.type === 'sales' ? 'sales' : 'consumption');
+        showToast("記錄已修改並同步雲端");
+        modal.remove();
+    }
+}
 // 排序函數
-let salesSortColumn = 'date', salesSortAsc = false;
-let consumeSortColumn = 'date', consumeSortAsc = false;
-function sortSalesRecords(column) {
-    if (salesSortColumn === column) salesSortAsc = !salesSortAsc;
-    else { salesSortColumn = column; salesSortAsc = true; }
-    renderRecordsTables();
+function sortTable(tableId, colIndex, type) {
+    const table = document.getElementById(tableId);
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const isNumeric = type === 'number';
+    rows.sort((a, b) => {
+        let aVal = a.cells[colIndex].innerText;
+        let bVal = b.cells[colIndex].innerText;
+        if (isNumeric) {
+            aVal = parseFloat(aVal) || 0;
+            bVal = parseFloat(bVal) || 0;
+            return aVal - bVal;
+        } else {
+            return aVal.localeCompare(bVal);
+        }
+    });
+    tbody.innerHTML = '';
+    rows.forEach(row => tbody.appendChild(row));
 }
-function sortConsumeRecords(column) {
-    if (consumeSortColumn === column) consumeSortAsc = !consumeSortAsc;
-    else { consumeSortColumn = column; consumeSortAsc = true; }
-    renderRecordsTables();
-}
-
-// 渲染記錄表格（支援排序）
 async function renderRecordsTables() {
     const salesContainer = document.getElementById("salesRecordsTable");
     const consumeContainer = document.getElementById("consumeRecordsTable");
@@ -1005,40 +1712,11 @@ async function renderRecordsTables() {
             if (backupConsume.result.values) backupConsume.result.values.slice(1).forEach(row => { if(row[0]) backupIds.add(row[0]); });
         } catch(e) { console.warn("讀取備份狀態失敗", e); }
     }
-    let salesRecords = records.filter(r => r.type === 'sales');
-    let consumeRecords = records.filter(r => r.type === 'consumption');
-    // 排序銷售記錄
-    salesRecords.sort((a,b) => {
-        let valA, valB;
-        switch(salesSortColumn) {
-            case 'date': valA = new Date(a.date); valB = new Date(b.date); break;
-            case 'staff': valA = a.staffName; valB = b.staffName; break;
-            case 'product': valA = a.productName; valB = b.productName; break;
-            case 'payment': valA = a.payment; valB = b.payment; break;
-            default: valA = new Date(a.date); valB = new Date(b.date);
-        }
-        if (valA < valB) return salesSortAsc ? -1 : 1;
-        if (valA > valB) return salesSortAsc ? 1 : -1;
-        return 0;
-    });
-    // 排序消費記錄
-    consumeRecords.sort((a,b) => {
-        let valA, valB;
-        switch(consumeSortColumn) {
-            case 'date': valA = new Date(a.date); valB = new Date(b.date); break;
-            case 'staff': valA = a.staffName; valB = b.staffName; break;
-            case 'amount': valA = a.amount; valB = b.amount; break;
-            case 'payment': valA = a.payment; valB = b.payment; break;
-            default: valA = new Date(a.date); valB = new Date(b.date);
-        }
-        if (valA < valB) return consumeSortAsc ? -1 : 1;
-        if (valA > valB) return consumeSortAsc ? 1 : -1;
-        return 0;
-    });
-    // 渲染銷售表格
+    const salesRecords = records.filter(r => r.type === 'sales');
+    const consumeRecords = records.filter(r => r.type === 'consumption');
     if (salesRecords.length === 0) salesContainer.innerHTML = "<div>暫無產品銷售記錄</div>";
     else {
-        let html = '<table class="records-table"><thead><tr><th onclick="sortSalesRecords(\'date\')">日子</th><th onclick="sortSalesRecords(\'staff\')">員工</th><th onclick="sortSalesRecords(\'product\')">產品</th><th onclick="sortSalesRecords(\'payment\')">支付方式</th><th>同步狀態</th><th>備份狀態</th><th>操作</th></tr></thead><tbody>';
+        let html = '<table class="records-table" id="salesTable"><thead><tr><th class="sortable" data-col="0" data-type="string">日子</th><th class="sortable" data-col="1" data-type="string">員工</th><th class="sortable" data-col="2" data-type="string">產品</th><th class="sortable" data-col="3" data-type="string">支付方式</th><th class="sortable" data-col="4" data-type="string">同步狀態</th><th class="sortable" data-col="5" data-type="string">備份狀態</th><th>操作</th></tr></thead><tbody>';
         for (const rec of salesRecords) {
             let statusClass = 'sync-pending', statusText = '待同步';
             if (rec.syncStatus === 'success') { statusClass = 'sync-success'; statusText = '已同步'; }
@@ -1056,11 +1734,19 @@ async function renderRecordsTables() {
         }
         html += '</tbody></table>';
         salesContainer.innerHTML = html;
+        // 綁定排序事件
+        document.querySelectorAll('#salesTable .sortable').forEach(th => {
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', () => {
+                const col = parseInt(th.dataset.col);
+                const type = th.dataset.type;
+                sortTable('salesTable', col, type);
+            });
+        });
     }
-    // 渲染消費表格
     if (consumeRecords.length === 0) consumeContainer.innerHTML = "<div>暫無客人消費記錄</div>";
     else {
-        let html = '<table class="records-table"><thead><tr><th onclick="sortConsumeRecords(\'date\')">日子</th><th onclick="sortConsumeRecords(\'staff\')">員工</th><th>工號</th><th onclick="sortConsumeRecords(\'amount\')">金額</th><th onclick="sortConsumeRecords(\'payment\')">支付方式</th><th>同步狀態</th><th>備份狀態</th><th>操作</th></tr></thead><tbody>';
+        let html = '<table class="records-table" id="consumeTable"><thead><tr><th class="sortable" data-col="0" data-type="string">日子</th><th class="sortable" data-col="1" data-type="string">員工</th><th class="sortable" data-col="2" data-type="string">工號</th><th class="sortable" data-col="3" data-type="number">金額</th><th class="sortable" data-col="4" data-type="string">支付方式</th><th class="sortable" data-col="5" data-type="string">同步狀態</th><th class="sortable" data-col="6" data-type="string">備份狀態</th><th>操作</th></tr></thead><tbody>';
         for (const rec of consumeRecords) {
             let statusClass = 'sync-pending', statusText = '待同步';
             if (rec.syncStatus === 'success') { statusClass = 'sync-success'; statusText = '已同步'; }
@@ -1079,8 +1765,15 @@ async function renderRecordsTables() {
         }
         html += '</tbody></table>';
         consumeContainer.innerHTML = html;
+        document.querySelectorAll('#consumeTable .sortable').forEach(th => {
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', () => {
+                const col = parseInt(th.dataset.col);
+                const type = th.dataset.type;
+                sortTable('consumeTable', col, type);
+            });
+        });
     }
-    // 綁定編輯刪除事件
     document.querySelectorAll('#salesRecordsTable .edit-btn, #consumeRecordsTable .edit-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
             const id = btn.dataset.id;
@@ -1095,25 +1788,345 @@ async function renderRecordsTables() {
         });
     });
 }
-window.sortSalesRecords = sortSalesRecords;
-window.sortConsumeRecords = sortConsumeRecords;
-
-// 其餘函數（與原始相同，保留）
-function renderStaff(containerId, selectedCode, onChange) { /* 同原始 */ }
-function renderPayment(containerId, selected, onChange, isSales) { /* 同原始 */ }
-function renderPresetButtons() { /* 同原始 */ }
-function clearPresetHighlight() { /* 同原始 */ }
-function updateRecentRecord(type) { /* 同原始 */ }
-function showEditModal(record) { /* 同原始 */ }
-function renderStaffManageList() { /* 同原始 */ }
-function renderProductManageList() { /* 同原始 */ }
-function renderPresetManageList() { /* 同原始 */ }
-async function syncConfigToSheet() { /* 同原始 */ }
-async function loadConfigFromSheet() { /* 同原始 */ }
-async function pullAllRecordsFromSheets() { /* 同原始 */ }
-async function addRecord(recordData) { /* 同原始 */ }
-async function editRecord(record, options) { /* 同原始 */ }
-async function deleteRecordById(id, options) { /* 同原始 */ }
+function renderStaffManageList() {
+    const container = document.getElementById("staffManageList");
+    if (!container) return;
+    container.innerHTML = "";
+    staffList.forEach((staff, idx) => {
+        const div = document.createElement("div");
+        div.className = "setting-row";
+        div.innerHTML = `<span style="flex:2;"><strong>${staff.name}</strong> (${staff.code})</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="staff">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="staff">🗑️ 刪除</button>`;
+        const editBtn = div.querySelector(".edit-btn");
+        const delBtn = div.querySelector(".danger-btn");
+        editBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要編輯員工 ${staff.name} (${staff.code}) 嗎？`)) return;
+            const newName = prompt("輸入新姓名", staff.name);
+            const newCode = prompt("輸入新工號", staff.code);
+            if (newName && newCode) {
+                staff.name = newName.trim(); staff.code = newCode.trim();
+                saveStaff(); renderStaffManageList();
+                renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+                renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+                await syncConfigToSheet();
+                showToast("員工已修改並同步雲端");
+            }
+        };
+        delBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要刪除員工 ${staff.name} (${staff.code}) 嗎？`)) return;
+            staffList.splice(idx, 1); saveStaff(); renderStaffManageList();
+            renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+            renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+            await syncConfigToSheet();
+            showToast("員工已刪除並同步雲端");
+        };
+        container.appendChild(div);
+    });
+}
+function renderProductManageList() {
+    const container = document.getElementById("productManageList");
+    if (!container) return;
+    container.innerHTML = "";
+    productList.forEach((prod, idx) => {
+        const div = document.createElement("div");
+        div.className = "setting-row";
+        div.innerHTML = `<span style="flex:2;">${prod.name} - $${prod.price} (${prod.type})</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="product">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="product">🗑️ 刪除</button>`;
+        const editBtn = div.querySelector(".edit-btn");
+        const delBtn = div.querySelector(".danger-btn");
+        editBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要編輯產品 ${prod.name} 嗎？`)) return;
+            const newName = prompt("輸入新產品名稱", prod.name);
+            const newPrice = parseFloat(prompt("輸入新價格", prod.price));
+            const newType = prompt("輸入類型 (普通/消耗品)", prod.type);
+            if (newName && !isNaN(newPrice) && (newType === '普通' || newType === '消耗品')) {
+                prod.name = newName.trim(); prod.price = newPrice; prod.type = newType;
+                saveProducts(); renderProductManageList(); renderProducts();
+                await syncConfigToSheet();
+                await syncProductTypesToInventory();
+                showToast("產品已修改並同步雲端");
+            }
+        };
+        delBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要刪除產品 ${prod.name} 嗎？`)) return;
+            productList.splice(idx, 1); saveProducts(); renderProductManageList(); renderProducts();
+            await syncConfigToSheet();
+            await syncProductTypesToInventory();
+            showToast("產品已刪除並同步雲端");
+        };
+        container.appendChild(div);
+    });
+}
+function renderPresetManageList() {
+    const container = document.getElementById("presetManageList");
+    if (!container) return;
+    container.innerHTML = "";
+    presetAmounts.forEach((amt, idx) => {
+        const div = document.createElement("div");
+        div.className = "setting-row";
+        div.innerHTML = `<span style="flex:2;">$${amt}</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="preset">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="preset">🗑️ 刪除</button>`;
+        const editBtn = div.querySelector(".edit-btn");
+        const delBtn = div.querySelector(".danger-btn");
+        editBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要編輯預設金額 $${amt} 嗎？`)) return;
+            const newAmt = parseFloat(prompt("輸入新金額", amt));
+            if (!isNaN(newAmt) && newAmt > 0) {
+                presetAmounts[idx] = newAmt;
+                savePresets(); renderPresetManageList(); renderPresetButtons();
+                await syncConfigToSheet();
+                showToast("預設金額已修改並同步雲端");
+            }
+        };
+        delBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要刪除預設金額 $${amt} 嗎？`)) return;
+            presetAmounts.splice(idx, 1); savePresets(); renderPresetManageList(); renderPresetButtons();
+            await syncConfigToSheet();
+            showToast("預設金額已刪除並同步雲端");
+        };
+        container.appendChild(div);
+    });
+}
+async function syncConfigToSheet() {
+    if (!gapiReady) return;
+    try {
+        await ensureSheetExists(CONFIG_SHEET, ["類型","鍵","值"]);
+        await clearSheetData(CONFIG_SHEET);
+        for (let s of staffList) await appendToSheet(CONFIG_SHEET, ['employee', s.code, s.name]);
+        for (let p of productList) await appendToSheet(CONFIG_SHEET, ['product', p.name, p.price.toString()]);
+        for (let amt of presetAmounts) await appendToSheet(CONFIG_SHEET, ['preset', amt.toString(), amt.toString()]);
+        await appendToSheet(CONFIG_SHEET, ['password', 'admin', settingsPassword]);
+    } catch (err) { console.error("同步設定失敗", err); }
+}
+async function loadConfigFromSheet() {
+    if (!gapiReady) return;
+    try {
+        const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: 'staff!A:C' });
+        if (resp.result.values && resp.result.values.length > 1) {
+            const rows = resp.result.values.slice(1);
+            const newStaff = [], newProducts = [], newPresets = [];
+            let newPassword = null;
+            for (let row of rows) {
+                const type = row[0], key = row[1], val = row[2];
+                if (type === 'employee') newStaff.push({ code: key, name: val });
+                else if (type === 'product') newProducts.push({ name: key, price: parseFloat(val), type: '普通' });
+                else if (type === 'preset') newPresets.push(parseFloat(val));
+                else if (type === 'password' && key === 'admin') newPassword = val;
+            }
+            if (newStaff.length) staffList = newStaff;
+            if (newProducts.length) productList = newProducts;
+            if (newPresets.length) presetAmounts = newPresets;
+            if (newPassword) settingsPassword = newPassword;
+            saveStaff(); saveProducts(); savePresets();
+        }
+        renderUI();
+    } catch (err) { console.error("讀取設定失敗", err); }
+}
+async function pullAllRecordsFromSheets() {
+    if (!gapiReady) { showToast("未登入，無法從雲端拉取"); return false; }
+    try {
+        const salesResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '產品!A:K' });
+        const consumeResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '客人!A:H' });
+        const cloudRecords = [];
+        if (salesResp.result.values && salesResp.result.values.length > 1) {
+            for (let row of salesResp.result.values.slice(1)) {
+                if (row.length < 10) continue;
+                const recordId = row.length >= 11 ? row[10] : null;
+                const year = row[0], month = row[1], day = row[2];
+                let isoDate = '';
+                if (year && month && day) isoDate = `${year}-${month.padStart(2,'0')}-${day.padStart(2,'0')}`;
+                else isoDate = getTodayISO();
+                cloudRecords.push({
+                    id: recordId || `legacy_${Date.now()}_${Math.random()}`,
+                    type: 'sales',
+                    date: isoDate,
+                    staffCode: row[4] || '',
+                    staffName: row[3] || '',
+                    productName: row[5] || '',
+                    productPrice: parseFloat(row[6]) || 0,
+                    amount: parseFloat(row[6]) || 0,
+                    payment: row[7] || '',
+                    syncStatus: 'success',
+                    createdAt: new Date().toISOString(),
+                    displayDate: formatDisplayDate(isoDate)
+                });
+            }
+        }
+        if (consumeResp.result.values && consumeResp.result.values.length > 1) {
+            for (let row of consumeResp.result.values.slice(1)) {
+                if (row.length < 3) continue;
+                const recordId = row.length >= 8 ? row[7] : null;
+                const googleDate = row[0];
+                let isoDate = '';
+                const parts = googleDate.split('/');
+                if (parts.length === 3) isoDate = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                else isoDate = getTodayISO();
+                cloudRecords.push({
+                    id: recordId || `legacy_${Date.now()}_${Math.random()}`,
+                    type: 'consumption',
+                    date: isoDate,
+                    staffName: row[1] || '',
+                    staffCode: row[2] || '',
+                    amount: parseFloat(row[3]) || 0,
+                    payment: row[4] || '',
+                    syncStatus: 'success',
+                    createdAt: new Date().toISOString(),
+                    displayDate: formatDisplayDate(isoDate)
+                });
+            }
+        }
+        const localMap = new Map(records.map(r => [r.id, r]));
+        for (const cloudRec of cloudRecords) {
+            if (localMap.has(cloudRec.id)) {
+                Object.assign(localMap.get(cloudRec.id), cloudRec);
+                localMap.get(cloudRec.id).syncStatus = 'success';
+                delete localMap.get(cloudRec.id).syncError;
+            } else {
+                localMap.set(cloudRec.id, cloudRec);
+            }
+        }
+        records = Array.from(localMap.values());
+        saveRecords();
+        renderRecordsTables();
+        showToast(`已從雲端拉取 ${cloudRecords.length} 筆記錄，合併後本地共 ${records.length} 筆`);
+        return true;
+    } catch (err) {
+        console.error("拉取雲端記錄失敗", err);
+        showToast("拉取雲端記錄失敗: " + err.message);
+        return false;
+    }
+}
+async function addRecord(recordData) {
+    const newId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
+    const safeDate = ensureValidDate(recordData.date);
+    const newRecord = {
+        id: newId,
+        syncStatus: "pending",
+        ...recordData,
+        date: safeDate,
+        displayDate: formatDisplayDate(safeDate),
+        createdAt: new Date().toISOString()
+    };
+    records.unshift(newRecord);
+    saveRecords();
+    renderRecordsTables();
+    if (recordData.type === 'sales') {
+        lastSalesRecord = { ...newRecord };
+        updateRecentRecord('sales');
+    } else {
+        lastConsumeRecord = { ...newRecord };
+        updateRecentRecord('consumption');
+    }
+    if (gapiReady) {
+        const sheetName = newRecord.type === 'sales' ? '產品' : '客人';
+        await ensureSheetExists(sheetName, sheetName === '產品' ? ["年份","月份","日期","員工姓名","員工工號","產品名稱","金額","支付方式","時間","同步狀態","訂單編號"] : ["日期","員工姓名","員工工號","金額","支付方式","時間","同步狀態","訂單編號"]);
+        if (sheetName === '產品') {
+            const googleDate = toGoogleDate(newRecord.date);
+            const { year, month, day } = extractYearMonthDay(googleDate);
+            await appendToSheet(sheetName, [year, month, day, newRecord.staffName, newRecord.staffCode, newRecord.productName, newRecord.amount.toString(), newRecord.payment, getCurrentTime(), 'success', newRecord.id]);
+        } else {
+            await appendToSheet(sheetName, [toGoogleDate(newRecord.date), newRecord.staffName, newRecord.staffCode, newRecord.amount.toString(), newRecord.payment, getCurrentTime(), 'success', newRecord.id]);
+        }
+        await appendToBackup(sheetName, newRecord, "新增");
+        newRecord.syncStatus = 'success';
+        saveRecords();
+        renderRecordsTables();
+    }
+    return newRecord;
+}
+async function editRecord(record, options = {}) {
+    if (!options.skipPassword) {
+        if (!await requirePassword()) return false;
+    }
+    if (!confirm("確定要修改此記錄嗎？")) return false;
+    let newData = {};
+    if (record.type === 'sales') {
+        const newProduct = prompt("輸入新產品名稱", record.productName);
+        const newPrice = parseFloat(prompt("輸入新價格", record.productPrice));
+        const newPayment = prompt("輸入新支付方式（現金/轉數快/支付寶/PayMe/微信支付/公司）", record.payment);
+        if (newProduct && !isNaN(newPrice) && newPayment) {
+            newData.productName = newProduct.trim();
+            newData.productPrice = newPrice;
+            newData.amount = newPrice;
+            newData.payment = newPayment;
+        } else { alert("修改無效"); return false; }
+    } else {
+        const newAmount = parseFloat(prompt("輸入新金額", record.amount));
+        const newPayment = prompt("輸入新支付方式（現金/轉數快/支付寶/PayMe/微信支付）", record.payment);
+        if (!isNaN(newAmount) && newAmount > 0 && newPayment) {
+            newData.amount = newAmount;
+            newData.payment = newPayment;
+        } else { alert("修改無效"); return false; }
+    }
+    Object.assign(record, newData);
+    saveRecords();
+    if (gapiReady) {
+        const sheetName = record.type === 'sales' ? '產品' : '客人';
+        const rowMap = await getRowMap(sheetName);
+        const rowIndex = rowMap.get(record.id);
+        if (rowIndex) {
+            await updateSheetRow(sheetName, rowIndex, record);
+            await appendToBackup(sheetName, record, "修改");
+        } else {
+            await fullSyncToSheets();
+        }
+    }
+    renderRecordsTables();
+    updateRecentRecord(record.type === 'sales' ? 'sales' : 'consumption');
+    showToast("記錄已修改並同步雲端");
+    return true;
+}
+async function deleteRecordById(id, options = {}) {
+    const recordToDelete = records.find(r => r.id === id);
+    if (!recordToDelete) return false;
+    const sameType = records.filter(r => r.type === recordToDelete.type);
+    let isLatest = false;
+    if (sameType.length > 0) {
+        const latest = sameType.reduce((a,b) => new Date(b.createdAt || b.date) > new Date(a.createdAt || a.date) ? b : a);
+        isLatest = (latest.id === id);
+    }
+    if (!isLatest) {
+        if (!await requirePassword()) return false;
+    } else {
+        if (options.skipPassword) {
+            const now = Date.now();
+            if (now - lastQuickDeleteTime < 5000) {
+                if (!await requirePassword()) return false;
+            }
+            lastQuickDeleteTime = now;
+        } else {
+            if (!await requirePassword()) return false;
+        }
+    }
+    if (!confirm("確定要刪除此記錄嗎？此操作不可復原！")) return false;
+    if (gapiReady) {
+        const sheetName = recordToDelete.type === 'sales' ? '產品' : '客人';
+        const rowMap = await getRowMap(sheetName);
+        const rowIndex = rowMap.get(recordToDelete.id);
+        if (rowIndex) {
+            await appendToBackup(sheetName, recordToDelete, "刪除");
+            await deleteSheetRow(sheetName, rowIndex);
+        } else {
+            await fullSyncToSheets();
+        }
+    }
+    const index = records.findIndex(r => r.id === id);
+    if (index !== -1) records.splice(index, 1);
+    saveRecords();
+    renderRecordsTables();
+    updateRecentRecord(recordToDelete.type === 'sales' ? 'sales' : 'consumption');
+    showToast("記錄已刪除並同步雲端");
+    return true;
+}
 let submitting = false;
 async function submitSales() {
     if (submitting) { showToast("請稍後，正在處理中..."); return; }
@@ -1431,6 +2444,7 @@ function ensureInit() {
     } else setTimeout(ensureInit, 200);
 }
 window.addEventListener('load', () => { loadLocalData(); initNavButtons(); bindActivityEvents(); ensureInit(); });
+// 修復學生預約返回
 document.getElementById("closeIframeBtn").onclick = () => {
     document.getElementById("iframeModal").style.display = "none";
     document.getElementById("bookingIframe").src = "";
@@ -1441,4 +2455,3 @@ document.getElementById("closeIframeBtn").onclick = () => {
 <script src="https://accounts.google.com/gsi/client"></script>
 </body>
 </html>
-<!-- ========== 第三段結束，複製完畢後儲存為 .html 檔案，並透過 HTTP 伺服器執行 ========== -->
