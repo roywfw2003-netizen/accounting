@@ -959,7 +959,24 @@ async function deleteRecordById(id, options = {}) {
     if (index !== -1) records.splice(index, 1);
     saveRecords();
     renderRecordsTables();
-    updateRecentRecord(recordToDelete.type === 'sales' ? 'sales' : 'consumption');
+    
+    // 修改：如果刪除的是當前顯示的最新記錄，則隱藏最近記錄區塊，不再顯示前一筆
+    const type = recordToDelete.type === 'sales' ? 'sales' : 'consumption';
+    const wasLatest = (type === 'sales' && lastSalesRecord && lastSalesRecord.id === id) ||
+                      (type === 'consumption' && lastConsumeRecord && lastConsumeRecord.id === id);
+    if (wasLatest) {
+        if (type === 'sales') {
+            lastSalesRecord = null;
+            const div = document.getElementById('salesRecent');
+            if (div) div.style.display = 'none';
+        } else {
+            lastConsumeRecord = null;
+            const div = document.getElementById('consumeRecent');
+            if (div) div.style.display = 'none';
+        }
+    } else {
+        updateRecentRecord(type);
+    }
     showToast("記錄已刪除並同步雲端");
     return true;
 }
@@ -1441,7 +1458,7 @@ async function submitConsumption() {
         });
         showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
         document.getElementById("consumeAmount").value = "";
-        clearPresetHighlight();
+        clearPresetHighlight();  // 清除預設金額按鈕的橙色高亮
     } finally {
         submitting = false;
         submitBtn.classList.remove("disabled-btn");
