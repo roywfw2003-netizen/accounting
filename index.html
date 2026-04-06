@@ -25,9 +25,6 @@
             --button-font-scale: 1.5;
             --records-font-scale: 1;
             --button-text-scale: 1;
-            --stock-red: #ef4444;
-            --stock-yellow: #eab308;
-            --stock-green: #22c55e;
         }
         body.dark {
             --bg-body: #1f2937;
@@ -43,9 +40,6 @@
             --btn-gray-shadow: #1f2937;
             --accent-orange: #f97316;
             --accent-orange-shadow: #b45309;
-            --stock-red: #dc2626;
-            --stock-yellow: #ca8a04;
-            --stock-green: #16a34a;
         }
         * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
         body {
@@ -59,15 +53,12 @@
         }
         h1, h2, h3, h4, h5, h6, p, span, div, label, button, input, select, .setting-row span, .small-btn, .record-item {
             color: var(--text-primary);
-            font-size: calc(1rem * var(--button-text-scale));
-        }
-        .nav-btn span, .staff-name, .staff-code, .product-name, .product-price, .payment-btn, .preset-btn {
-            font-size: calc(1rem * var(--button-text-scale)) !important;
         }
         .nav-btn, .submit-btn, .settings-icon-small, .small-btn, .danger-btn { color: white; }
         .settings-icon-small i { color: white; }
         .danger-btn { color: #b91c1c !important; }
         body.dark .danger-btn { color: #ff7b72 !important; }
+
         #loginPanel {
             position: fixed;
             top: 0;
@@ -107,6 +98,7 @@
             transition: 0.05s linear;
         }
         #googleLoginBtn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--btn-primary-shadow); }
+
         .app-container {
             width: 100%;
             max-width: 100%;
@@ -121,23 +113,37 @@
             display: none;
             flex-direction: column;
         }
-        @media (orientation: landscape) and (min-width: 900px) {
-            .app-container { flex-direction: row; padding: 12px; gap: 16px; }
-            .btn-group { flex-direction: column; width: 120px; gap: 12px; margin-bottom: 0; }
-            .nav-btn { width: 100%; padding: 16px 8px; }
-            .page { flex: 1; overflow-y: auto; }
+
+        .nav-btn, .staff-btn, .payment-btn, .preset-btn, .product-btn, .small-btn, .submit-btn, #submitConsume, .settings-icon-small { font-size: calc(0.9rem * var(--button-font-scale)); }
+        .staff-btn, .payment-btn, .preset-btn, .product-btn { font-size: calc(0.9rem * var(--button-text-scale)); }
+        .staff-name, .product-name { font-size: calc(1rem * var(--button-text-scale)); }
+        .staff-code, .product-price { font-size: calc(0.75rem * var(--button-text-scale)); }
+        .record-item { font-size: calc(0.85rem * var(--button-font-scale)); }
+        .records-table, .records-table th, .records-table td, .sync-badge { font-size: calc(0.8rem * var(--records-font-scale)); }
+        .records-table th, .records-table td { font-size: calc(0.8rem * var(--records-font-scale)); }
+        .sync-badge { font-size: calc(0.7rem * var(--records-font-scale)); }
+
+        @media (orientation: landscape) {
+            .app-container { padding: 8px 12px; }
+            .nav-btn { padding: 10px 4px; }
+            .nav-btn i { font-size: calc(1.5rem * var(--button-font-scale)); }
+            .product-btn, .preset-btn { padding: 8px 4px; }
+            .staff-btn, .payment-btn { padding: 8px 4px; }
+            .total, .recent-record { font-size: calc(0.9rem * var(--button-font-scale)); margin-top: 4px; padding-top: 4px; }
+            .submit-btn, #submitConsume { padding: 10px; font-size: calc(1rem * var(--button-font-scale)); margin-top: 8px; }
+            .settings-section { margin-bottom: 8px; padding: 6px; }
+            .record-item { padding: 6px; }
+            .small-btn { padding: 4px 8px; }
         }
-        @media (orientation: portrait), (max-width: 899px) {
-            .btn-group { flex-direction: row; flex-wrap: wrap; margin-bottom: 12px; }
-            .nav-btn { flex: 1; min-width: 100px; }
-        }
-        .btn-group { display: flex; gap: 12px; margin-bottom: 12px; }
+        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
         .nav-btn {
             background: var(--btn-gray-bg);
             border: none;
             border-radius: 32px;
             font-weight: bold;
             cursor: pointer;
+            flex: 1;
+            min-width: 100px;
             padding: 12px 8px;
             text-align: center;
             transition: 0.05s linear;
@@ -148,8 +154,10 @@
             gap: 6px;
         }
         .nav-btn i { font-size: calc(1.8rem * var(--button-font-scale)); }
+        .nav-btn span { font-size: calc(0.85rem * var(--button-font-scale)); }
         .nav-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-gray-shadow); }
         .nav-btn.active { background: var(--accent-orange); color: white; box-shadow: 0 5px 0 var(--accent-orange-shadow); }
+        .nav-btn.active:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--accent-orange-shadow); }
         .page { display: none; }
         .active { display: block; }
         .form-group { margin-bottom: 10px; }
@@ -252,7 +260,7 @@
             box-shadow: 0 3px 0 var(--accent-orange-shadow);
             font-size: calc(0.9rem * var(--button-font-scale));
         }
-        .close-iframe:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-primary-shadow); }
+        .close-iframe:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
         .recent-record {
             background: var(--btn-gray-bg);
             border-radius: 20px;
@@ -282,8 +290,7 @@
         .records-action-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
         .records-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
         .records-table th, .records-table td { border: 1px solid var(--border-color); padding: 6px; text-align: left; }
-        .records-table th { background: var(--btn-gray-bg); cursor: pointer; user-select: none; }
-        .records-table th:hover { background: var(--accent-orange); color: white; }
+        .records-table th { background: var(--btn-gray-bg); }
         .record-cell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; max-width: 120px; }
         .action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
         @media (max-width: 600px) { .records-table th, .records-table td { padding: 4px; } }
@@ -311,6 +318,7 @@
         .edit-option-grid { display: grid; gap: 8px; margin: 16px 0; }
         .edit-option-btn { background: var(--btn-gray-bg); padding: 12px; border-radius: 40px; text-align: center; cursor: pointer; transition: 0.05s linear; font-weight: bold; }
         .edit-option-btn:active { transform: scale(0.98); }
+        .edit-modal-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 16px; }
         .password-toggle-btn {
             background: var(--btn-gray-bg);
             border: none;
@@ -330,7 +338,6 @@
         .password-input-wrapper input { flex: 1; }
         .back-home-btn { margin-bottom: 12px; background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
         .back-home-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
-        .inventory-header { display: flex; align-items: center; gap: 10px; }
     </style>
 </head>
 <body>
@@ -344,7 +351,11 @@
 </div>
 
 <div class="app-container">
-    <div class="btn-group" id="navButtons"></div>
+    <div class="btn-group">
+        <button class="nav-btn" data-page="sales"><i class="fa-solid fa-cube"></i><span>產品銷售</span></button>
+        <button class="nav-btn" data-page="consumption"><i class="fa-solid fa-user-group"></i><span>客人消費</span></button>
+        <button class="nav-btn" id="studentBookingBtn"><i class="fa-solid fa-school"></i><span>學生預約</span></button>
+    </div>
 
     <div id="salesPage" class="page">
         <div class="form-group">
@@ -354,19 +365,9 @@
                 <button class="settings-icon-small" id="settingsIconSales"><i class="fa-solid fa-gear"></i></button>
             </div>
         </div>
-        <div class="form-group">
-            <label class="section-title">👤 員工</label>
-            <div class="staff-group" id="salesStaff"></div>
-        </div>
-        <div class="form-group">
-            <label class="section-title">📦 產品</label>
-            <div id="productList" class="product-grid"></div>
-            <div class="total">總金額: <span id="totalAmount">0</span> 元</div>
-        </div>
-        <div class="form-group">
-            <label class="section-title">💳 支付方式</label>
-            <div class="payment-group" id="salesPayment"></div>
-        </div>
+        <div class="form-group"><label class="section-title">👤 員工</label><div class="staff-group" id="salesStaff"></div></div>
+        <div class="form-group"><label class="section-title">📦 產品</label><div id="productList" class="product-grid"></div><div class="total">總金額: <span id="totalAmount">0</span> 元</div></div>
+        <div class="form-group"><label class="section-title">💳 支付方式</label><div class="payment-group" id="salesPayment"></div></div>
         <button id="submitSales" class="submit-btn">提交銷售</button>
         <div id="salesRecent" class="recent-record" style="display:none;"></div>
     </div>
@@ -379,197 +380,70 @@
                 <button class="settings-icon-small" id="settingsIconConsume"><i class="fa-solid fa-gear"></i></button>
             </div>
         </div>
-        <div class="form-group">
-            <label class="section-title">👤 員工</label>
-            <div class="staff-group" id="consumeStaff"></div>
-        </div>
-        <div class="form-group">
-            <label class="section-title">💰 金額</label>
-            <div id="presetAmounts" class="preset-grid"></div>
-            <input type="number" id="consumeAmount" placeholder="或手動輸入" step="1">
-        </div>
-        <div class="form-group">
-            <label class="section-title">💳 支付方式</label>
-            <div class="payment-group" id="consumePayment"></div>
-        </div>
+        <div class="form-group"><label class="section-title">👤 員工</label><div class="staff-group" id="consumeStaff"></div></div>
+        <div class="form-group"><label class="section-title">💰 金額</label><div id="presetAmounts" class="preset-grid"></div><input type="number" id="consumeAmount" placeholder="或手動輸入" step="1"></div>
+        <div class="form-group"><label class="section-title">💳 支付方式</label><div class="payment-group" id="consumePayment"></div></div>
         <button id="submitConsume" class="submit-btn">提交消費</button>
         <div id="consumeRecent" class="recent-record" style="display:none;"></div>
     </div>
 
-    <div id="inventoryPage" class="page">
-        <div class="inventory-header">
-            <h3>📦 庫存管理</h3>
-            <button class="settings-icon-small" id="settingsIconInventory"><i class="fa-solid fa-gear"></i></button>
-            <button id="toggleCostPriceBtn" class="small-btn">🔒 顯示來貨價</button>
-        </div>
-        <div id="inventoryTable"></div>
-        <div style="margin-top:16px;">
-            <button id="refreshInventoryBtn" class="small-btn">🔄 重新整理庫存</button>
-        </div>
-    </div>
-
     <div id="settingsPage" class="page">
         <button id="backToHomeBtn" class="small-btn back-home-btn" style="width:100%; margin-bottom:12px;">🏠 返回主頁</button>
-        <h3>⚙️ 系統設定</h3><hr>
+        <h3>⚙️ 系統設定</h3>
+        <hr>
         <div class="settings-section">
-            <div class="settings-header">
-                <h4>🌙 夜間模式</h4>
-                <div class="toggle-switch" id="toggleDarkMode"></div>
-            </div>
+            <div class="settings-header"><h4>🌙 夜間模式</h4><div class="toggle-switch" id="toggleDarkMode"></div></div>
         </div>
         <div class="settings-section">
-            <div class="settings-header">
-                <h4>🔘 按鈕文字大小</h4>
-            </div>
-            <div>
-                <input type="range" id="buttonTextSlider" class="button-text-slider" min="0.5" max="2.0" step="0.01" value="1.0">
-                <span id="buttonTextValue" class="scale-value">100%</span>
-            </div>
+            <div class="settings-header"><h4>🔘 按鈕字體大小（主頁面）</h4></div>
+            <div><input type="range" id="buttonTextSlider" class="button-text-slider" min="0.5" max="2.0" step="0.01" value="1.0"><span id="buttonTextValue" class="scale-value">100%</span><div style="font-size:0.7rem;">僅影響員工、產品、支付方式、預設金額按鈕上的文字</div></div>
         </div>
         <div class="settings-section">
-            <div class="settings-header">
-                <h4>🔘 導航按鈕大小</h4>
-            </div>
-            <div>
-                <input type="range" id="fontScaleSlider" class="font-scale-slider" min="0.5" max="2.5" step="0.01" value="1.5">
-                <span id="fontScaleValue" class="scale-value">150%</span>
-            </div>
+            <div class="settings-header"><h4>🔘 導航按鈕字體大小</h4></div>
+            <div><input type="range" id="fontScaleSlider" class="font-scale-slider" min="0.5" max="2.5" step="0.01" value="1.5"><span id="fontScaleValue" class="scale-value">150%</span><div style="font-size:0.7rem;">影響頂部導航按鈕</div></div>
         </div>
         <div class="settings-section">
-            <div class="settings-header">
-                <h4>📋 記錄表格大小</h4>
-            </div>
-            <div>
-                <input type="range" id="recordsScaleSlider" class="records-scale-slider" min="0.5" max="2.0" step="0.01" value="1">
-                <span id="recordsScaleValue" class="scale-value">100%</span>
-            </div>
+            <div class="settings-header"><h4>📋 記錄表格字體大小</h4></div>
+            <div><input type="range" id="recordsScaleSlider" class="records-scale-slider" min="0.5" max="2.0" step="0.01" value="1"><span id="recordsScaleValue" class="scale-value">100%</span><div style="font-size:0.7rem;">僅影響記錄表格</div></div>
         </div>
         <div class="settings-section">
-            <div class="settings-header">
-                <h4>🔴🟡🟢 庫存燈號閾值</h4>
-            </div>
-            <div>
-                <label>紅色上限 (≤): <input type="number" id="redThreshold" value="3" step="1" style="width:80px;"></label>
-                <label style="margin-left:12px;">綠色下限 (≥): <input type="number" id="greenThreshold" value="8" step="1" style="width:80px;"></label>
-                <button id="saveThresholdBtn" class="small-btn">儲存</button>
-                <div style="font-size:0.7rem;">庫存 ≤ 紅 = 紅色燈；介於之間 = 黃色燈；≥ 綠 = 綠色燈</div>
-            </div>
+            <div class="settings-header"><h4>👥 員工管理</h4><div class="toggle-switch" id="toggleStaff"></div></div>
+            <div id="staffContent" class="settings-content hidden-content"><div id="staffManageList"></div><div class="setting-row"><input type="text" id="newStaffName" placeholder="員工姓名" style="flex:2;"><input type="text" id="newStaffCode" placeholder="工號" style="flex:1;"><button class="small-btn" id="addStaffBtn">➕ 新增</button></div></div>
         </div>
         <div class="settings-section">
-            <div class="settings-header">
-                <h4>👥 員工管理</h4>
-                <div class="toggle-switch" id="toggleStaff"></div>
-            </div>
-            <div id="staffContent" class="settings-content hidden-content">
-                <div id="staffManageList"></div>
-                <div class="setting-row">
-                    <input type="text" id="newStaffName" placeholder="員工姓名" style="flex:2;">
-                    <input type="text" id="newStaffCode" placeholder="工號" style="flex:1;">
-                    <button class="small-btn" id="addStaffBtn">➕ 新增</button>
-                </div>
-            </div>
+            <div class="settings-header"><h4>📦 產品管理</h4><div class="toggle-switch" id="toggleProduct"></div></div>
+            <div id="productContent" class="settings-content hidden-content"><div id="productManageList"></div><div class="setting-row"><input type="text" id="newProductName" placeholder="產品名稱" style="flex:2;"><input type="number" id="newProductPrice" placeholder="價格" style="flex:1;"><button class="small-btn" id="addProductBtn">➕ 新增</button></div></div>
         </div>
         <div class="settings-section">
-            <div class="settings-header">
-                <h4>📦 產品管理</h4>
-                <div class="toggle-switch" id="toggleProduct"></div>
-            </div>
-            <div id="productContent" class="settings-content hidden-content">
-                <div id="productManageList"></div>
-                <div class="setting-row">
-                    <input type="text" id="newProductName" placeholder="產品名稱" style="flex:2;">
-                    <input type="number" id="newProductPrice" placeholder="價格" style="flex:1;">
-                    <select id="newProductType">
-                        <option value="普通">普通</option>
-                        <option value="消耗品">消耗品</option>
-                    </select>
-                    <button class="small-btn" id="addProductBtn">➕ 新增</button>
-                </div>
-            </div>
+            <div class="settings-header"><h4>💰 預設金額管理</h4><div class="toggle-switch" id="togglePreset"></div></div>
+            <div id="presetContent" class="settings-content hidden-content"><div id="presetManageList"></div><div class="setting-row"><input type="number" id="newPresetAmount" placeholder="金額" style="flex:1;"><button class="small-btn" id="addPresetBtn">➕ 新增</button></div></div>
         </div>
         <div class="settings-section">
-            <div class="settings-header">
-                <h4>💰 預設金額管理</h4>
-                <div class="toggle-switch" id="togglePreset"></div>
-            </div>
-            <div id="presetContent" class="settings-content hidden-content">
-                <div id="presetManageList"></div>
-                <div class="setting-row">
-                    <input type="number" id="newPresetAmount" placeholder="金額" style="flex:1;">
-                    <button class="small-btn" id="addPresetBtn">➕ 新增</button>
-                </div>
-            </div>
+            <div class="settings-header"><h4>🔘 按鈕每行數量</h4></div>
+            <div><div class="setting-row"><span>每行顯示個數：</span><input type="number" id="buttonsPerRow" min="1" max="6" value="3" style="width:80px;"><button class="small-btn" id="applyButtonsPerRow">套用</button></div><div style="font-size:0.7rem;">數字越大按鈕越窄</div></div>
         </div>
         <div class="settings-section">
-            <div class="settings-header">
-                <h4>🔘 按鈕每行數量</h4>
-            </div>
-            <div>
-                <div class="setting-row">
-                    <span>每行顯示個數：</span>
-                    <input type="number" id="buttonsPerRow" min="1" max="6" value="3" style="width:80px;">
-                    <button class="small-btn" id="applyButtonsPerRow">套用</button>
-                </div>
-            </div>
+            <div class="settings-header"><h4>🛍️ 產品銷售記錄</h4><div class="toggle-switch" id="toggleSalesRecords"></div></div>
+            <div id="salesRecordsContent" class="settings-content hidden-content"><div class="records-action-row"><button class="small-btn danger-btn" id="clearSalesRecordsBtn">🗑️ 清除所有產品銷售記錄</button><button class="small-btn" id="retrySalesFailedSyncBtn">🔄 重試銷售同步失敗</button><button class="small-btn" id="manualSyncBtn">📡 手動同步（從雲端拉取）</button></div><div id="salesRecordsTable"></div></div>
         </div>
         <div class="settings-section">
-            <div class="settings-header">
-                <h4>🛍️ 產品銷售記錄</h4>
-                <div class="toggle-switch" id="toggleSalesRecords"></div>
-            </div>
-            <div id="salesRecordsContent" class="settings-content hidden-content">
-                <div class="records-action-row">
-                    <button class="small-btn danger-btn" id="clearSalesRecordsBtn">🗑️ 清除所有產品銷售記錄</button>
-                    <button class="small-btn" id="retrySalesFailedSyncBtn">🔄 重試銷售同步失敗</button>
-                    <button class="small-btn" id="manualSyncBtn">📡 手動同步（從雲端拉取）</button>
-                </div>
-                <div id="salesRecordsTable"></div>
-            </div>
+            <div class="settings-header"><h4>👥 客人消費記錄</h4><div class="toggle-switch" id="toggleConsumeRecords"></div></div>
+            <div id="consumeRecordsContent" class="settings-content hidden-content"><div class="records-action-row"><button class="small-btn danger-btn" id="clearConsumeRecordsBtn">🗑️ 清除所有客人消費記錄</button><button class="small-btn" id="retryConsumeFailedSyncBtn">🔄 重試消費同步失敗</button><button class="small-btn" id="manualSyncBtnConsume">📡 手動同步（從雲端拉取）</button></div><div id="consumeRecordsTable"></div></div>
         </div>
         <div class="settings-section">
-            <div class="settings-header">
-                <h4>👥 客人消費記錄</h4>
-                <div class="toggle-switch" id="toggleConsumeRecords"></div>
-            </div>
-            <div id="consumeRecordsContent" class="settings-content hidden-content">
-                <div class="records-action-row">
-                    <button class="small-btn danger-btn" id="clearConsumeRecordsBtn">🗑️ 清除所有客人消費記錄</button>
-                    <button class="small-btn" id="retryConsumeFailedSyncBtn">🔄 重試消費同步失敗</button>
-                    <button class="small-btn" id="manualSyncBtnConsume">📡 手動同步（從雲端拉取）</button>
-                </div>
-                <div id="consumeRecordsTable"></div>
-            </div>
-        </div>
-        <div class="settings-section">
-            <div class="settings-header">
-                <h4>🔧 工作表修復</h4>
-            </div>
-            <div>
-                <button class="small-btn" id="repairSheetsBtn">🔄 修復工作表格式（全量同步）</button>
-            </div>
+            <div class="settings-header"><h4>🔧 工作表修復</h4></div>
+            <div><button class="small-btn" id="repairSheetsBtn">🔄 修復工作表格式（全量同步）</button><div style="font-size:0.7rem; margin-top:5px;">若寫入位置錯亂，請點此按鈕修復（僅推送本地記錄到雲端）</div></div>
         </div>
         <hr>
         <h4>🔐 修改管理密碼</h4>
-        <div class="setting-row">
-            <div class="password-input-wrapper">
-                <input type="password" id="newPassword" placeholder="新密碼" style="flex:1;">
-                <button class="password-toggle-btn" data-target="newPassword">👁️</button>
-            </div>
-            <div class="password-input-wrapper">
-                <input type="password" id="confirmPassword" placeholder="確認新密碼" style="flex:1;">
-                <button class="password-toggle-btn" data-target="confirmPassword">👁️</button>
-            </div>
-            <button class="small-btn" id="changePasswordBtn">更新密碼</button>
-        </div>
+        <div class="setting-row"><div class="password-input-wrapper"><input type="password" id="newPassword" placeholder="新密碼" style="flex:1;"><button class="password-toggle-btn" data-target="newPassword">👁️</button></div><div class="password-input-wrapper"><input type="password" id="confirmPassword" placeholder="確認新密碼" style="flex:1;"><button class="password-toggle-btn" data-target="confirmPassword">👁️</button></div><button class="small-btn" id="changePasswordBtn">更新密碼</button></div>
     </div>
 </div>
 
-<div id="iframeModal" class="iframe-container">
-    <button class="close-iframe" id="closeIframeBtn">✖ 關閉</button>
-    <iframe id="bookingIframe" src=""></iframe>
-</div>
+<div id="iframeModal" class="iframe-container"><button class="close-iframe" id="closeIframeBtn">✖ 關閉</button><iframe id="bookingIframe" src=""></iframe></div>
 
 <script>
+// ========== OAuth 設定 ==========
 const CLIENT_ID = '448045465424-kg6sd2dhp0nu8bl4afnafhpmd9f8bhj2.apps.googleusercontent.com';
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
@@ -587,19 +461,17 @@ let staffList = [
     { code: "3", name: "Kin" }
 ];
 let productList = [
-    { name: "紅罐", price: 178, type: "普通" },
-    { name: "猩猩粉", price: 100, type: "普通" },
-    { name: "打底水", price: 148, type: "普通" }
+    { name: "紅罐", price: 178 },
+    { name: "猩猩粉", price: 100 },
+    { name: "打底水", price: 148 }
 ];
 let presetAmounts = [50, 100, 150, 200];
 let records = [];
-
 let selectedProducts = new Set();
 let selectedSalesStaff = null;
 let selectedConsumeStaff = null;
 let selectedSalesPayment = "現金";
 let selectedConsumePayment = "現金";
-
 let lastSalesRecord = null;
 let lastConsumeRecord = null;
 const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付"];
@@ -608,28 +480,20 @@ const SALES_PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支�
 let toggleStaff = false, toggleProduct = false, togglePreset = false;
 let toggleSalesRecords = false, toggleConsumeRecords = false;
 let buttonsPerRow = 3;
-let redThreshold = 3, greenThreshold = 8;
-let showCostPrice = false;
 
 let passwordAuth = { verified: false };
-let idleTimer = null;
+let lastQuickDeleteTime = 0;
 
-function resetIdleTimer() {
-    if (idleTimer) clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
-        passwordAuth.verified = false;
-        showToast("已自動登出，請重新輸入密碼");
-    }, 60 * 60 * 1000);
+function isInSettingsPage() {
+    const settingsPage = document.getElementById("settingsPage");
+    return settingsPage && settingsPage.classList.contains("active");
 }
-function bindActivityEvents() {
-    ['click', 'touchstart', 'keydown'].forEach(ev => document.addEventListener(ev, resetIdleTimer));
-}
+
 async function requirePassword() {
     if (passwordAuth.verified) return true;
     const pwd = prompt("請輸入管理密碼");
     if (pwd === settingsPassword) {
         passwordAuth.verified = true;
-        resetIdleTimer();
         return true;
     } else {
         if (pwd !== null) alert("密碼錯誤");
@@ -670,6 +534,7 @@ function ensureValidDate(dateStr) {
     const d = new Date(dateStr);
     return isNaN(d.getTime()) ? getTodayISO() : dateStr;
 }
+
 function setButtonsPerRow(count) {
     buttonsPerRow = count;
     localStorage.setItem('buttonsPerRow', count);
@@ -699,17 +564,6 @@ function loadLocalData() {
     }
     const storedPerRow = localStorage.getItem('buttonsPerRow');
     if (storedPerRow) buttonsPerRow = parseInt(storedPerRow);
-    const storedRed = localStorage.getItem('redThreshold');
-    if (storedRed) redThreshold = parseInt(storedRed);
-    const storedGreen = localStorage.getItem('greenThreshold');
-    if (storedGreen) greenThreshold = parseInt(storedGreen);
-    
-    const btnScale = localStorage.getItem('buttonFontScale');
-    if(btnScale) document.documentElement.style.setProperty('--button-font-scale', btnScale);
-    const recScale = localStorage.getItem('recordsFontScale');
-    if(recScale) document.documentElement.style.setProperty('--records-font-scale', recScale);
-    const textScale = localStorage.getItem('buttonTextScale');
-    if(textScale) document.documentElement.style.setProperty('--button-text-scale', textScale);
 }
 function saveStaff() { localStorage.setItem("staffList", JSON.stringify(staffList)); }
 function saveProducts() { localStorage.setItem("productList", JSON.stringify(productList)); }
@@ -728,6 +582,9 @@ function setDarkMode(enabled) {
     localStorage.setItem('darkMode', enabled);
 }
 
+const CONFIG_SHEET = 'staff';
+
+// ---------- Google Sheets 操作 ----------
 async function ensureSheetExists(sheetName, headers) {
     try {
         const resp = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
@@ -747,36 +604,80 @@ async function ensureSheetExists(sheetName, headers) {
         }
     } catch(e) { console.error(`確保工作表 ${sheetName} 失敗`, e); }
 }
-async function appendToSheet(sheetName, values) {
+
+async function appendToSheet(sheetName, record) {
+    let values;
+    if (sheetName === '產品') {
+        const googleDate = toGoogleDate(record.date);
+        const { year, month, day } = extractYearMonthDay(googleDate);
+        const time = getCurrentTime();
+        values = [[year, month, day, record.staffName, record.staffCode, record.productName, record.amount.toString(), record.payment, time, 'success', record.id]];
+    } else if (sheetName === '客人') {
+        const googleDate = toGoogleDate(record.date);
+        const time = getCurrentTime();
+        values = [[googleDate, record.staffName, record.staffCode, record.amount.toString(), record.payment, time, 'success', record.id]];
+    } else {
+        values = [[record[0], record[1], record[2]]];
+    }
     await gapi.client.sheets.spreadsheets.values.append({
         spreadsheetId: SPREADSHEET_ID,
         range: `${sheetName}!A:Z`,
         valueInputOption: 'USER_ENTERED',
-        resource: { values: [values] }
+        resource: { values: values }
     });
 }
-async function clearSheetData(sheetName) {
-    const range = `${sheetName}!A2:Z`;
-    await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId: SPREADSHEET_ID, range: range });
-}
-async function getSheetId(sheetName) {
-    const resp = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
-    const sheet = resp.result.sheets.find(s => s.properties.title === sheetName);
-    return sheet.properties.sheetId;
-}
-async function deleteSheetRow(sheetName, rowIndex) {
-    const sheetId = await getSheetId(sheetName);
-    await gapi.client.sheets.spreadsheets.batchUpdate({
-        spreadsheetId: SPREADSHEET_ID,
-        resource: {
-            requests: [{
-                deleteDimension: {
-                    range: { sheetId: sheetId, dimension: "ROWS", startIndex: rowIndex-1, endIndex: rowIndex }
-                }
-            }]
+
+async function appendToBackup(sheetName, record, operationType) {
+    const backupSheetName = sheetName === '產品' ? '產品Backup' : '客人Backup';
+    let headers = [];
+    if (sheetName === '產品') {
+        headers = ["年份","月份","日期","員工姓名","員工工號","產品名稱","金額","支付方式","時間","同步狀態","訂單編號"];
+    } else {
+        headers = ["日期","員工姓名","員工工號","金額","支付方式","時間","同步狀態","訂單編號"];
+    }
+    const fullHeaders = [...headers, "操作類型", "操作時間"];
+    try {
+        await ensureSheetExists(backupSheetName, fullHeaders);
+        let rowData = [];
+        if (sheetName === '產品') {
+            const googleDate = toGoogleDate(record.date);
+            const { year, month, day } = extractYearMonthDay(googleDate);
+            const time = getCurrentTime();
+            rowData = [year, month, day, record.staffName, record.staffCode, record.productName, record.amount.toString(), record.payment, time, 'success', record.id];
+        } else {
+            const googleDate = toGoogleDate(record.date);
+            const time = getCurrentTime();
+            rowData = [googleDate, record.staffName, record.staffCode, record.amount.toString(), record.payment, time, 'success', record.id];
         }
-    });
+        rowData.push(operationType, getCurrentTime());
+        await gapi.client.sheets.spreadsheets.values.append({
+            spreadsheetId: SPREADSHEET_ID,
+            range: `${backupSheetName}!A:Z`,
+            valueInputOption: 'USER_ENTERED',
+            resource: { values: [rowData] }
+        });
+        console.log(`備份成功: ${backupSheetName}`);
+    } catch (err) {
+        console.error(`備份失敗: ${backupSheetName}`, err);
+        showToast(`警告：備份記錄失敗（${operationType}），但主要資料已儲存。錯誤：${err.message}`);
+    }
 }
+
+async function getRowMap(sheetName) {
+    const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${sheetName}!A:Z` });
+    const rows = resp.result.values || [];
+    if (rows.length <= 1) return new Map();
+    const idColIndex = (sheetName === '產品') ? 10 : 7;
+    const map = new Map();
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (row.length > idColIndex && row[idColIndex]) {
+            map.set(row[idColIndex], i+1);
+        }
+    }
+    return map;
+}
+
 async function updateSheetRow(sheetName, rowIndex, record) {
     let values;
     if (sheetName === '產品') {
@@ -796,20 +697,31 @@ async function updateSheetRow(sheetName, rowIndex, record) {
         resource: { values: values }
     });
 }
-async function getRowMap(sheetName) {
-    const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${sheetName}!A:Z` });
-    const rows = resp.result.values || [];
-    if (rows.length <= 1) return new Map();
-    const idColIndex = (sheetName === '產品') ? 10 : 7;
-    const map = new Map();
-    for (let i = 1; i < rows.length; i++) {
-        const row = rows[i];
-        if (row.length > idColIndex && row[idColIndex]) {
-            map.set(row[idColIndex], i+1);
+
+async function deleteSheetRow(sheetName, rowIndex) {
+    const sheetId = await getSheetId(sheetName);
+    await gapi.client.sheets.spreadsheets.batchUpdate({
+        spreadsheetId: SPREADSHEET_ID,
+        resource: {
+            requests: [{
+                deleteDimension: {
+                    range: { sheetId: sheetId, dimension: "ROWS", startIndex: rowIndex-1, endIndex: rowIndex }
+                }
+            }]
         }
-    }
-    return map;
+    });
 }
+async function getSheetId(sheetName) {
+    const resp = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
+    const sheet = resp.result.sheets.find(s => s.properties.title === sheetName);
+    return sheet.properties.sheetId;
+}
+
+async function clearSheetData(sheetName) {
+    const range = `${sheetName}!A2:Z`;
+    await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId: SPREADSHEET_ID, range: range });
+}
+
 async function fullSyncToSheets() {
     if (!gapiReady) { showToast("未登入，無法同步"); return false; }
     try {
@@ -819,13 +731,7 @@ async function fullSyncToSheets() {
         await clearSheetData('客人');
         for (const rec of records) {
             const sheetName = rec.type === 'sales' ? '產品' : '客人';
-            if (sheetName === '產品') {
-                const googleDate = toGoogleDate(rec.date);
-                const { year, month, day } = extractYearMonthDay(googleDate);
-                await appendToSheet(sheetName, [year, month, day, rec.staffName, rec.staffCode, rec.productName, rec.amount.toString(), rec.payment, getCurrentTime(), 'success', rec.id]);
-            } else {
-                await appendToSheet(sheetName, [toGoogleDate(rec.date), rec.staffName, rec.staffCode, rec.amount.toString(), rec.payment, getCurrentTime(), 'success', rec.id]);
-            }
+            await appendToSheet(sheetName, rec);
         }
         records.forEach(r => { r.syncStatus = 'success'; delete r.syncError; });
         saveRecords();
@@ -838,382 +744,224 @@ async function fullSyncToSheets() {
         return false;
     }
 }
-async function appendToBackup(sheetName, record, operationType) {
-    const backupSheetName = sheetName === '產品' ? '產品Backup' : '客人Backup';
-    let headers = [];
-    if (sheetName === '產品') {
-        headers = ["年份","月份","日期","員工姓名","員工工號","產品名稱","金額","支付方式","時間","同步狀態","訂單編號"];
-    } else {
-        headers = ["日期","員工姓名","員工工號","金額","支付方式","時間","同步狀態","訂單編號"];
-    }
-    const fullHeaders = [...headers, "操作類型", "操作時間"];
+
+async function loadConfigFromSheet() {
+    if (!gapiReady) return;
     try {
-        await ensureSheetExists(backupSheetName, fullHeaders);
-        let rowData;
-        if (sheetName === '產品') {
-            const googleDate = toGoogleDate(record.date);
-            const { year, month, day } = extractYearMonthDay(googleDate);
-            const time = getCurrentTime();
-            rowData = [year, month, day, record.staffName, record.staffCode, record.productName, record.amount.toString(), record.payment, time, 'success', record.id];
-        } else {
-            const googleDate = toGoogleDate(record.date);
-            const time = getCurrentTime();
-            rowData = [googleDate, record.staffName, record.staffCode, record.amount.toString(), record.payment, time, 'success', record.id];
+        const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${CONFIG_SHEET}!A:C` });
+        if (resp.result.values && resp.result.values.length > 1) {
+            const rows = resp.result.values.slice(1);
+            const newStaff = [], newProducts = [], newPresets = [];
+            let newPassword = null;
+            for (let row of rows) {
+                const type = row[0], key = row[1], val = row[2];
+                if (type === 'employee') newStaff.push({ code: key, name: val });
+                else if (type === 'product') newProducts.push({ name: key, price: parseFloat(val) });
+                else if (type === 'preset') newPresets.push(parseFloat(val));
+                else if (type === 'password' && key === 'admin') newPassword = val;
+            }
+            if (newStaff.length) staffList = newStaff;
+            if (newProducts.length) productList = newProducts;
+            if (newPresets.length) presetAmounts = newPresets;
+            if (newPassword) settingsPassword = newPassword;
+            saveStaff(); saveProducts(); savePresets();
         }
-        rowData.push(operationType, getCurrentTime());
-        await appendToSheet(backupSheetName, rowData);
-    } catch (err) {
-        showToast(`備份失敗：${err.message}`);
-    }
+        renderUI();
+    } catch (err) { console.error("讀取設定失敗", err); }
 }
 
-async function loadInventory() {
-    if (!gapiReady) return [];
+async function pullAllRecordsFromSheets() {
+    if (!gapiReady) { showToast("未登入，無法從雲端拉取"); return false; }
     try {
-        const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '庫存!A:G' });
-        const rows = resp.result.values || [];
-        if (rows.length <= 1) return [];
-        const inventory = [];
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i];
-            if (row.length >= 4) {
-                inventory.push({
-                    product: row[0],
-                    stock: parseInt(row[1]) || 0,
-                    avgCost: parseFloat(row[2]) || 0,
-                    totalCost: parseFloat(row[3]) || 0,
-                    type: row[4] || '普通',
-                    lastUpdate: row[5] || '',
-                    unit: row[6] || ''
+        const salesResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '產品!A:K' });
+        const consumeResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '客人!A:H' });
+        const cloudRecords = [];
+        if (salesResp.result.values && salesResp.result.values.length > 1) {
+            for (let row of salesResp.result.values.slice(1)) {
+                if (row.length < 10) continue;
+                const recordId = row.length >= 11 ? row[10] : null;
+                const year = row[0], month = row[1], day = row[2];
+                let isoDate = '';
+                if (year && month && day) isoDate = `${year}-${month.padStart(2,'0')}-${day.padStart(2,'0')}`;
+                else isoDate = getTodayISO();
+                cloudRecords.push({
+                    id: recordId || `legacy_${Date.now()}_${Math.random()}`,
+                    type: 'sales',
+                    date: isoDate,
+                    staffCode: row[4] || '',
+                    staffName: row[3] || '',
+                    productName: row[5] || '',
+                    productPrice: parseFloat(row[6]) || 0,
+                    amount: parseFloat(row[6]) || 0,
+                    payment: row[7] || '',
+                    syncStatus: 'success',
+                    createdAt: new Date().toISOString(),
+                    displayDate: formatDisplayDate(isoDate)
                 });
             }
         }
-        return inventory;
-    } catch(e) { console.error("讀取庫存失敗", e); return []; }
-}
-async function saveInventory(inventory) {
-    if (!gapiReady) return false;
-    try {
-        await ensureSheetExists('庫存', ['產品名稱','目前庫存','平均單價','總成本','類型','最後更新時間','單位']);
-        await clearSheetData('庫存');
-        for (let item of inventory) {
-            await appendToSheet('庫存', [item.product, item.stock, item.avgCost, item.totalCost, item.type, item.lastUpdate, item.unit]);
-        }
-        return true;
-    } catch(e) { console.error("儲存庫存失敗", e); return false; }
-}
-async function updateStock(productName, deltaQty, reason, extraCost = null, extraAmount = null) {
-    let inventory = await loadInventory();
-    let idx = inventory.findIndex(i => i.product === productName);
-    if (idx === -1) return false;
-    let item = inventory[idx];
-    let newStock = item.stock + deltaQty;
-    let newAvgCost = item.avgCost;
-    let newTotalCost = item.totalCost;
-    if (reason === '補貨' && extraCost !== null && extraAmount !== null) {
-        const newQty = deltaQty;
-        const newTotal = extraAmount;
-        newTotalCost = item.totalCost + newTotal;
-        newAvgCost = newTotalCost / (item.stock + newQty);
-        newStock = item.stock + newQty;
-    } else if (reason === '銷售') {
-        if (item.type === '消耗品') return true;
-        newTotalCost = newStock * item.avgCost;
-    } else if (reason === '手動調整' || reason === '盤點') {
-        newTotalCost = newStock * item.avgCost;
-    }
-    item.stock = newStock;
-    item.avgCost = newAvgCost;
-    item.totalCost = newTotalCost;
-    item.lastUpdate = getCurrentTime();
-    inventory[idx] = item;
-    await saveInventory(inventory);
-    await ensureSheetExists('庫存異動', ['時間','產品名稱','變動數量','變動後庫存','變動後平均單價','原因','備註']);
-    await appendToSheet('庫存異動', [getCurrentTime(), productName, deltaQty, newStock, newAvgCost, reason, extraCost ? `進貨總額:${extraAmount}` : '']);
-    return true;
-}
-async function syncProductTypesToInventory() {
-    let inventory = await loadInventory();
-    for (let prod of productList) {
-        let idx = inventory.findIndex(i => i.product === prod.name);
-        if (idx === -1) {
-            inventory.push({ product: prod.name, stock: 0, avgCost: 0, totalCost: 0, type: prod.type || '普通', lastUpdate: getCurrentTime(), unit: '' });
-        } else {
-            inventory[idx].type = prod.type || '普通';
-        }
-    }
-    await saveInventory(inventory);
-}
-
-async function renderInventoryPage() {
-    const container = document.getElementById("inventoryTable");
-    if (!container) return;
-    const inventory = await loadInventory();
-    if (inventory.length === 0) { container.innerHTML = "<div>暫無庫存資料</div>"; return; }
-    let html = '<table class="records-table"><thead><tr><th>產品</th><th>目前庫存</th><th>類型</th><th>平均單價</th><th>總成本</th><th>利潤</th><th>操作</th></tr></thead><tbody>';
-    for (let item of inventory) {
-        const sellPrice = productList.find(p=>p.name===item.product)?.price || 0;
-        const unitProfit = sellPrice - item.avgCost;
-        const soldQty = records.filter(r=>r.type==='sales' && r.productName===item.product).length;
-        const totalProfit = unitProfit * soldQty;
-        html += `<tr>
-            <td>${item.product}</td>
-            <td>${item.stock}</td>
-            <td>${item.type}</td>
-            <td class="cost-price-col" style="${showCostPrice ? '' : 'filter: blur(4px);'}">${showCostPrice ? `$${item.avgCost.toFixed(2)}` : '●●●'}</td>
-            <td class="cost-price-col" style="${showCostPrice ? '' : 'filter: blur(4px);'}">${showCostPrice ? `$${item.totalCost.toFixed(2)}` : '●●●'}</td>
-            <td class="cost-price-col" style="${showCostPrice ? '' : 'filter: blur(4px);'}">${showCostPrice ? `$${totalProfit.toFixed(2)}` : '●●●'}</td>
-            <td>
-                <button class="small-btn replenish-btn" data-product="${item.product}">📦 補貨</button>
-                <button class="small-btn manual-btn" data-product="${item.product}">✏️ 手動調整</button>
-                ${item.type === '消耗品' ? `<button class="small-btn stocktake-btn" data-product="${item.product}">📋 盤點</button>` : ''}
-            </td>
-        </tr>`;
-    }
-    html += '</tbody></table>';
-    container.innerHTML = html;
-    document.querySelectorAll('.replenish-btn').forEach(btn => btn.addEventListener('click', async () => {
-        if(!await requirePassword()) return;
-        const product = btn.dataset.product;
-        const qty = parseInt(prompt("補貨數量"));
-        if (qty && qty>0) {
-            const totalAmount = parseFloat(prompt("進貨總金額"));
-            if (totalAmount && totalAmount>0) {
-                await updateStock(product, qty, '補貨', totalAmount/qty, totalAmount);
-                await renderInventoryPage();
-                renderProducts();
+        if (consumeResp.result.values && consumeResp.result.values.length > 1) {
+            for (let row of consumeResp.result.values.slice(1)) {
+                if (row.length < 3) continue;
+                const recordId = row.length >= 8 ? row[7] : null;
+                const googleDate = row[0];
+                let isoDate = '';
+                const parts = googleDate.split('/');
+                if (parts.length === 3) isoDate = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                else isoDate = getTodayISO();
+                cloudRecords.push({
+                    id: recordId || `legacy_${Date.now()}_${Math.random()}`,
+                    type: 'consumption',
+                    date: isoDate,
+                    staffName: row[1] || '',
+                    staffCode: row[2] || '',
+                    amount: parseFloat(row[3]) || 0,
+                    payment: row[4] || '',
+                    syncStatus: 'success',
+                    createdAt: new Date().toISOString(),
+                    displayDate: formatDisplayDate(isoDate)
+                });
             }
         }
-    }));
-    document.querySelectorAll('.manual-btn').forEach(btn => btn.addEventListener('click', async () => {
-        if(!await requirePassword()) return;
-        const product = btn.dataset.product;
-        const delta = parseInt(prompt("調整數量 (正數增加，負數減少)"));
-        if (!isNaN(delta)) {
-            await updateStock(product, delta, '手動調整');
-            await renderInventoryPage();
-            renderProducts();
+        const localMap = new Map(records.map(r => [r.id, r]));
+        for (const cloudRec of cloudRecords) {
+            if (localMap.has(cloudRec.id)) {
+                Object.assign(localMap.get(cloudRec.id), cloudRec);
+                localMap.get(cloudRec.id).syncStatus = 'success';
+                delete localMap.get(cloudRec.id).syncError;
+            } else {
+                localMap.set(cloudRec.id, cloudRec);
+            }
         }
-    }));
-    document.querySelectorAll('.stocktake-btn').forEach(btn => btn.addEventListener('click', async () => {
-        if(!await requirePassword()) return;
-        const product = btn.dataset.product;
-        const newStock = parseInt(prompt("盤點後的新庫存數量"));
-        if (!isNaN(newStock)) {
-            const inv = await loadInventory();
-            const item = inv.find(i=>i.product===product);
-            const delta = newStock - item.stock;
-            await updateStock(product, delta, '盤點');
-            await renderInventoryPage();
-            renderProducts();
-        }
-    }));
-}
-
-async function renderProducts() {
-    const container = document.getElementById("productList");
-    if (!container) return;
-    const inventory = await loadInventory();
-    container.innerHTML = "";
-    for (let p of productList) {
-        const inv = inventory.find(i => i.product === p.name);
-        const stock = inv ? inv.stock : 0;
-        let bulbColor = 'var(--stock-green)';
-        let numColor = '#000';
-        if (stock <= redThreshold) {
-            bulbColor = 'var(--stock-red)';
-            numColor = '#fff';
-        } else if (stock < greenThreshold) {
-            bulbColor = 'var(--stock-yellow)';
-            numColor = '#000';
-        }
-        const btn = document.createElement("div");
-        btn.className = "product-btn" + (selectedProducts.has(p.name) ? " selected" : "");
-        btn.innerHTML = `
-            <div style="display:flex; align-items:center; gap:6px; width:100%; justify-content:center;">
-                <div style="width:24px; height:24px; border-radius:50%; background:${bulbColor}; display:flex; align-items:center; justify-content:center;">
-                    <span style="color:${numColor}; font-weight:bold; font-size:12px;">${stock}</span>
-                </div>
-                <div style="display:flex; flex-direction:column; align-items:center;">
-                    <span class="product-name" style="color:${selectedProducts.has(p.name)?'white':'var(--text-primary)'};">${p.name}</span>
-                    <span class="product-price" style="color:${selectedProducts.has(p.name)?'white':'var(--text-primary)'};">$${p.price}</span>
-                </div>
-            </div>`;
-        btn.onclick = () => {
-            if (selectedProducts.has(p.name)) selectedProducts.delete(p.name);
-            else selectedProducts.add(p.name);
-            renderProducts();
-            calcTotal();
-        };
-        container.appendChild(btn);
-    }
-    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
-}
-function calcTotal() {
-    let total = 0;
-    productList.forEach(p => { if (selectedProducts.has(p.name)) total += p.price; });
-    if (selectedSalesPayment === "公司") total = 0;
-    document.getElementById("totalAmount").innerText = total;
-    return total;
-}
-
-function initNavButtons() {
-    const container = document.getElementById("navButtons");
-    const buttons = [
-        { page: "consumption", icon: "fa-user-group", label: "客人消費" },
-        { page: "sales", icon: "fa-cube", label: "產品銷售" },
-        { page: "inventory", icon: "fa-boxes", label: "庫存管理" },
-        { page: "booking", icon: "fa-school", label: "學生預約" }
-    ];
-    container.innerHTML = "";
-    buttons.forEach(btn => {
-        const btnEl = document.createElement("button");
-        btnEl.className = "nav-btn";
-        btnEl.dataset.page = btn.page;
-        btnEl.innerHTML = `<i class="fa-solid ${btn.icon}"></i><span>${btn.label}</span>`;
-        btnEl.onclick = () => showPage(btn.page);
-        container.appendChild(btnEl);
-    });
-    const bookingBtn = document.querySelector("[data-page='booking']");
-    if (bookingBtn) bookingBtn.onclick = () => {
-        document.getElementById("bookingIframe").src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html";
-        document.getElementById("iframeModal").style.display = "block";
-    };
-}
-
-function showPage(pageId) {
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    const targetPage = document.getElementById(pageId + "Page");
-    if (targetPage) targetPage.classList.add("active");
-    document.querySelectorAll(".nav-btn").forEach(btn => {
-        if (btn.dataset.page === pageId) btn.classList.add("active");
-        else btn.classList.remove("active");
-    });
-    if (pageId === "sales") {
-        document.getElementById("salesDate").value = getTodayISO();
-        renderProducts();
-        updateRecentRecord('sales');
-        renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
-    }
-    if (pageId === "consumption") {
-        document.getElementById("consumeDate").value = getTodayISO();
-        renderPresetButtons();
-        updateRecentRecord('consumption');
-        renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
-    }
-    if (pageId === "inventory") {
-        renderInventoryPage();
-    }
-    if (pageId === "settings") {
-        renderStaffManageList();
-        renderProductManageList();
-        renderPresetManageList();
+        records = Array.from(localMap.values());
+        saveRecords();
         renderRecordsTables();
-        document.getElementById("toggleStaff").classList.toggle("active", toggleStaff);
-        document.getElementById("toggleProduct").classList.toggle("active", toggleProduct);
-        document.getElementById("togglePreset").classList.toggle("active", togglePreset);
-        document.getElementById("toggleSalesRecords").classList.toggle("active", toggleSalesRecords);
-        document.getElementById("toggleConsumeRecords").classList.toggle("active", toggleConsumeRecords);
-        document.getElementById("staffContent").classList.toggle("hidden-content", !toggleStaff);
-        document.getElementById("productContent").classList.toggle("hidden-content", !toggleProduct);
-        document.getElementById("presetContent").classList.toggle("hidden-content", !togglePreset);
-        document.getElementById("salesRecordsContent").classList.toggle("hidden-content", !toggleSalesRecords);
-        document.getElementById("consumeRecordsContent").classList.toggle("hidden-content", !toggleConsumeRecords);
-        document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
-        document.getElementById("buttonsPerRow").value = buttonsPerRow;
-        document.getElementById("redThreshold").value = redThreshold;
-        document.getElementById("greenThreshold").value = greenThreshold;
+        showToast(`已從雲端拉取 ${cloudRecords.length} 筆記錄，合併後本地共 ${records.length} 筆`);
+        return true;
+    } catch (err) {
+        console.error("拉取雲端記錄失敗", err);
+        showToast("拉取雲端記錄失敗: " + err.message);
+        return false;
     }
 }
 
-function renderStaff(containerId, selectedCode, onChange) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    container.innerHTML = "";
-    staffList.forEach(s => {
-        const btn = document.createElement("div");
-        btn.className = "staff-btn" + (selectedCode === s.code ? " active" : "");
-        btn.innerHTML = `<div class="staff-name">${s.name}</div><div class="staff-code">${s.code}</div>`;
-        btn.onclick = () => {
-            container.querySelectorAll(".staff-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            onChange(s.code, s.name);
-        };
-        container.appendChild(btn);
-    });
-    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
-}
-function renderPayment(containerId, selected, onChange, isSales = false) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    container.innerHTML = "";
-    const payments = isSales ? SALES_PAYMENTS : PAYMENTS;
-    payments.forEach(p => {
-        const btn = document.createElement("div");
-        btn.className = "payment-btn" + (selected === p ? " active" : "");
-        btn.textContent = p;
-        btn.onclick = () => {
-            container.querySelectorAll(".payment-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            onChange(p);
-            if (isSales && p === "公司") document.getElementById("totalAmount").innerText = "0";
-            else if (isSales) calcTotal();
-        };
-        container.appendChild(btn);
-    });
-    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
-}
-function renderPresetButtons() {
-    const container = document.getElementById("presetAmounts");
-    if (!container) return;
-    container.innerHTML = "";
-    presetAmounts.forEach(amt => {
-        const btn = document.createElement("div");
-        btn.className = "preset-btn";
-        btn.textContent = `$${amt}`;
-        btn.onclick = () => {
-            document.querySelectorAll("#presetAmounts .preset-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            document.getElementById("consumeAmount").value = amt;
-        };
-        container.appendChild(btn);
-    });
-    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
-    const amountInput = document.getElementById("consumeAmount");
-    if (amountInput) {
-        amountInput.removeEventListener("input", clearPresetHighlight);
-        amountInput.addEventListener("input", clearPresetHighlight);
-    }
-}
-function clearPresetHighlight() {
-    document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
-}
-
-function updateRecentRecord(type) {
-    const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
-    const recordsOfType = records.filter(r => r.type === type).sort((a,b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
-    const record = recordsOfType.length ? recordsOfType[0] : null;
-    if (type === 'sales') lastSalesRecord = record;
-    else lastConsumeRecord = record;
-    if (!record) { if(div) div.style.display = 'none'; return; }
-    div.style.display = 'flex';
-    let content = '';
-    if (type === 'sales') {
-        content = `📅 ${record.displayDate || formatDisplayDate(record.date)} | 👤 ${record.staffName} | 📦 ${record.productName} | 💳 ${record.payment}`;
+async function addRecord(recordData) {
+    const newId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
+    const safeDate = ensureValidDate(recordData.date);
+    const newRecord = {
+        id: newId,
+        syncStatus: "pending",
+        ...recordData,
+        date: safeDate,
+        displayDate: formatDisplayDate(safeDate),
+        createdAt: new Date().toISOString()
+    };
+    records.unshift(newRecord);
+    saveRecords();
+    renderRecordsTables();
+    if (recordData.type === 'sales') {
+        lastSalesRecord = { ...newRecord };
+        updateRecentRecord('sales');
     } else {
-        content = `📅 ${record.displayDate || formatDisplayDate(record.date)} | 👤 ${record.staffName} | 💰 $${record.amount} | 💳 ${record.payment}`;
+        lastConsumeRecord = { ...newRecord };
+        updateRecentRecord('consumption');
     }
-    div.innerHTML = `<span>${content}</span><div class="action-btns"><button class="small-btn edit-recent-btn" data-type="${type}" data-id="${record.id}">✏️ 修改</button><button class="small-btn danger-btn delete-recent-btn" data-type="${type}" data-id="${record.id}">🗑️ 刪除</button></div>`;
-    const editBtn = div.querySelector('.edit-recent-btn');
-    const delBtn = div.querySelector('.delete-recent-btn');
-    editBtn.onclick = async () => {
-        const targetRecord = records.find(r => r.id === record.id);
-        if (targetRecord) showEditModal(targetRecord);
-    };
-    delBtn.onclick = async () => {
-        await deleteRecordById(record.id, { skipPassword: true });
-        updateRecentRecord(type);
-    };
+    if (gapiReady) {
+        const sheetName = newRecord.type === 'sales' ? '產品' : '客人';
+        await ensureSheetExists(sheetName, sheetName === '產品' ? ["年份","月份","日期","員工姓名","員工工號","產品名稱","金額","支付方式","時間","同步狀態","訂單編號"] : ["日期","員工姓名","員工工號","金額","支付方式","時間","同步狀態","訂單編號"]);
+        await appendToSheet(sheetName, newRecord);
+        await appendToBackup(sheetName, newRecord, "新增");
+        newRecord.syncStatus = 'success';
+        saveRecords();
+        renderRecordsTables();
+    }
+    return newRecord;
+}
+
+async function editRecord(record, options = {}) {
+    if (!options.skipPassword) {
+        if (!await requirePassword()) return false;
+    }
+    if (!confirm("確定要修改此記錄嗎？")) return false;
+    let newData = {};
+    if (record.type === 'sales') {
+        const newProduct = prompt("輸入新產品名稱", record.productName);
+        const newPrice = parseFloat(prompt("輸入新價格", record.productPrice));
+        const newPayment = prompt("輸入新支付方式（現金/轉數快/支付寶/PayMe/微信支付/公司）", record.payment);
+        if (newProduct && !isNaN(newPrice) && newPayment) {
+            newData.productName = newProduct.trim();
+            newData.productPrice = newPrice;
+            newData.amount = newPrice;
+            newData.payment = newPayment;
+        } else { alert("修改無效"); return false; }
+    } else {
+        const newAmount = parseFloat(prompt("輸入新金額", record.amount));
+        const newPayment = prompt("輸入新支付方式（現金/轉數快/支付寶/PayMe/微信支付）", record.payment);
+        if (!isNaN(newAmount) && newAmount > 0 && newPayment) {
+            newData.amount = newAmount;
+            newData.payment = newPayment;
+        } else { alert("修改無效"); return false; }
+    }
+    Object.assign(record, newData);
+    saveRecords();
+    if (gapiReady) {
+        const sheetName = record.type === 'sales' ? '產品' : '客人';
+        const rowMap = await getRowMap(sheetName);
+        const rowIndex = rowMap.get(record.id);
+        if (rowIndex) {
+            await updateSheetRow(sheetName, rowIndex, record);
+            await appendToBackup(sheetName, record, "修改");
+        } else {
+            await fullSyncToSheets();
+        }
+    }
+    renderRecordsTables();
+    updateRecentRecord(record.type === 'sales' ? 'sales' : 'consumption');
+    showToast("記錄已修改並同步雲端");
+    return true;
+}
+
+async function deleteRecordById(id, options = {}) {
+    const recordToDelete = records.find(r => r.id === id);
+    if (!recordToDelete) return false;
+    const sameType = records.filter(r => r.type === recordToDelete.type);
+    let isLatest = false;
+    if (sameType.length > 0) {
+        const latest = sameType.reduce((a,b) => new Date(b.createdAt || b.date) > new Date(a.createdAt || a.date) ? b : a);
+        isLatest = (latest.id === id);
+    }
+    if (!isLatest) {
+        if (!await requirePassword()) return false;
+    } else {
+        if (options.skipPassword) {
+            const now = Date.now();
+            if (now - lastQuickDeleteTime < 5000) {
+                if (!await requirePassword()) return false;
+            }
+            lastQuickDeleteTime = now;
+        } else {
+            if (!await requirePassword()) return false;
+        }
+    }
+    if (!confirm("確定要刪除此記錄嗎？此操作不可復原！")) return false;
+    if (gapiReady) {
+        const sheetName = recordToDelete.type === 'sales' ? '產品' : '客人';
+        const rowMap = await getRowMap(sheetName);
+        const rowIndex = rowMap.get(recordToDelete.id);
+        if (rowIndex) {
+            await appendToBackup(sheetName, recordToDelete, "刪除");
+            await deleteSheetRow(sheetName, rowIndex);
+        } else {
+            await fullSyncToSheets();
+        }
+    }
+    const index = records.findIndex(r => r.id === id);
+    if (index !== -1) records.splice(index, 1);
+    saveRecords();
+    renderRecordsTables();
+    updateRecentRecord(recordToDelete.type === 'sales' ? 'sales' : 'consumption');
+    showToast("記錄已刪除並同步雲端");
+    return true;
 }
 
 function showEditModal(record) {
@@ -1302,24 +1050,9 @@ function showEditModal(record) {
         }
         renderRecordsTables();
         updateRecentRecord(record.type === 'sales' ? 'sales' : 'consumption');
-        showToast("記錄已修改");
+        showToast("記錄已修改並同步雲端");
         modal.remove();
     }
-}
-
-let currentSortField = 'date';
-let currentSortOrder = 'desc';
-function sortRecords(recordsArray, field) {
-    if(currentSortField === field) currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
-    else { currentSortField = field; currentSortOrder = 'desc'; }
-    return [...recordsArray].sort((a,b) => {
-        let valA = a[field] || '';
-        let valB = b[field] || '';
-        if(field === 'date') { valA = new Date(valA); valB = new Date(valB); }
-        if(valA < valB) return currentSortOrder === 'asc' ? -1 : 1;
-        if(valA > valB) return currentSortOrder === 'asc' ? 1 : -1;
-        return 0;
-    });
 }
 
 async function renderRecordsTables() {
@@ -1333,178 +1066,672 @@ async function renderRecordsTables() {
             if (backupSales.result.values) backupSales.result.values.slice(1).forEach(row => { if(row[0]) backupIds.add(row[0]); });
             const backupConsume = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '客人Backup!H:H' });
             if (backupConsume.result.values) backupConsume.result.values.slice(1).forEach(row => { if(row[0]) backupIds.add(row[0]); });
-        } catch(e) {}
+        } catch(e) { console.warn("讀取備份狀態失敗", e); }
     }
-    const salesRecords = sortRecords(records.filter(r => r.type === 'sales'), currentSortField);
-    const consumeRecords = sortRecords(records.filter(r => r.type === 'consumption'), currentSortField);
-    salesContainer.innerHTML = salesRecords.length === 0 ? "<div>暫無產品銷售記錄</div>" : renderTable(salesRecords, 'sales', backupIds);
-    consumeContainer.innerHTML = consumeRecords.length === 0 ? "<div>暫無客人消費記錄</div>" : renderTable(consumeRecords, 'consume', backupIds);
-    bindTableSortEvents();
-}
-function renderTable(records, type, backupIds) {
-    let html = '<table class="records-table"><thead><tr>';
-    if(type==='sales') html += `<th data-sort="date">日子</th><th data-sort="staffName">員工</th><th data-sort="productName">產品</th><th data-sort="payment">支付</th><th>同步</th><th>備份</th><th>操作</th>`;
-    else html += `<th data-sort="date">日子</th><th data-sort="staffName">員工</th><th>工號</th><th data-sort="amount">金額</th><th data-sort="payment">支付</th><th>同步</th><th>備份</th><th>操作</th>`;
-    html += '</tr></thead><tbody>';
-    records.forEach(rec => {
-        let statusClass = 'sync-pending', statusText = '待同步';
-        if (rec.syncStatus === 'success') { statusClass = 'sync-success'; statusText = '已同步'; }
-        else if (rec.syncStatus === 'failed') { statusClass = 'sync-failed'; statusText = '失敗'; }
-        const backup = backupIds.has(rec.id) ? '已備份' : '未備份';
-        html += `<tr>`;
-        if(type==='sales') html += `
-            <td class="record-cell">${rec.displayDate || formatDisplayDate(rec.date)}</td>
-            <td>${rec.staffName}</td>
-            <td>${rec.productName}</td>
-            <td>${rec.payment}</td>`;
-        else html += `
-            <td class="record-cell">${rec.displayDate || formatDisplayDate(rec.date)}</td>
-            <td>${rec.staffName}</td>
-            <td>${rec.staffCode || ''}</td>
-            <td>${rec.amount}</td>
-            <td>${rec.payment}</td>`;
-        html += `
-            <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
-            <td>${backup}</td>
-            <td class="action-btns">
-                <button class="small-btn edit-btn" data-id="${rec.id}">✏️</button>
-                <button class="small-btn danger-btn delete-btn" data-id="${rec.id}">🗑️</button>
-            </td>
-        </tr>`;
+    const salesRecords = records.filter(r => r.type === 'sales');
+    const consumeRecords = records.filter(r => r.type === 'consumption');
+    if (salesRecords.length === 0) salesContainer.innerHTML = "<div>暫無產品銷售記錄</div>";
+    else {
+        let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>產品</th><th>支付方式</th><th>同步狀態</th><th>備份狀態</th><th>操作</th> </tr></thead><tbody>';
+        for (const rec of salesRecords) {
+            let statusClass = 'sync-pending', statusText = '待同步';
+            if (rec.syncStatus === 'success') { statusClass = 'sync-success'; statusText = '已同步'; }
+            else if (rec.syncStatus === 'failed') { statusClass = 'sync-failed'; statusText = '同步失敗'; }
+            const backupStatus = backupIds.has(rec.id) ? '已備份' : '沒有對應上';
+            html += `<tr>
+                <td class="record-cell" title="${rec.date}">${rec.displayDate || formatDisplayDate(rec.date)}</td>
+                <td>${rec.staffName}</td>
+                <td>${rec.productName}</td>
+                <td>${rec.payment}</td>
+                <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
+                <td>${backupStatus}</td>
+                <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
+            </tr>`;
+        }
+        html += '</tbody></table>';
+        salesContainer.innerHTML = html;
+    }
+    if (consumeRecords.length === 0) consumeContainer.innerHTML = "<div>暫無客人消費記錄</div>";
+    else {
+        let html = '<table class="records-table"><thead> <tr><th>日子</th><th>員工</th><th>工號</th><th>金額</th><th>支付方式</th><th>同步狀態</th><th>備份狀態</th><th>操作</th> </tr></thead><tbody>';
+        for (const rec of consumeRecords) {
+            let statusClass = 'sync-pending', statusText = '待同步';
+            if (rec.syncStatus === 'success') { statusClass = 'sync-success'; statusText = '已同步'; }
+            else if (rec.syncStatus === 'failed') { statusClass = 'sync-failed'; statusText = '同步失敗'; }
+            const backupStatus = backupIds.has(rec.id) ? '已備份' : '沒有對應上';
+            html += `<tr>
+                <td class="record-cell" title="${rec.date}">${rec.displayDate || formatDisplayDate(rec.date)}</td>
+                <td>${rec.staffName}</td>
+                <td>${rec.staffCode || ''}</td>
+                <td>${rec.amount}</td>
+                <td>${rec.payment}</td>
+                <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
+                <td>${backupStatus}</td>
+                <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
+            </tr>`;
+        }
+        html += '</tbody></table>';
+        consumeContainer.innerHTML = html;
+    }
+    document.querySelectorAll('#salesRecordsTable .edit-btn, #consumeRecordsTable .edit-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const id = btn.dataset.id;
+            const record = records.find(r => r.id === id);
+            if (record) await editRecord(record);
+        });
     });
-    html += '</tbody></table>';
-    return html;
-}
-function bindTableSortEvents() {
-    document.querySelectorAll('.records-table th').forEach(th => {
-        th.onclick = () => {
-            const field = th.dataset.sort;
-            if(field) { currentSortField = field; renderRecordsTables(); }
-        };
-    });
-    document.querySelectorAll('.edit-btn').forEach(btn => btn.onclick = async () => {
-        const r = records.find(x => x.id === btn.dataset.id);
-        if(r) showEditModal(r);
-    });
-    document.querySelectorAll('.delete-btn').forEach(btn => btn.onclick = async () => {
-        await deleteRecordById(btn.dataset.id);
+    document.querySelectorAll('#salesRecordsTable .danger-btn, #consumeRecordsTable .danger-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const id = btn.dataset.id;
+            await deleteRecordById(id);
+        });
     });
 }
 
-function renderStaffManageList() {}
-function renderProductManageList() {}
-function renderPresetManageList() {}
-async function syncConfigToSheet() {}
-async function loadConfigFromSheet() {}
-async function pullAllRecordsFromSheets() {}
-async function addRecord(data) {
-    const id = Date.now().toString(36) + Math.random().toString(36).slice(2);
-    const record = { ...data, id, syncStatus: gapiReady ? 'pending' : 'local', displayDate: formatDisplayDate(data.date) };
-    records.unshift(record);
-    saveRecords();
-    renderRecordsTables();
-    if(gapiReady) {
-        try {
-            const sheet = data.type === 'sales' ? '產品' : '客人';
-            if(sheet === '產品') {
-                const gdate = toGoogleDate(data.date);
-                const {y,m,d} = extractYearMonthDay(gdate);
-                await appendToSheet(sheet, [y,m,d,data.staffName,data.staffCode,data.productName,data.amount,data.payment,getCurrentTime(),'success',id]);
-            } else {
-                await appendToSheet(sheet, [toGoogleDate(data.date),data.staffName,data.staffCode,data.amount,data.payment,getCurrentTime(),'success',id]);
-            }
-            record.syncStatus = 'success';
-            await appendToBackup(sheet, record, '新增');
-            saveRecords();
-            renderRecordsTables();
-        } catch(e){ record.syncStatus = 'failed'; saveRecords(); }
+function updateRecentRecord(type) {
+    const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
+    const recordsOfType = records.filter(r => r.type === type).sort((a,b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
+    const record = recordsOfType.length ? recordsOfType[0] : null;
+    if (type === 'sales') lastSalesRecord = record;
+    else lastConsumeRecord = record;
+    if (!record) { if(div) div.style.display = 'none'; return; }
+    div.style.display = 'flex';
+    let content = '';
+    if (type === 'sales') {
+        content = `📅 ${record.displayDate || formatDisplayDate(record.date)} | 👤 ${record.staffName} | 📦 ${record.productName} | 💳 ${record.payment}`;
+    } else {
+        content = `📅 ${record.displayDate || formatDisplayDate(record.date)} | 👤 ${record.staffName} | 💰 $${record.amount} | 💳 ${record.payment}`;
+    }
+    div.innerHTML = `<span>${content}</span><div class="action-btns"><button class="small-btn edit-recent-btn" data-type="${type}" data-id="${record.id}">✏️ 修改</button><button class="small-btn danger-btn delete-recent-btn" data-type="${type}" data-id="${record.id}">🗑️ 刪除</button></div>`;
+    const editBtn = div.querySelector('.edit-recent-btn');
+    const delBtn = div.querySelector('.delete-recent-btn');
+    editBtn.onclick = async () => {
+        const targetRecord = records.find(r => r.id === record.id);
+        if (targetRecord) showEditModal(targetRecord);
+    };
+    delBtn.onclick = async () => {
+        await deleteRecordById(record.id, { skipPassword: true });
+        updateRecentRecord(type);
+    };
+}
+
+function renderStaff(containerId, selectedCode, onChange) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    staffList.forEach(s => {
+        const btn = document.createElement("div");
+        btn.className = "staff-btn" + (selectedCode === s.code ? " active" : "");
+        btn.innerHTML = `<div class="staff-name">${s.name}</div><div class="staff-code">${s.code}</div>`;
+        btn.onclick = () => {
+            container.querySelectorAll(".staff-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            onChange(s.code, s.name);
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+}
+
+function renderProducts() {
+    const container = document.getElementById("productList");
+    if (!container) return;
+    container.innerHTML = "";
+    productList.forEach(p => {
+        const btn = document.createElement("div");
+        btn.className = "product-btn" + (selectedProducts.has(p.name) ? " selected" : "");
+        btn.innerHTML = `<div class="product-name">${p.name}</div><div class="product-price">$${p.price}</div>`;
+        btn.onclick = () => {
+            if (selectedProducts.has(p.name)) selectedProducts.delete(p.name);
+            else selectedProducts.add(p.name);
+            renderProducts();
+            calcTotal();
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+}
+
+function renderPayment(containerId, selected, onChange, isSales = false) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    const payments = isSales ? SALES_PAYMENTS : PAYMENTS;
+    payments.forEach(p => {
+        const btn = document.createElement("div");
+        btn.className = "payment-btn" + (selected === p ? " active" : "");
+        btn.textContent = p;
+        btn.onclick = () => {
+            container.querySelectorAll(".payment-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            onChange(p);
+            if (isSales && p === "公司") document.getElementById("totalAmount").innerText = "0";
+            else if (isSales) calcTotal();
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+}
+
+function renderPresetButtons() {
+    const container = document.getElementById("presetAmounts");
+    if (!container) return;
+    container.innerHTML = "";
+    presetAmounts.forEach(amt => {
+        const btn = document.createElement("div");
+        btn.className = "preset-btn";
+        btn.textContent = `$${amt}`;
+        btn.onclick = () => {
+            document.querySelectorAll("#presetAmounts .preset-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById("consumeAmount").value = amt;
+        };
+        container.appendChild(btn);
+    });
+    container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
+    const amountInput = document.getElementById("consumeAmount");
+    if (amountInput) {
+        amountInput.removeEventListener("input", clearPresetHighlight);
+        amountInput.addEventListener("input", clearPresetHighlight);
     }
 }
-async function deleteRecordById(id, opts={}) {
-    if(!opts.skipPassword && !await requirePassword()) return;
-    const idx = records.findIndex(r => r.id === id);
-    if(idx === -1) return;
-    const rec = records[idx];
-    records.splice(idx,1);
-    saveRecords();
-    renderRecordsTables();
-    updateRecentRecord(rec.type === 'sales' ? 'sales' : 'consume');
-    if(gapiReady) {
-        try {
-            const sheet = rec.type === 'sales' ? '產品' : '客人';
-            await appendToBackup(sheet, rec, '刪除');
-            const rowMap = await getRowMap(sheet);
-            const row = rowMap.get(id);
-            if(row) await deleteSheetRow(sheet, row);
-        } catch(e){}
-    }
+function clearPresetHighlight() {
+    document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
+}
+function calcTotal() {
+    let total = 0;
+    productList.forEach(p => { if (selectedProducts.has(p.name)) total += p.price; });
+    if (selectedSalesPayment === "公司") total = 0;
+    document.getElementById("totalAmount").innerText = total;
+    return total;
+}
+
+function renderStaffManageList() {
+    const container = document.getElementById("staffManageList");
+    if (!container) return;
+    container.innerHTML = "";
+    staffList.forEach((staff, idx) => {
+        const div = document.createElement("div");
+        div.className = "setting-row";
+        div.innerHTML = `<span style="flex:2;"><strong>${staff.name}</strong> (${staff.code})</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="staff">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="staff">🗑️ 刪除</button>`;
+        const editBtn = div.querySelector(".edit-btn");
+        const delBtn = div.querySelector(".danger-btn");
+        editBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要編輯員工 ${staff.name} (${staff.code}) 嗎？`)) return;
+            const newName = prompt("輸入新姓名", staff.name);
+            const newCode = prompt("輸入新工號", staff.code);
+            if (newName && newCode) {
+                staff.name = newName.trim(); staff.code = newCode.trim();
+                saveStaff(); renderStaffManageList();
+                renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+                renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+                await syncConfigToSheet();
+                showToast("員工已修改並同步雲端");
+            }
+        };
+        delBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要刪除員工 ${staff.name} (${staff.code}) 嗎？`)) return;
+            staffList.splice(idx, 1); saveStaff(); renderStaffManageList();
+            renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+            renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+            await syncConfigToSheet();
+            showToast("員工已刪除並同步雲端");
+        };
+        container.appendChild(div);
+    });
+}
+function renderProductManageList() {
+    const container = document.getElementById("productManageList");
+    if (!container) return;
+    container.innerHTML = "";
+    productList.forEach((prod, idx) => {
+        const div = document.createElement("div");
+        div.className = "setting-row";
+        div.innerHTML = `<span style="flex:2;">${prod.name} - $${prod.price}</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="product">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="product">🗑️ 刪除</button>`;
+        const editBtn = div.querySelector(".edit-btn");
+        const delBtn = div.querySelector(".danger-btn");
+        editBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要編輯產品 ${prod.name} 嗎？`)) return;
+            const newName = prompt("輸入新產品名稱", prod.name);
+            const newPrice = prompt("輸入新價格", prod.price);
+            if (newName && newPrice && !isNaN(parseFloat(newPrice))) {
+                prod.name = newName.trim(); prod.price = parseFloat(newPrice);
+                saveProducts(); renderProductManageList(); renderProducts();
+                await syncConfigToSheet();
+                showToast("產品已修改並同步雲端");
+            }
+        };
+        delBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要刪除產品 ${prod.name} 嗎？`)) return;
+            productList.splice(idx, 1); saveProducts(); renderProductManageList(); renderProducts();
+            await syncConfigToSheet();
+            showToast("產品已刪除並同步雲端");
+        };
+        container.appendChild(div);
+    });
+}
+function renderPresetManageList() {
+    const container = document.getElementById("presetManageList");
+    if (!container) return;
+    container.innerHTML = "";
+    presetAmounts.forEach((amt, idx) => {
+        const div = document.createElement("div");
+        div.className = "setting-row";
+        div.innerHTML = `<span style="flex:2;">$${amt}</span>
+            <button class="small-btn edit-btn" data-idx="${idx}" data-type="preset">✏️ 編輯</button>
+            <button class="small-btn danger-btn" data-idx="${idx}" data-type="preset">🗑️ 刪除</button>`;
+        const editBtn = div.querySelector(".edit-btn");
+        const delBtn = div.querySelector(".danger-btn");
+        editBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要編輯預設金額 $${amt} 嗎？`)) return;
+            const newAmt = prompt("輸入新金額", amt);
+            if (newAmt && !isNaN(parseFloat(newAmt))) {
+                presetAmounts[idx] = parseFloat(newAmt);
+                savePresets(); renderPresetManageList(); renderPresetButtons();
+                await syncConfigToSheet();
+                showToast("預設金額已修改並同步雲端");
+            }
+        };
+        delBtn.onclick = async () => {
+            if (!await requirePassword()) return;
+            if (!confirm(`確定要刪除預設金額 $${amt} 嗎？`)) return;
+            presetAmounts.splice(idx, 1); savePresets(); renderPresetManageList(); renderPresetButtons();
+            await syncConfigToSheet();
+            showToast("預設金額已刪除並同步雲端");
+        };
+        container.appendChild(div);
+    });
+}
+
+async function syncConfigToSheet() {
+    if (!gapiReady) return;
+    try {
+        await ensureSheetExists(CONFIG_SHEET, ["類型","鍵","值"]);
+        await clearSheetData(CONFIG_SHEET);
+        for (let s of staffList) await appendToSheet(CONFIG_SHEET, ['employee', s.code, s.name]);
+        for (let p of productList) await appendToSheet(CONFIG_SHEET, ['product', p.name, p.price.toString()]);
+        for (let amt of presetAmounts) await appendToSheet(CONFIG_SHEET, ['preset', amt.toString(), amt.toString()]);
+        await appendToSheet(CONFIG_SHEET, ['password', 'admin', settingsPassword]);
+    } catch (err) { console.error("同步設定失敗", err); }
 }
 
 let submitting = false;
 async function submitSales() {
-    if (submitting) return;
+    if (submitting) { showToast("請稍後，正在處理中..."); return; }
     submitting = true;
-    const btn = document.getElementById("submitSales");
-    btn.classList.add("disabled-btn");
+    const submitBtn = document.getElementById("submitSales");
+    submitBtn.classList.add("disabled-btn");
     try {
+        if (!gapiReady) alert("尚未登入，記錄將先儲存於本地，登入後自動同步");
         const date = document.getElementById("salesDate").value;
-        if (!date || !selectedSalesStaff) { alert("請填寫完整"); return; }
-        const payment = selectedSalesPayment;
-        const items = productList.filter(p => selectedProducts.has(p.name));
-        if (items.length === 0 && payment !== "公司") { alert("請選擇產品"); return; }
-        for(const prod of items) {
+        if (!date) { alert("請選擇日期"); submitting=false; submitBtn.classList.remove("disabled-btn"); return; }
+        if (!selectedSalesStaff) { alert("請選擇員工"); submitting=false; submitBtn.classList.remove("disabled-btn"); return; }
+        let payment = selectedSalesPayment;
+        let total = 0;
+        const selected = [];
+        productList.forEach(p => { if (selectedProducts.has(p.name)) { selected.push(p); total += p.price; } });
+        if (selected.length === 0 && payment !== "公司") { alert("請至少選擇一件產品"); submitting=false; submitBtn.classList.remove("disabled-btn"); return; }
+        if (payment === "公司") total = 0;
+        for (const prod of selected) {
             await addRecord({
-                type: "sales", date, staffCode: selectedSalesStaff.code, staffName: selectedSalesStaff.name,
-                productName: prod.name, productPrice: prod.price, amount: prod.price, payment, createdAt: new Date().toISOString()
+                type: "sales",
+                date: date,
+                staffCode: selectedSalesStaff.code,
+                staffName: selectedSalesStaff.name,
+                productName: prod.name,
+                productPrice: prod.price,
+                amount: payment === "公司" ? 0 : prod.price,
+                payment: payment,
+                createdAt: new Date().toISOString()
             });
-            if(prod.type !== '消耗品') await updateStock(prod.name, -1, '銷售');
         }
-        if(payment === "公司" && items.length === 0) {
+        if (payment === "公司" && selected.length === 0) {
             await addRecord({
-                type: "sales", date, staffCode: selectedSalesStaff.code, staffName: selectedSalesStaff.name,
-                productName: "（無產品）", amount: 0, payment: "公司", createdAt: new Date().toISOString()
+                type: "sales",
+                date: date,
+                staffCode: selectedSalesStaff.code,
+                staffName: selectedSalesStaff.name,
+                productName: "（無產品）",
+                productPrice: 0,
+                amount: 0,
+                payment: "公司",
+                createdAt: new Date().toISOString()
             });
         }
-        showToast("提交成功");
+        showToast(`✅ 訂單已完成！總共 ${selected.length} 件產品，總金額 ${total} 元`);
         selectedProducts.clear();
         renderProducts();
-        updateRecentRecord('sales');
+        document.getElementById("salesDate").value = getTodayISO();
+        selectedSalesPayment = "現金";
+        renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
     } finally {
         submitting = false;
-        btn.classList.remove("disabled-btn");
-    }
-}
-async function submitConsumption() {
-    if (submitting) return;
-    submitting = true;
-    const btn = document.getElementById("submitConsume");
-    btn.classList.add("disabled-btn");
-    try {
-        const date = document.getElementById("consumeDate").value;
-        const amount = document.getElementById("consumeAmount").value;
-        if (!date || !selectedConsumeStaff || !amount) { alert("請填寫完整"); return; }
-        await addRecord({
-            type: "consumption", date, staffCode: selectedConsumeStaff.code, staffName: selectedConsumeStaff.name,
-            amount: parseInt(amount), payment: selectedConsumePayment, createdAt: new Date().toISOString()
-        });
-        showToast("提交成功");
-        document.getElementById("consumeAmount").value = "";
-        updateRecentRecord('consumption');
-    } finally {
-        submitting = false;
-        btn.classList.remove("disabled-btn");
+        submitBtn.classList.remove("disabled-btn");
     }
 }
 
-document.getElementById("settingsIconSales").onclick = openSettingsPage;
-document.getElementById("settingsIconConsume").onclick = openSettingsPage;
-document.getElementById("settingsIconInventory").onclick = openSettingsPage;
-document.getElementById("closeIframeBtn").onclick = () => {
-    document.getElementById("iframeModal").style.display = "none";
-    showPage("sales");
-};
+async function submitConsumption() {
+    if (submitting) { showToast("請稍後，正在處理中..."); return; }
+    submitting = true;
+    const submitBtn = document.getElementById("submitConsume");
+    submitBtn.classList.add("disabled-btn");
+    try {
+        if (!gapiReady) alert("尚未登入，記錄將先儲存於本地，登入後自動同步");
+        const date = document.getElementById("consumeDate").value;
+        if (!date) { alert("請選擇日期"); submitting=false; submitBtn.classList.remove("disabled-btn"); return; }
+        if (!selectedConsumeStaff) { alert("請選擇員工"); submitting=false; submitBtn.classList.remove("disabled-btn"); return; }
+        let amount = parseFloat(document.getElementById("consumeAmount").value);
+        if (isNaN(amount) || amount <= 0) { alert("請輸入正確金額或點選預設金額按鈕"); submitting=false; submitBtn.classList.remove("disabled-btn"); return; }
+        const payment = selectedConsumePayment;
+        await addRecord({
+            type: "consumption",
+            date: date,
+            staffCode: selectedConsumeStaff.code,
+            staffName: selectedConsumeStaff.name,
+            amount: amount,
+            payment: payment,
+            createdAt: new Date().toISOString()
+        });
+        showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
+        document.getElementById("consumeAmount").value = "";
+        clearPresetHighlight();
+    } finally {
+        submitting = false;
+        submitBtn.classList.remove("disabled-btn");
+    }
+}
+
+function showPage(pageId) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(pageId + "Page").classList.add("active");
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+        if (btn.dataset.page === pageId) btn.classList.add("active");
+        else btn.classList.remove("active");
+    });
+    if (pageId === "sales") {
+        document.getElementById("salesDate").value = getTodayISO();
+        renderProducts();
+        updateRecentRecord('sales');
+        renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
+    }
+    if (pageId === "consumption") {
+        document.getElementById("consumeDate").value = getTodayISO();
+        renderPresetButtons();
+        updateRecentRecord('consumption');
+        renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
+    }
+    if (pageId === "settings") {
+        renderStaffManageList(); renderProductManageList(); renderPresetManageList(); renderRecordsTables();
+        document.getElementById("toggleStaff").classList.toggle("active", toggleStaff);
+        document.getElementById("toggleProduct").classList.toggle("active", toggleProduct);
+        document.getElementById("togglePreset").classList.toggle("active", togglePreset);
+        document.getElementById("toggleSalesRecords").classList.toggle("active", toggleSalesRecords);
+        document.getElementById("toggleConsumeRecords").classList.toggle("active", toggleConsumeRecords);
+        document.getElementById("staffContent").classList.toggle("hidden-content", !toggleStaff);
+        document.getElementById("productContent").classList.toggle("hidden-content", !toggleProduct);
+        document.getElementById("presetContent").classList.toggle("hidden-content", !togglePreset);
+        document.getElementById("salesRecordsContent").classList.toggle("hidden-content", !toggleSalesRecords);
+        document.getElementById("consumeRecordsContent").classList.toggle("hidden-content", !toggleConsumeRecords);
+        document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
+        document.getElementById("buttonsPerRow").value = buttonsPerRow;
+        const currentScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--button-font-scale')) || 1.5;
+        document.getElementById("fontScaleSlider").value = currentScale;
+        document.getElementById("fontScaleValue").innerText = Math.round(currentScale * 100) + "%";
+        const currentRecordsScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--records-font-scale')) || 1;
+        document.getElementById("recordsScaleSlider").value = currentRecordsScale;
+        document.getElementById("recordsScaleValue").innerText = Math.round(currentRecordsScale * 100) + "%";
+        const currentButtonTextScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--button-text-scale')) || 1;
+        document.getElementById("buttonTextSlider").value = currentButtonTextScale;
+        document.getElementById("buttonTextValue").innerText = Math.round(currentButtonTextScale * 100) + "%";
+    }
+}
+
+function initToggles() {
+    document.getElementById("toggleStaff").addEventListener("click", () => {
+        toggleStaff = !toggleStaff; document.getElementById("toggleStaff").classList.toggle("active", toggleStaff);
+        document.getElementById("staffContent").classList.toggle("hidden-content", !toggleStaff); saveToggles();
+    });
+    document.getElementById("toggleProduct").addEventListener("click", () => {
+        toggleProduct = !toggleProduct; document.getElementById("toggleProduct").classList.toggle("active", toggleProduct);
+        document.getElementById("productContent").classList.toggle("hidden-content", !toggleProduct); saveToggles();
+    });
+    document.getElementById("togglePreset").addEventListener("click", () => {
+        togglePreset = !togglePreset; document.getElementById("togglePreset").classList.toggle("active", togglePreset);
+        document.getElementById("presetContent").classList.toggle("hidden-content", !togglePreset); saveToggles();
+    });
+    document.getElementById("toggleSalesRecords").addEventListener("click", () => {
+        toggleSalesRecords = !toggleSalesRecords; document.getElementById("toggleSalesRecords").classList.toggle("active", toggleSalesRecords);
+        document.getElementById("salesRecordsContent").classList.toggle("hidden-content", !toggleSalesRecords); saveToggles();
+    });
+    document.getElementById("toggleConsumeRecords").addEventListener("click", () => {
+        toggleConsumeRecords = !toggleConsumeRecords; document.getElementById("toggleConsumeRecords").classList.toggle("active", toggleConsumeRecords);
+        document.getElementById("consumeRecordsContent").classList.toggle("hidden-content", !toggleConsumeRecords); saveToggles();
+    });
+    document.getElementById("toggleDarkMode").addEventListener("click", () => {
+        setDarkMode(!darkMode);
+        document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
+    });
+    document.getElementById("applyButtonsPerRow").addEventListener("click", () => {
+        let val = parseInt(document.getElementById("buttonsPerRow").value);
+        if (isNaN(val) || val < 1) val = 3;
+        if (val > 6) val = 6;
+        setButtonsPerRow(val);
+        renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+        renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+        renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
+        renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
+        renderProducts();
+        renderPresetButtons();
+        showToast(`按鈕每行數量已改為 ${buttonsPerRow}`);
+    });
+    const btnSlider = document.getElementById("fontScaleSlider");
+    const btnScaleValue = document.getElementById("fontScaleValue");
+    const updateFontScale = (value) => {
+        value = parseFloat(value);
+        if (isNaN(value)) return;
+        document.documentElement.style.setProperty('--button-font-scale', value);
+        localStorage.setItem('buttonFontScale', value);
+        btnScaleValue.innerText = Math.round(value * 100) + "%";
+    };
+    btnSlider.addEventListener("input", (e) => updateFontScale(e.target.value));
+    const savedBtnScale = localStorage.getItem('buttonFontScale');
+    if (savedBtnScale !== null && !isNaN(parseFloat(savedBtnScale))) {
+        updateFontScale(parseFloat(savedBtnScale));
+        btnSlider.value = parseFloat(savedBtnScale);
+    } else {
+        updateFontScale(1.5);
+        btnSlider.value = 1.5;
+    }
+    const recordsSlider = document.getElementById("recordsScaleSlider");
+    const recordsScaleValue = document.getElementById("recordsScaleValue");
+    const updateRecordsScale = (value) => {
+        value = parseFloat(value);
+        if (isNaN(value)) return;
+        document.documentElement.style.setProperty('--records-font-scale', value);
+        localStorage.setItem('recordsFontScale', value);
+        recordsScaleValue.innerText = Math.round(value * 100) + "%";
+    };
+    recordsSlider.addEventListener("input", (e) => updateRecordsScale(e.target.value));
+    const savedRecordsScale = localStorage.getItem('recordsFontScale');
+    if (savedRecordsScale !== null && !isNaN(parseFloat(savedRecordsScale))) {
+        updateRecordsScale(parseFloat(savedRecordsScale));
+        recordsSlider.value = parseFloat(savedRecordsScale);
+    } else {
+        updateRecordsScale(1);
+        recordsSlider.value = 1;
+    }
+    const buttonTextSlider = document.getElementById("buttonTextSlider");
+    const buttonTextValue = document.getElementById("buttonTextValue");
+    const updateButtonTextScale = (value) => {
+        value = parseFloat(value);
+        if (isNaN(value)) return;
+        document.documentElement.style.setProperty('--button-text-scale', value);
+        localStorage.setItem('buttonTextScale', value);
+        buttonTextValue.innerText = Math.round(value * 100) + "%";
+    };
+    buttonTextSlider.addEventListener("input", (e) => updateButtonTextScale(e.target.value));
+    const savedButtonTextScale = localStorage.getItem('buttonTextScale');
+    if (savedButtonTextScale !== null && !isNaN(parseFloat(savedButtonTextScale))) {
+        updateButtonTextScale(parseFloat(savedButtonTextScale));
+        buttonTextSlider.value = parseFloat(savedButtonTextScale);
+    } else {
+        updateButtonTextScale(1);
+        buttonTextSlider.value = 1;
+    }
+}
+
+async function openSettingsPage() {
+    if (passwordAuth.verified) {
+        if (gapiReady) {
+            await loadConfigFromSheet();
+            await pullAllRecordsFromSheets();
+        }
+        showPage("settings");
+        return;
+    }
+    const pwd = prompt("請輸入管理密碼");
+    if (pwd === settingsPassword) {
+        passwordAuth.verified = true;
+        if (gapiReady) {
+            await loadConfigFromSheet();
+            await pullAllRecordsFromSheets();
+        }
+        showPage("settings");
+    } else if (pwd !== null) alert("密碼錯誤");
+}
+
+document.getElementById("settingsIconSales").addEventListener("click", openSettingsPage);
+document.getElementById("settingsIconConsume").addEventListener("click", openSettingsPage);
+document.getElementById("changePasswordBtn").addEventListener("click", async () => {
+    const newPwd = document.getElementById("newPassword").value, confirmPwd = document.getElementById("confirmPassword").value;
+    if (!newPwd) { alert("請輸入新密碼"); return; }
+    if (newPwd !== confirmPwd) { alert("兩次密碼不一致"); return; }
+    settingsPassword = newPwd;
+    if (gapiReady) await syncConfigToSheet();
+    alert("密碼已更新，並同步至所有裝置");
+    document.getElementById("newPassword").value = ""; document.getElementById("confirmPassword").value = "";
+});
+
+document.querySelectorAll('.password-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const input = document.getElementById(targetId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            btn.textContent = '👁️';
+        }
+    });
+});
+
+const iframeModal = document.getElementById("iframeModal"), bookingIframe = document.getElementById("bookingIframe");
+document.getElementById("studentBookingBtn").onclick = () => { bookingIframe.src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html"; iframeModal.style.display = "block"; };
+document.getElementById("closeIframeBtn").onclick = () => { iframeModal.style.display = "none"; bookingIframe.src = ""; };
+document.querySelectorAll("[data-page]").forEach(btn => btn.onclick = () => showPage(btn.dataset.page));
 document.getElementById("submitSales").onclick = submitSales;
 document.getElementById("submitConsume").onclick = submitConsumption;
+document.getElementById("addStaffBtn").onclick = async () => {
+    if (!gapiReady) { alert("請先登入才能新增員工"); return; }
+    if (!await requirePassword()) return;
+    const name = document.getElementById("newStaffName").value.trim(), code = document.getElementById("newStaffCode").value.trim();
+    if (!name || !code) { alert("請填寫員工姓名與工號"); return; }
+    staffList.push({ code, name }); saveStaff(); renderStaffManageList();
+    renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+    renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+    await syncConfigToSheet();
+    document.getElementById("newStaffName").value = ""; document.getElementById("newStaffCode").value = "";
+    showToast("員工已新增並同步雲端");
+};
+document.getElementById("addProductBtn").onclick = async () => {
+    if (!gapiReady) { alert("請先登入才能新增產品"); return; }
+    if (!await requirePassword()) return;
+    const name = document.getElementById("newProductName").value.trim(), price = parseFloat(document.getElementById("newProductPrice").value);
+    if (!name || isNaN(price) || price <= 0) { alert("請填寫產品名稱與正確價格"); return; }
+    productList.push({ name, price }); saveProducts(); renderProductManageList(); renderProducts();
+    await syncConfigToSheet();
+    document.getElementById("newProductName").value = ""; document.getElementById("newProductPrice").value = "";
+    showToast("產品已新增並同步雲端");
+};
+document.getElementById("addPresetBtn").onclick = async () => {
+    if (!gapiReady) { alert("請先登入才能新增預設金額"); return; }
+    if (!await requirePassword()) return;
+    const amt = parseFloat(document.getElementById("newPresetAmount").value);
+    if (isNaN(amt) || amt <= 0) { alert("請輸入正確金額"); return; }
+    presetAmounts.push(amt); savePresets(); renderPresetManageList(); renderPresetButtons();
+    await syncConfigToSheet();
+    document.getElementById("newPresetAmount").value = "";
+    showToast("預設金額已新增並同步雲端");
+};
+document.getElementById("clearSalesRecordsBtn").onclick = async () => {
+    if (!await requirePassword()) return;
+    if (!confirm("⚠️ 確定清除所有產品銷售記錄？此操作無法復原！")) return;
+    records = records.filter(r => r.type !== 'sales');
+    saveRecords();
+    if (gapiReady) await fullSyncToSheets();
+    renderRecordsTables();
+    showToast("已清除所有產品銷售記錄並同步雲端");
+};
+document.getElementById("clearConsumeRecordsBtn").onclick = async () => {
+    if (!await requirePassword()) return;
+    if (!confirm("⚠️ 確定清除所有客人消費記錄？此操作無法復原！")) return;
+    records = records.filter(r => r.type !== 'consumption');
+    saveRecords();
+    if (gapiReady) await fullSyncToSheets();
+    renderRecordsTables();
+    showToast("已清除所有客人消費記錄並同步雲端");
+};
+document.getElementById("retrySalesFailedSyncBtn").onclick = async () => {
+    if (!gapiReady) { showToast("尚未登入，請先登入後再重試同步"); return; }
+    if (!await requirePassword()) return;
+    await fullSyncToSheets();
+    renderRecordsTables();
+    showToast("重試同步完成");
+};
+document.getElementById("retryConsumeFailedSyncBtn").onclick = async () => {
+    if (!gapiReady) { showToast("尚未登入，請先登入後再重試同步"); return; }
+    if (!await requirePassword()) return;
+    await fullSyncToSheets();
+    renderRecordsTables();
+    showToast("重試同步完成");
+};
+document.getElementById("repairSheetsBtn").onclick = async () => {
+    if (!gapiReady) { showToast("請先登入"); return; }
+    if (!await requirePassword()) return;
+    await fullSyncToSheets();
+};
+document.getElementById("manualSyncBtn").addEventListener("click", async () => {
+    if (!gapiReady) { showToast("請先登入"); return; }
+    if (!await requirePassword()) return;
+    await pullAllRecordsFromSheets();
+    renderUI();
+});
+document.getElementById("manualSyncBtnConsume").addEventListener("click", async () => {
+    if (!gapiReady) { showToast("請先登入"); return; }
+    if (!await requirePassword()) return;
+    await pullAllRecordsFromSheets();
+    renderUI();
+});
+document.getElementById("backToHomeBtn").addEventListener("click", () => {
+    passwordAuth.verified = false;
+    showPage("sales");
+});
+
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
+}
 
 function gapiLoaded() { gapi.load('client', initGapiClient); }
 async function initGapiClient() {
@@ -1515,55 +1742,72 @@ function gisLoaded() {
     tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '' });
     gisInited = true; maybeEnableButtons();
 }
+
+let autoLoginTimer = null;
 function maybeEnableButtons() {
-    if (gapiInited && gisInited) {
+    if (gapiInited && gisInited && !gapiReady) {
         gapiReady = true;
-        document.getElementById('loginPanel').style.display = 'none';
-        document.querySelector('.app-container').style.display = 'flex';
-        renderUI();
+        attemptAutoLogin();
     }
 }
-document.getElementById('googleLoginBtn').onclick = () => {
+function attemptAutoLogin() {
+    autoLoginTimer = setTimeout(() => { document.getElementById('loginPanel').style.display = 'flex'; }, 2000);
     tokenClient.callback = (resp) => {
-        if (resp.error) return;
-        gapiReady = true;
+        if (resp.error !== undefined) {
+            console.error(resp);
+            alert("登入失敗：" + (resp.error_description || resp.error));
+            return;
+        }
+        if (autoLoginTimer) clearTimeout(autoLoginTimer);
         document.getElementById('loginPanel').style.display = 'none';
         document.querySelector('.app-container').style.display = 'flex';
-        renderUI();
+        (async () => {
+            await loadConfigFromSheet();
+            await pullAllRecordsFromSheets();
+            renderUI();
+        })();
     };
-    tokenClient.requestAccessToken({ prompt: 'select_account' });
+    tokenClient.requestAccessToken({ prompt: '' });
+}
+document.getElementById('googleLoginBtn').onclick = () => {
+    if (autoLoginTimer) clearTimeout(autoLoginTimer);
+    tokenClient.callback = (resp) => {
+        if (resp.error !== undefined) {
+            console.error(resp);
+            alert("登入失敗：" + (resp.error_description || resp.error));
+            return;
+        }
+        document.getElementById('loginPanel').style.display = 'none';
+        document.querySelector('.app-container').style.display = 'flex';
+        (async () => {
+            await loadConfigFromSheet();
+            await pullAllRecordsFromSheets();
+            renderUI();
+        })();
+    };
+    tokenClient.requestAccessToken();
 };
 
-function showToast(msg) {
-    const t = document.createElement('div');
-    t.className = 'toast';
-    t.innerText = msg;
-    document.body.appendChild(t);
-    setTimeout(() => { t.style.opacity = 0; setTimeout(()=>t.remove(),300); }, 2000);
-}
 function renderUI() {
-    renderStaff("salesStaff", null, (c,n)=>selectedSalesStaff={code:c,name:n});
-    renderStaff("consumeStaff", null, (c,n)=>selectedConsumeStaff={code:c,name:n});
-    renderPayment("salesPayment", selectedSalesPayment, p=>selectedSalesPayment=p, true);
-    renderPayment("consumePayment", selectedConsumePayment, p=>selectedConsumePayment=p, false);
+    renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
+    renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
+    renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
+    renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
     renderProducts(); renderPresetButtons(); renderRecordsTables();
-    updateRecentRecord('sales'); updateRecentRecord('consume');
-    setDarkMode(darkMode);
+    renderStaffManageList(); renderProductManageList(); renderPresetManageList();
+    updateRecentRecord('sales'); updateRecentRecord('consumption');
+    initToggles(); setDarkMode(darkMode);
     showPage("sales");
     setButtonsPerRow(buttonsPerRow);
 }
-async function openSettingsPage() {
-    if(!await requirePassword()) return;
-    showPage("settings");
-}
 
-window.onload = () => {
-    loadLocalData();
-    initNavButtons();
-    bindActivityEvents();
-    if (typeof gapi !== 'undefined') gapiLoaded();
-    if (typeof google !== 'undefined') gisLoaded();
-};
+function ensureInit() {
+    if (typeof gapi !== 'undefined' && typeof google !== 'undefined' && typeof google.accounts !== 'undefined') {
+        if (!gapiInited) gapiLoaded();
+        if (!gisInited) gisLoaded();
+    } else setTimeout(ensureInit, 200);
+}
+window.addEventListener('load', () => { loadLocalData(); ensureInit(); });
 </script>
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
