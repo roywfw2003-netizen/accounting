@@ -51,10 +51,12 @@
         <button id="googleLoginBtn">🔐 登入 Google</button>
     </div>
 </div>
-﻿
+
+
 <div class="app-container">
     <div class="btn-group" id="navButtons"></div>
-﻿
+
+
     <!-- 產品銷售頁 -->
     <div id="salesPage" class="page">
         <div class="form-group"><label>📅 日期</label><div style="display:flex;gap:10px;"><input type="date" id="salesDate"><button class="settings-icon-small" id="settingsIconSales"><i class="fa-solid fa-gear"></i></button></div></div>
@@ -64,7 +66,8 @@
         <button id="submitSales" class="submit-btn">提交銷售</button>
         <div id="salesRecent" class="recent-record" style="display:none;"></div>
     </div>
-﻿
+
+
     <!-- 客人消費頁 -->
     <div id="consumptionPage" class="page">
         <div class="form-group"><label>📅 日期</label><div style="display:flex;gap:10px;"><input type="date" id="consumeDate"><button class="settings-icon-small" id="settingsIconConsume"><i class="fa-solid fa-gear"></i></button></div></div>
@@ -74,7 +77,8 @@
         <button id="submitConsume" class="submit-btn">提交消費</button>
         <div id="consumeRecent" class="recent-record" style="display:none;"></div>
     </div>
-﻿
+
+
     <!-- 庫存管理頁 -->
     <div id="inventoryPage" class="page">
         <h3>📦 庫存管理 
@@ -84,7 +88,8 @@
         <div id="inventoryTable"></div>
         <button id="refreshInventoryBtn" class="submit-btn" style="margin-top:10px;">🔄 重新整理庫存</button>
     </div>
-﻿
+
+
     <!-- 系統設定頁 -->
     <div id="settingsPage" class="page">
         <button id="backToHomeBtn" class="submit-btn" style="background:#f97316;margin-bottom:12px;">🏠 返回主頁</button>
@@ -100,13 +105,15 @@
         <button id="changePasswordBtn">更新密碼</button>
     </div>
 </div>
-﻿
+
+
 <script>
 // ==================== 變數與初始化 ====================
 const CLIENT_ID = '448045465424-kg6sd2dhp0nu8bl4afnafhpmd9f8bhj2.apps.googleusercontent.com';
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
-﻿
+
+
 let tokenClient, gapiInited = false, gisInited = false, gapiReady = false;
 let settingsPassword = 'admin123';
 let staffList = [{code:"1",name:"Roy"},{code:"2",name:"Ken"},{code:"3",name:"Kin"}];
@@ -119,7 +126,8 @@ let selectedSalesPayment = "現金", selectedConsumePayment = "現金";
 let darkMode = localStorage.getItem('darkMode') === 'true';
 let passwordAuth = { verified: false };
 let submitting = false;
-﻿
+
+
 // ==================== 輔助函數 ====================
 function getTodayISO() { return new Date().toISOString().slice(0,10); }
 function formatDisplayDate(dateStr) {
@@ -143,7 +151,8 @@ async function requirePassword() {
     alert("密碼錯誤");
     return false;
 }
-﻿
+
+
 // ==================== Google Sheets 操作 ====================
 async function ensureSheetExists(sheetName, headers) {
     const resp = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
@@ -159,18 +168,21 @@ async function ensureSheetExists(sheetName, headers) {
         resource: { values: [headers] }
     });
 }
-﻿
+
+
 // ==================== 設定同步到 Staff 工作表 ====================
 async function syncConfigToSheet() {
     if (!gapiReady) return;
     await ensureSheetExists('Staff', ["類型", "內容"]);
     await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId: SPREADSHEET_ID, range: 'Staff!A2:Z' });
-﻿
+
+
     let rows = [["密碼", settingsPassword]];
     staffList.forEach(s => rows.push(["員工", `${s.name}|${s.code}`]));
     productList.forEach(p => rows.push(["產品", `${p.name}|${p.price}|${p.type}`]));
     presetAmounts.forEach(amt => rows.push(["預設金額", amt]));
-﻿
+
+
     await gapi.client.sheets.spreadsheets.values.append({
         spreadsheetId: SPREADSHEET_ID,
         range: 'Staff!A:Z',
@@ -178,7 +190,8 @@ async function syncConfigToSheet() {
         resource: { values: rows }
     });
 }
-﻿
+
+
 async function loadConfigFromSheet() {
     if (!gapiReady) return;
     try {
@@ -201,30 +214,36 @@ async function loadConfigFromSheet() {
         });
     } catch(e) {}
 }
-﻿
+
+
 // ==================== 最近一筆記錄顯示（關鍵修改） ====================
 function updateRecentRecord(type) {
     const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
     const filtered = records.filter(r => r.type === type)
         .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
-﻿
+
+
     if (filtered.length === 0) {
         div.style.display = 'none';
         return;
     }
-﻿
+
+
     const record = filtered[0];
     let content = type === 'sales' 
         ? `📅 ${formatDisplayDate(record.date)} | 👤 ${record.staffName} | 📦 ${record.productName} | 💳 ${record.payment}`
         : `📅 ${formatDisplayDate(record.date)} | 👤 ${record.staffName} | 💰 $${record.amount} | 💳 ${record.payment}`;
-﻿
+
+
     div.innerHTML = `
         <span>${content}</span>
         <button class="danger-btn" style="padding:4px 10px;border-radius:20px;" data-id="${record.id}" data-type="${type}">🗑️ 刪除</button>
     `;
-﻿
+
+
     div.style.display = 'flex';
-﻿
+
+
     // 刪除按鈕：刪除後直接隱藏，不顯示前一筆
     div.querySelector('.danger-btn').onclick = async () => {
         if (await requirePassword()) {
@@ -234,7 +253,8 @@ function updateRecentRecord(type) {
         }
     };
 }
-﻿
+
+
 // ==================== 提交消費（重點修正） ====================
 async function submitConsumption() {
     if (submitting) return;
@@ -244,7 +264,8 @@ async function submitConsumption() {
         if (!selectedConsumeStaff) { alert("請選擇員工"); return; }
         let amount = parseInt(document.getElementById("consumeAmount").value) || 0;
         if (amount <= 0) { alert("請輸入有效金額"); return; }
-﻿
+
+
         const newRecord = {
             id: 'rec-' + Date.now(),
             type: "consumption",
@@ -255,22 +276,27 @@ async function submitConsumption() {
             payment: selectedConsumePayment,
             createdAt: new Date().toISOString()
         };
-﻿
+
+
         records.unshift(newRecord);
         showToast(`✅ 消費記錄已提交！金額 ${amount} 元`);
-﻿
+
+
         // 重置金額相關狀態（重點）
         document.getElementById("consumeAmount").value = '';
         document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
-﻿
+
+
         // 更新最近一筆顯示
         updateRecentRecord('consumption');
-﻿
+
+
     } finally {
         submitting = false;
     }
 }
-﻿
+
+
 // ==================== 提交銷售（同樣更新最近一筆） ====================
 async function submitSales() {
     if (submitting) return;
@@ -280,7 +306,8 @@ async function submitSales() {
         if (!selectedSalesStaff) { alert("請選擇員工"); return; }
         const selected = productList.filter(p => selectedProducts.has(p.name));
         if (selected.length === 0 && selectedSalesPayment !== "公司") { alert("請選擇產品"); return; }
-﻿
+
+
         for (let prod of selected) {
             const newRecord = {
                 id: 'rec-' + Date.now() + Math.random().toString(36).substr(2,4),
@@ -295,19 +322,23 @@ async function submitSales() {
             };
             records.unshift(newRecord);
         }
-﻿
+
+
         showToast(`✅ 銷售訂單已提交！共 ${selected.length} 件`);
         selectedProducts.clear();
         renderProducts();
         document.getElementById("totalAmount").innerText = "0";
-﻿
+
+
         updateRecentRecord('sales');
-﻿
+
+
     } finally {
         submitting = false;
     }
 }
-﻿
+
+
 // ==================== 渲染函數（簡化版，保持核心功能） ====================
 function renderStaff(containerId, selectedCode, onChange) {
     const container = document.getElementById(containerId);
@@ -324,7 +355,8 @@ function renderStaff(containerId, selectedCode, onChange) {
         container.appendChild(btn);
     });
 }
-﻿
+
+
 function renderPayment(containerId, selected, onChange, isSales) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
@@ -341,7 +373,8 @@ function renderPayment(containerId, selected, onChange, isSales) {
         container.appendChild(btn);
     });
 }
-﻿
+
+
 async function renderProducts() {
     const container = document.getElementById("productList");
     container.innerHTML = '';
@@ -358,14 +391,16 @@ async function renderProducts() {
         container.appendChild(btn);
     });
 }
-﻿
+
+
 function calcTotal() {
     let total = 0;
     productList.forEach(p => { if (selectedProducts.has(p.name)) total += p.price; });
     if (selectedSalesPayment === "公司") total = 0;
     document.getElementById("totalAmount").innerText = total;
 }
-﻿
+
+
 function renderPresetButtons() {
     const container = document.getElementById("presetAmounts");
     container.innerHTML = '';
@@ -381,14 +416,16 @@ function renderPresetButtons() {
         container.appendChild(btn);
     });
 }
-﻿
+
+
 // ==================== 頁面切換與初始化 ====================
 function showPage(page) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(page + "Page").classList.add('active');
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.page === page));
 }
-﻿
+
+
 function initNavButtons() {
     const container = document.getElementById("navButtons");
     const pages = [
@@ -405,7 +442,8 @@ function initNavButtons() {
         container.appendChild(btn);
     });
 }
-﻿
+
+
 async function openSettingsPage() {
     if (!passwordAuth.verified) {
         const pwd = prompt("請輸入管理密碼");
@@ -415,7 +453,8 @@ async function openSettingsPage() {
     await loadConfigFromSheet();
     showPage("settings");
 }
-﻿
+
+
 // ==================== Google 登入 ====================
 function gapiLoaded() { gapi.load('client', initGapiClient); }
 async function initGapiClient() {
@@ -440,7 +479,8 @@ function handleTokenResponse(resp) {
         renderUI();
     })();
 }
-﻿
+
+
 // ==================== 主渲染 ====================
 function renderUI() {
     renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = {code:c, name:n});
@@ -453,18 +493,22 @@ function renderUI() {
     updateRecentRecord('consumption');
     showPage("sales");
 }
-﻿
+
+
 // ==================== 事件綁定 ====================
 window.addEventListener('load', () => {
     initNavButtons();
-﻿
+
+
     document.getElementById("settingsIconSales").onclick = openSettingsPage;
     document.getElementById("settingsIconConsume").onclick = openSettingsPage;
     document.getElementById("settingsIconInventory").onclick = openSettingsPage;
-﻿
+
+
     document.getElementById("submitSales").onclick = submitSales;
     document.getElementById("submitConsume").onclick = submitConsumption;
-﻿
+
+
     document.getElementById("changePasswordBtn").onclick = async () => {
         const np = document.getElementById("newPassword").value;
         const cp = document.getElementById("confirmPassword").value;
@@ -474,7 +518,8 @@ window.addEventListener('load', () => {
             alert("密碼已更新並同步");
         }
     };
-﻿
+
+
     document.getElementById("addStaffBtn").onclick = () => {
         const name = document.getElementById("newStaffName").value.trim();
         const code = document.getElementById("newStaffCode").value.trim();
@@ -485,22 +530,26 @@ window.addEventListener('load', () => {
             renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n)=>selectedConsumeStaff={code:c,name:n});
         }
     };
-﻿
+
+
     // Google API 載入
     const script1 = document.createElement('script');
     script1.src = "https://apis.google.com/js/api.js";
     script1.onload = gapiLoaded;
     document.head.appendChild(script1);
-﻿
+
+
     const script2 = document.createElement('script');
     script2.src = "https://accounts.google.com/gsi/client";
     script2.onload = gisLoaded;
     document.head.appendChild(script2);
 });
-﻿
+
+
 function renderProducts() { /* 已在上方定義 */ }
 </script>
-﻿
+
+
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
 </body>
