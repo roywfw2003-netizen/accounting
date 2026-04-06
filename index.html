@@ -8,7 +8,7 @@
     <title>Hair World系統</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ========== 全局变量（與 V1 完全相同） ========== */
+        /* 此處樣式與您提供的可登入代碼完全相同，無需改動 */
         :root {
             --bg-body: #cfe7ff;
             --bg-card: white;
@@ -387,7 +387,7 @@
 <div id="iframeModal" class="iframe-container"><button class="close-iframe" id="closeIframeBtn">✖ 關閉</button><iframe id="bookingIframe" src=""></iframe></div>
 
 <script>
-// ========== OAuth 設定（完全保留 V1 可登入版本，不做任何修改） ==========
+// ========== OAuth 設定（完全複製自您提供的可登入代碼，一字不改） ==========
 const CLIENT_ID = '448045465424-kg6sd2dhp0nu8bl4afnafhpmd9f8bhj2.apps.googleusercontent.com';
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
@@ -398,7 +398,6 @@ let gisInited = false;
 let gapiReady = false;
 let settingsPassword = 'admin123';
 let darkMode = localStorage.getItem('darkMode') === 'true';
-
 let staffList = [
     { code: "1", name: "Roy" },
     { code: "2", name: "Ken" },
@@ -831,7 +830,7 @@ async function renderInventoryPage() {
     }));
 }
 
-// 渲染產品按鈕（產品名稱在上，價格在下，左側圓內數字，產品文字白色）
+// 渲染產品按鈕（還原原始樣式：產品名稱在上，價格在下，左側圓內數字，產品文字白色）
 async function renderProducts() {
     const container = document.getElementById("productList");
     if (!container) return;
@@ -1207,7 +1206,7 @@ async function renderRecordsTables() {
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
             </tr>`;
         }
-        html += '</tbody></tr>';
+        html += '</tbody></table>';
         salesContainer.innerHTML = html;
         document.querySelectorAll('#salesTable .sortable').forEach(th => {
             th.style.cursor = 'pointer';
@@ -1220,7 +1219,7 @@ async function renderRecordsTables() {
     }
     if (consumeRecords.length === 0) consumeContainer.innerHTML = "<div>暫無客人消費記錄</div>";
     else {
-        let html = '<table class="records-table" id="consumeTable"><thead><tr><th class="sortable" data-col="0" data-type="string">日子</th><th class="sortable" data-col="1" data-type="string">員工</th><th class="sortable" data-col="2" data-type="string">工號</th><th class="sortable" data-col="3" data-type="number">金額</th><th class="sortable" data-col="4" data-type="string">支付方式</th><th class="sortable" data-col="5" data-type="string">同步狀態</th><th class="sortable" data-col="6" data-type="string">備份狀態</th><th>操作</th></tr></thead><tbody>';
+        let html = '<table class="records-table" id="consumeTable"><thead><tr><th class="sortable" data-col="0" data-type="string">日子</th><th class="sortable" data-col="1" data-type="string">員工</th><th class="sortable" data-col="2" data-type="string">工號</th><th class="sortable" data-col="3" data-type="number">金額</th><th class="sortable" data-col="4" data-type="string">支付方式</th><th class="sortable" data-col="5" data-type="string">同步狀態</th><th class="sortable" data-col="6" data-type="string">備份狀態</th><th>操作</th></table></thead><tbody>';
         for (const rec of consumeRecords) {
             let statusClass = 'sync-pending', statusText = '待同步';
             if (rec.syncStatus === 'success') { statusClass = 'sync-success'; statusText = '已同步'; }
@@ -1237,7 +1236,7 @@ async function renderRecordsTables() {
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
             </tr>`;
         }
-        html += '</tbody><tr>';
+        html += '</tbody></table>';
         consumeContainer.innerHTML = html;
         document.querySelectorAll('#consumeTable .sortable').forEach(th => {
             th.style.cursor = 'pointer';
