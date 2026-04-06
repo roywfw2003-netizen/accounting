@@ -322,7 +322,6 @@
         .edit-option-grid { display: grid; gap: 8px; margin: 16px 0; }
         .edit-option-btn { background: var(--btn-gray-bg); padding: 12px; border-radius: 40px; text-align: center; cursor: pointer; transition: 0.05s linear; font-weight: bold; }
         .edit-option-btn:active { transform: scale(0.98); }
-        .edit-modal-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 16px; }
         .password-toggle-btn {
             background: var(--btn-gray-bg);
             border: none;
@@ -632,7 +631,6 @@ async function ensureSheetExists(sheetName, headers) {
         }
     } catch(e) { console.error(`確保工作表 ${sheetName} 失敗`, e); }
 }
-
 async function appendToSheet(sheetName, values) {
     await gapi.client.sheets.spreadsheets.values.append({
         spreadsheetId: SPREADSHEET_ID,
@@ -641,7 +639,6 @@ async function appendToSheet(sheetName, values) {
         resource: { values: [values] }
     });
 }
-
 async function clearSheetData(sheetName) {
     const range = `${sheetName}!A2:Z`;
     await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId: SPREADSHEET_ID, range: range });
@@ -706,10 +703,13 @@ async function fullSyncToSheets() {
         await clearSheetData('客人');
         for (const rec of records) {
             const sheetName = rec.type === 'sales' ? '產品' : '客人';
-            await appendToSheet(sheetName, [
-                ...(sheetName === '產品' ? (() => { const gd = toGoogleDate(rec.date); const { year, month, day } = extractYearMonthDay(gd); return [year, month, day, rec.staffName, rec.staffCode, rec.productName, rec.amount.toString(), rec.payment, getCurrentTime(), 'success', rec.id]; })() :
-                [toGoogleDate(rec.date), rec.staffName, rec.staffCode, rec.amount.toString(), rec.payment, getCurrentTime(), 'success', rec.id])
-            ]);
+            if (sheetName === '產品') {
+                const googleDate = toGoogleDate(rec.date);
+                const { year, month, day } = extractYearMonthDay(googleDate);
+                await appendToSheet(sheetName, [year, month, day, rec.staffName, rec.staffCode, rec.productName, rec.amount.toString(), rec.payment, getCurrentTime(), 'success', rec.id]);
+            } else {
+                await appendToSheet(sheetName, [toGoogleDate(rec.date), rec.staffName, rec.staffCode, rec.amount.toString(), rec.payment, getCurrentTime(), 'success', rec.id]);
+            }
         }
         records.forEach(r => { r.syncStatus = 'success'; delete r.syncError; });
         saveRecords();
@@ -901,7 +901,7 @@ async function renderInventoryPage() {
     }));
 }
 
-// 渲染產品按鈕（加入庫存燈號，左側圓圈顯示數字，產品名稱在上價格在下）
+// 渲染產品按鈕（文字顏色跟隨普通按鈕，圓圈燈號顯示數字）
 async function renderProducts() {
     const container = document.getElementById("productList");
     if (!container) return;
@@ -923,6 +923,7 @@ async function renderProducts() {
         btn.style.justifyContent = "center";
         btn.style.position = "relative";
         btn.style.padding = "12px 8px";
+        // 左側圓圈
         const circleSpan = document.createElement("span");
         circleSpan.style.position = "absolute";
         circleSpan.style.left = "8px";
@@ -941,12 +942,9 @@ async function renderProducts() {
         circleSpan.innerText = stock;
         const nameSpan = document.createElement("span");
         nameSpan.className = "product-name";
-        nameSpan.style.color = "white";
-        nameSpan.style.marginBottom = "4px";
         nameSpan.innerText = p.name;
         const priceSpan = document.createElement("span");
         priceSpan.className = "product-price";
-        priceSpan.style.color = "white";
         priceSpan.innerText = `$${p.price}`;
         btn.appendChild(circleSpan);
         btn.appendChild(nameSpan);
@@ -967,11 +965,6 @@ function calcTotal() {
     if (selectedSalesPayment === "公司") total = 0;
     document.getElementById("totalAmount").innerText = total;
     return total;
-}
-
-// 導航按鈕初始化（保持與原始一致，已包含庫存管理按鈕）
-function initNavButtons() {
-    // 已在HTML中寫死按鈕，此函數為空以避免覆蓋
 }
 
 // 頁面切換
@@ -999,7 +992,10 @@ function showPage(pageId) {
         renderInventoryPage();
     }
     if (pageId === "settings") {
-        renderStaffManageList(); renderProductManageList(); renderPresetManageList(); renderRecordsTables();
+        renderStaffManageList();
+        renderProductManageList();
+        renderPresetManageList();
+        renderRecordsTables();
         document.getElementById("toggleStaff").classList.toggle("active", toggleStaff);
         document.getElementById("toggleProduct").classList.toggle("active", toggleProduct);
         document.getElementById("togglePreset").classList.toggle("active", togglePreset);
@@ -1257,7 +1253,7 @@ async function renderRecordsTables() {
             if (rec.syncStatus === 'success') { statusClass = 'sync-success'; statusText = '已同步'; }
             else if (rec.syncStatus === 'failed') { statusClass = 'sync-failed'; statusText = '同步失敗'; }
             const backupStatus = backupIds.has(rec.id) ? '已備份' : '沒有對應上';
-            html += `<td>
+            html += `<tr>
                 <td class="record-cell" title="${rec.date}">${rec.displayDate || formatDisplayDate(rec.date)}</td>
                 <td>${rec.staffName}</td>
                 <td>${rec.staffCode || ''}</td>
@@ -1402,9 +1398,9 @@ function renderPresetManageList() {
         editBtn.onclick = async () => {
             if (!await requirePassword()) return;
             if (!confirm(`確定要編輯預設金額 $${amt} 嗎？`)) return;
-            const newAmt = parseFloat(prompt("輸入新金額", amt));
-            if (!isNaN(newAmt) && newAmt > 0) {
-                presetAmounts[idx] = newAmt;
+            const newAmt = prompt("輸入新金額", amt);
+            if (newAmt && !isNaN(parseFloat(newAmt))) {
+                presetAmounts[idx] = parseFloat(newAmt);
                 savePresets(); renderPresetManageList(); renderPresetButtons();
                 await syncConfigToSheet();
                 showToast("預設金額已修改並同步雲端");
@@ -1988,6 +1984,17 @@ document.getElementById("closeIframeBtn").onclick = () => {
     document.getElementById("bookingIframe").src = "";
     showPage("sales");
 };
+// 確保導航按鈕綁定
+document.querySelectorAll(".nav-btn").forEach(btn => {
+    if (btn.id === "studentBookingBtn") {
+        btn.onclick = () => {
+            document.getElementById("bookingIframe").src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html";
+            document.getElementById("iframeModal").style.display = "block";
+        };
+    } else {
+        btn.onclick = () => showPage(btn.dataset.page);
+    }
+});
 </script>
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
