@@ -137,6 +137,7 @@
             .btn-group { flex-direction: column; width: 120px; gap: 12px; margin-bottom: 0; }
             .nav-btn { width: 100%; padding: 16px 8px; }
             .page { flex: 1; overflow-y: auto; }
+            /* 橫屏時按鈕順序由 HTML 中的順序決定，我們將在 HTML 中調整順序 */
         }
         @media (orientation: portrait), (max-width: 899px) {
             .btn-group { flex-direction: row; flex-wrap: wrap; margin-bottom: 12px; }
@@ -1206,25 +1207,8 @@ function showEditModal(record) {
             }
         }
         renderRecordsTables();
-        // 修改後：如果修改的是最新記錄，則隱藏該類型的最近記錄區塊
-        const type = record.type === 'sales' ? 'sales' : 'consumption';
-        const recordsOfType = records.filter(r => r.type === type).sort((a,b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
-        const latest = recordsOfType.length ? recordsOfType[0] : null;
-        if (latest && latest.id === record.id) {
-            // 修改的是最新記錄，隱藏區塊
-            if (type === 'sales') {
-                lastSalesRecord = null;
-                const div = document.getElementById('salesRecent');
-                if (div) div.style.display = 'none';
-            } else {
-                lastConsumeRecord = null;
-                const div = document.getElementById('consumeRecent');
-                if (div) div.style.display = 'none';
-            }
-        } else {
-            // 修改的不是最新記錄，正常刷新
-            updateRecentRecord(type);
-        }
+        // 修改後更新最近記錄（可能沒有最新記錄了）
+        updateRecentRecord(record.type === 'sales' ? 'sales' : 'consumption');
         showToast("記錄已修改並同步雲端");
         modal.remove();
     }
@@ -1276,7 +1260,7 @@ async function renderRecordsTables() {
     }
     if (consumeRecords.length === 0) consumeContainer.innerHTML = "<div>暫無客人消費記錄</div>";
     else {
-        let html = '<table class="records-table" id="consumeTable"><thead><tr><th class="sortable" data-col="0" data-type="string">日子</th><th class="sortable" data-col="1" data-type="string">員工</th><th class="sortable" data-col="2" data-type="string">工號</th><th class="sortable" data-col="3" data-type="number">金額</th><th class="sortable" data-col="4" data-type="string">支付方式</th><th class="sortable" data-col="5" data-type="string">同步狀態</th><th class="sortable" data-col="6" data-type="string">備份狀態</th><th>操作</th><tr></thead><tbody>';
+        let html = '<table class="records-table" id="consumeTable"><thead><tr><th class="sortable" data-col="0" data-type="string">日子</th><th class="sortable" data-col="1" data-type="string">員工</th><th class="sortable" data-col="2" data-type="string">工號</th><th class="sortable" data-col="3" data-type="number">金額</th><th class="sortable" data-col="4" data-type="string">支付方式</th><th class="sortable" data-col="5" data-type="string">同步狀態</th><th class="sortable" data-col="6" data-type="string">備份狀態</th><th>操作</th></tr></thead><tbody>';
         for (const rec of consumeRecords) {
             let statusClass = 'sync-pending', statusText = '待同步';
             if (rec.syncStatus === 'success') { statusClass = 'sync-success'; statusText = '已同步'; }
@@ -1293,7 +1277,7 @@ async function renderRecordsTables() {
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
             </tr>`;
         }
-        html += '</tbody></table>';
+        html += '</tbody></td>';
         consumeContainer.innerHTML = html;
         document.querySelectorAll('#consumeTable .sortable').forEach(th => {
             th.style.cursor = 'pointer';
@@ -1630,25 +1614,7 @@ async function editRecord(record, options = {}) {
         }
     }
     renderRecordsTables();
-    // 修改後：如果修改的是最新記錄，則隱藏該類型的最近記錄區塊
-    const type = record.type === 'sales' ? 'sales' : 'consumption';
-    const recordsOfType = records.filter(r => r.type === type).sort((a,b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
-    const latest = recordsOfType.length ? recordsOfType[0] : null;
-    if (latest && latest.id === record.id) {
-        // 修改的是最新記錄，隱藏區塊
-        if (type === 'sales') {
-            lastSalesRecord = null;
-            const div = document.getElementById('salesRecent');
-            if (div) div.style.display = 'none';
-        } else {
-            lastConsumeRecord = null;
-            const div = document.getElementById('consumeRecent');
-            if (div) div.style.display = 'none';
-        }
-    } else {
-        // 修改的不是最新記錄，正常刷新
-        updateRecentRecord(type);
-    }
+    updateRecentRecord(record.type === 'sales' ? 'sales' : 'consumption');
     showToast("記錄已修改並同步雲端");
     return true;
 }
@@ -2035,12 +2001,8 @@ document.querySelectorAll(".nav-btn").forEach(btn => {
 // 確保提交按鈕綁定（防止被覆蓋）
 document.getElementById("submitSales").onclick = submitSales;
 document.getElementById("submitConsume").onclick = submitConsumption;
-// 確保關閉 iframe 按鈕返回銷售頁
-document.getElementById("closeIframeBtn").onclick = () => {
-    document.getElementById("iframeModal").style.display = "none";
-    document.getElementById("bookingIframe").src = "";
-    showPage("sales");
-};
+// 庫存管理頁的齒輪按鈕
+document.getElementById("settingsIconInventory").addEventListener("click", openSettingsPage);
 </script>
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
