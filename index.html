@@ -64,7 +64,7 @@
         .settings-icon-small i { color: white; }
         .danger-btn { color: #b91c1c !important; }
         body.dark .danger-btn { color: #ff7b72 !important; }
-        /* 導航按鈕圖示顏色改為黑色 */
+        /* 導航按鈕圖示顏色黑色 */
         .nav-btn i { color: black; }
         body.dark .nav-btn i { color: #f3f4f6; }
 
@@ -358,8 +358,9 @@
 
 <div class="app-container">
     <div class="btn-group">
-        <button class="nav-btn" data-page="sales"><i class="fa-solid fa-cube"></i><span>產品銷售</span></button>
+        <!-- 橫屏時順序由上而下：客人消費、產品銷售、庫存管理、學生預約 -->
         <button class="nav-btn" data-page="consumption"><i class="fa-solid fa-user-group"></i><span>客人消費</span></button>
+        <button class="nav-btn" data-page="sales"><i class="fa-solid fa-cube"></i><span>產品銷售</span></button>
         <button class="nav-btn" data-page="inventory"><i class="fa-solid fa-boxes"></i><span>庫存管理</span></button>
         <button class="nav-btn" id="studentBookingBtn"><i class="fa-solid fa-school"></i><span>學生預約</span></button>
     </div>
@@ -395,7 +396,7 @@
     </div>
 
     <div id="inventoryPage" class="page">
-        <h3>📦 庫存管理 <button id="toggleCostPriceBtn" class="small-btn" style="margin-left:12px;">🔒 顯示來貨價</button></h3>
+        <h3>📦 庫存管理 <button class="settings-icon-small" id="settingsIconInventory"><i class="fa-solid fa-gear"></i></button></h3>
         <div id="inventoryTable"></div>
         <div style="margin-top:16px;"><button id="refreshInventoryBtn" class="small-btn">🔄 重新整理庫存</button></div>
     </div>
@@ -1088,13 +1089,18 @@ function renderPresetButtons() {
 function clearPresetHighlight() {
     document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
 }
+
+// 修改 updateRecentRecord：僅在有最新記錄時顯示，否則隱藏
 function updateRecentRecord(type) {
     const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
     const recordsOfType = records.filter(r => r.type === type).sort((a,b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
     const record = recordsOfType.length ? recordsOfType[0] : null;
     if (type === 'sales') lastSalesRecord = record;
     else lastConsumeRecord = record;
-    if (!record) { if(div) div.style.display = 'none'; return; }
+    if (!record) {
+        if (div) div.style.display = 'none';
+        return;
+    }
     div.style.display = 'flex';
     let content = '';
     if (type === 'sales') {
@@ -1114,6 +1120,7 @@ function updateRecentRecord(type) {
         updateRecentRecord(type);
     };
 }
+
 function showEditModal(record) {
     const modal = document.createElement('div');
     modal.className = 'edit-modal';
@@ -1199,11 +1206,30 @@ function showEditModal(record) {
             }
         }
         renderRecordsTables();
-        updateRecentRecord(record.type === 'sales' ? 'sales' : 'consumption');
+        // 修改後：如果修改的是最新記錄，則隱藏該類型的最近記錄區塊
+        const type = record.type === 'sales' ? 'sales' : 'consumption';
+        const recordsOfType = records.filter(r => r.type === type).sort((a,b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
+        const latest = recordsOfType.length ? recordsOfType[0] : null;
+        if (latest && latest.id === record.id) {
+            // 修改的是最新記錄，隱藏區塊
+            if (type === 'sales') {
+                lastSalesRecord = null;
+                const div = document.getElementById('salesRecent');
+                if (div) div.style.display = 'none';
+            } else {
+                lastConsumeRecord = null;
+                const div = document.getElementById('consumeRecent');
+                if (div) div.style.display = 'none';
+            }
+        } else {
+            // 修改的不是最新記錄，正常刷新
+            updateRecentRecord(type);
+        }
         showToast("記錄已修改並同步雲端");
         modal.remove();
     }
 }
+
 async function renderRecordsTables() {
     const salesContainer = document.getElementById("salesRecordsTable");
     const consumeContainer = document.getElementById("consumeRecordsTable");
@@ -1237,7 +1263,7 @@ async function renderRecordsTables() {
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
             </tr>`;
         }
-        html += '</tbody></td>';
+        html += '</tbody></table>';
         salesContainer.innerHTML = html;
         document.querySelectorAll('#salesTable .sortable').forEach(th => {
             th.style.cursor = 'pointer';
@@ -1250,7 +1276,7 @@ async function renderRecordsTables() {
     }
     if (consumeRecords.length === 0) consumeContainer.innerHTML = "<div>暫無客人消費記錄</div>";
     else {
-        let html = '<table class="records-table" id="consumeTable"><thead><tr><th class="sortable" data-col="0" data-type="string">日子</th><th class="sortable" data-col="1" data-type="string">員工</th><th class="sortable" data-col="2" data-type="string">工號</th><th class="sortable" data-col="3" data-type="number">金額</th><th class="sortable" data-col="4" data-type="string">支付方式</th><th class="sortable" data-col="5" data-type="string">同步狀態</th><th class="sortable" data-col="6" data-type="string">備份狀態</th><th>操作</th></tr></thead><tbody>';
+        let html = '<table class="records-table" id="consumeTable"><thead><tr><th class="sortable" data-col="0" data-type="string">日子</th><th class="sortable" data-col="1" data-type="string">員工</th><th class="sortable" data-col="2" data-type="string">工號</th><th class="sortable" data-col="3" data-type="number">金額</th><th class="sortable" data-col="4" data-type="string">支付方式</th><th class="sortable" data-col="5" data-type="string">同步狀態</th><th class="sortable" data-col="6" data-type="string">備份狀態</th><th>操作</th><tr></thead><tbody>';
         for (const rec of consumeRecords) {
             let statusClass = 'sync-pending', statusText = '待同步';
             if (rec.syncStatus === 'success') { statusClass = 'sync-success'; statusText = '已同步'; }
@@ -1267,7 +1293,7 @@ async function renderRecordsTables() {
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
             </tr>`;
         }
-        html += '</tbody></tr>';
+        html += '</tbody></table>';
         consumeContainer.innerHTML = html;
         document.querySelectorAll('#consumeTable .sortable').forEach(th => {
             th.style.cursor = 'pointer';
@@ -1604,7 +1630,25 @@ async function editRecord(record, options = {}) {
         }
     }
     renderRecordsTables();
-    updateRecentRecord(record.type === 'sales' ? 'sales' : 'consumption');
+    // 修改後：如果修改的是最新記錄，則隱藏該類型的最近記錄區塊
+    const type = record.type === 'sales' ? 'sales' : 'consumption';
+    const recordsOfType = records.filter(r => r.type === type).sort((a,b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
+    const latest = recordsOfType.length ? recordsOfType[0] : null;
+    if (latest && latest.id === record.id) {
+        // 修改的是最新記錄，隱藏區塊
+        if (type === 'sales') {
+            lastSalesRecord = null;
+            const div = document.getElementById('salesRecent');
+            if (div) div.style.display = 'none';
+        } else {
+            lastConsumeRecord = null;
+            const div = document.getElementById('consumeRecent');
+            if (div) div.style.display = 'none';
+        }
+    } else {
+        // 修改的不是最新記錄，正常刷新
+        updateRecentRecord(type);
+    }
     showToast("記錄已修改並同步雲端");
     return true;
 }
@@ -1647,20 +1691,15 @@ async function deleteRecordById(id, options = {}) {
     saveRecords();
     renderRecordsTables();
     const type = recordToDelete.type === 'sales' ? 'sales' : 'consumption';
-    const wasLatest = (type === 'sales' && lastSalesRecord && lastSalesRecord.id === id) ||
-                      (type === 'consumption' && lastConsumeRecord && lastConsumeRecord.id === id);
-    if (wasLatest) {
-        if (type === 'sales') {
-            lastSalesRecord = null;
-            const div = document.getElementById('salesRecent');
-            if (div) div.style.display = 'none';
-        } else {
-            lastConsumeRecord = null;
-            const div = document.getElementById('consumeRecent');
-            if (div) div.style.display = 'none';
-        }
+    // 刪除後直接隱藏該類型的最近記錄區塊（不顯示前一筆）
+    if (type === 'sales') {
+        lastSalesRecord = null;
+        const div = document.getElementById('salesRecent');
+        if (div) div.style.display = 'none';
     } else {
-        updateRecentRecord(type);
+        lastConsumeRecord = null;
+        const div = document.getElementById('consumeRecent');
+        if (div) div.style.display = 'none';
     }
     showToast("記錄已刪除並同步雲端");
     return true;
@@ -1753,9 +1792,10 @@ async function submitConsumption() {
     }
 }
 
-// 事件綁定（確保提交按鈕綁定正確）
+// 事件綁定
 document.getElementById("settingsIconSales").addEventListener("click", openSettingsPage);
 document.getElementById("settingsIconConsume").addEventListener("click", openSettingsPage);
+document.getElementById("settingsIconInventory").addEventListener("click", openSettingsPage);
 document.getElementById("changePasswordBtn").addEventListener("click", async () => {
     const newPwd = document.getElementById("newPassword").value, confirmPwd = document.getElementById("confirmPassword").value;
     if (!newPwd) { alert("請輸入新密碼"); return; }
@@ -1995,6 +2035,12 @@ document.querySelectorAll(".nav-btn").forEach(btn => {
 // 確保提交按鈕綁定（防止被覆蓋）
 document.getElementById("submitSales").onclick = submitSales;
 document.getElementById("submitConsume").onclick = submitConsumption;
+// 確保關閉 iframe 按鈕返回銷售頁
+document.getElementById("closeIframeBtn").onclick = () => {
+    document.getElementById("iframeModal").style.display = "none";
+    document.getElementById("bookingIframe").src = "";
+    showPage("sales");
+};
 </script>
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
