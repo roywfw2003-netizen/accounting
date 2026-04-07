@@ -64,7 +64,6 @@
         .settings-icon-small i { color: white; }
         .danger-btn { color: #b91c1c !important; }
         body.dark .danger-btn { color: #ff7b72 !important; }
-        /* 導航按鈕圖示顏色改為黑色 */
         .nav-btn i { color: black; }
         body.dark .nav-btn i { color: #f3f4f6; }
 
@@ -132,9 +131,16 @@
         .records-table th, .records-table td { font-size: calc(0.8rem * var(--records-font-scale)); }
         .sync-badge { font-size: calc(0.7rem * var(--records-font-scale)); }
 
+        /* 橫屏樣式 (保持原有順序: 客人消費 → 產品銷售 → 庫存管理 → 學生預約) */
         @media (orientation: landscape) and (min-width: 900px) {
             .app-container { flex-direction: row; padding: 12px; gap: 16px; }
-            .btn-group { flex-direction: column; width: 120px; gap: 12px; margin-bottom: 0; }
+            .btn-group { 
+                display: flex; 
+                flex-direction: column; 
+                width: 120px; 
+                gap: 12px; 
+                margin-bottom: 0;
+            }
             .nav-btn { width: 100%; padding: 16px 8px; }
             .page { flex: 1; overflow-y: auto; }
             /* 橫屏時按順序: 客人消費(1) → 產品銷售(2) → 庫存管理(3) → 學生預約(4) */
@@ -143,10 +149,26 @@
             .btn-group .nav-btn[data-page="inventory"] { order: 3; }
             .btn-group .nav-btn#studentBookingBtn { order: 4; }
         }
+
+        /* 豎屏樣式: 前三個按鈕一排，第四個單獨一排，順序為 產品銷售 → 客人消費 → 庫存管理 → 學生預約 */
         @media (orientation: portrait), (max-width: 899px) {
-            .btn-group { flex-direction: row; flex-wrap: wrap; margin-bottom: 12px; }
-            .nav-btn { flex: 1; min-width: 100px; }
+            .btn-group {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+                margin-bottom: 12px;
+            }
+            .nav-btn {
+                width: auto;
+                min-width: 0;
+                margin: 0;
+            }
+            /* 學生預約按鈕強制佔滿整行 */
+            .btn-group .nav-btn#studentBookingBtn {
+                grid-column: 1 / -1;
+            }
         }
+
         .btn-group { display: flex; gap: 12px; margin-bottom: 12px; }
         .nav-btn {
             background: var(--btn-gray-bg);
@@ -154,8 +176,6 @@
             border-radius: 32px;
             font-weight: bold;
             cursor: pointer;
-            flex: 1;
-            min-width: 100px;
             padding: 12px 8px;
             text-align: center;
             transition: 0.05s linear;
@@ -649,7 +669,17 @@ async function appendToSheet(sheetName, values) {
 }
 async function clearSheetData(sheetName) {
     const range = `${sheetName}!A2:Z`;
-    await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId: SPREADSHEET_ID, range: range });
+    // 嘗試清除，最多重試3次
+    for (let i = 0; i < 3; i++) {
+        try {
+            await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId: SPREADSHEET_ID, range: range });
+            return;
+        } catch(e) {
+            console.warn(`清除工作表 ${sheetName} 失敗，重試 ${i+1}`, e);
+            await new Promise(r => setTimeout(r, 500));
+        }
+    }
+    throw new Error(`清除工作表 ${sheetName} 失敗`);
 }
 async function getSheetId(sheetName) {
     const resp = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
@@ -854,18 +884,18 @@ async function renderInventoryPage() {
         const soldQty = records.filter(r=>r.type==='sales' && r.productName===item.product).length;
         const totalProfit = unitProfit * soldQty;
         html += `<tr>
-            <td>${item.product}</td>
-            <td>${item.stock}</td>
-            <td>${item.type}</td>
+             <td>${item.product}</td>
+             <td>${item.stock}</td>
+             <td>${item.type}</td>
             <td class="cost-price-col" style="${showCostPrice ? '' : 'filter: blur(4px);'}">${showCostPrice ? `$${item.avgCost.toFixed(2)}` : '●●●'}</td>
             <td class="cost-price-col" style="${showCostPrice ? '' : 'filter: blur(4px);'}">${showCostPrice ? `$${item.totalCost.toFixed(2)}` : '●●●'}</td>
             <td class="cost-price-col" style="${showCostPrice ? '' : 'filter: blur(4px);'}">${showCostPrice ? `$${totalProfit.toFixed(2)}` : '●●●'}</td>
-            <td>
+             <td>
                 <button class="small-btn replenish-btn" data-product="${item.product}">📦 補貨</button>
                 <button class="small-btn manual-btn" data-product="${item.product}">✏️ 手動調整</button>
                 ${item.type === '消耗品' ? `<button class="small-btn stocktake-btn" data-product="${item.product}">📋 盤點</button>` : ''}
-            </td>
-        </tr>`;
+             </td>
+         </tr>`;
     }
     html += '</tbody></table>';
     container.innerHTML = html;
@@ -1250,7 +1280,7 @@ async function renderRecordsTables() {
                 <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
                 <td>${backupStatus}</td>
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
-            </tr>`;
+             </tr>`;
         }
         html += '</tbody></table>';
         salesContainer.innerHTML = html;
@@ -1280,7 +1310,7 @@ async function renderRecordsTables() {
                 <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
                 <td>${backupStatus}</td>
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
-            </tr>`;
+             </tr>`;
         }
         html += '</tbody></table>';
         consumeContainer.innerHTML = html;
@@ -1438,10 +1468,19 @@ async function syncConfigToSheet() {
     if (!gapiReady) return;
     try {
         await ensureSheetExists(CONFIG_SHEET, ["類型","鍵","值"]);
+        // 先清除整個工作表，再寫入乾淨的資料（去重後）
         await clearSheetData(CONFIG_SHEET);
-        for (let s of staffList) await appendToSheet(CONFIG_SHEET, ['employee', s.code, s.name]);
-        for (let p of productList) await appendToSheet(CONFIG_SHEET, ['product', p.name, p.price.toString()]);
-        for (let amt of presetAmounts) await appendToSheet(CONFIG_SHEET, ['preset', amt.toString(), amt.toString()]);
+        // 員工去重（依工號）
+        const uniqueStaff = new Map();
+        staffList.forEach(s => uniqueStaff.set(s.code, s));
+        for (let s of uniqueStaff.values()) await appendToSheet(CONFIG_SHEET, ['employee', s.code, s.name]);
+        // 產品去重（依名稱）
+        const uniqueProducts = new Map();
+        productList.forEach(p => uniqueProducts.set(p.name, p));
+        for (let p of uniqueProducts.values()) await appendToSheet(CONFIG_SHEET, ['product', p.name, p.price.toString()]);
+        // 預設金額去重（依數值）
+        const uniquePresets = [...new Set(presetAmounts)];
+        for (let amt of uniquePresets) await appendToSheet(CONFIG_SHEET, ['preset', amt.toString(), amt.toString()]);
         await appendToSheet(CONFIG_SHEET, ['password', 'admin', settingsPassword]);
     } catch (err) { console.error("同步設定失敗", err); }
 }
@@ -1451,18 +1490,33 @@ async function loadConfigFromSheet() {
         const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: 'staff!A:C' });
         if (resp.result.values && resp.result.values.length > 1) {
             const rows = resp.result.values.slice(1);
-            const newStaff = [], newProducts = [], newPresets = [];
+            const cloudStaff = new Map();    // code -> name
+            const cloudProducts = new Map();  // name -> price
+            const cloudPresets = new Set();
             let newPassword = null;
             for (let row of rows) {
                 const type = row[0], key = row[1], val = row[2];
-                if (type === 'employee') newStaff.push({ code: key, name: val });
-                else if (type === 'product') newProducts.push({ name: key, price: parseFloat(val), type: '普通' });
-                else if (type === 'preset') newPresets.push(parseFloat(val));
+                if (type === 'employee') cloudStaff.set(key, val);
+                else if (type === 'product') cloudProducts.set(key, parseFloat(val));
+                else if (type === 'preset') cloudPresets.add(parseFloat(val));
                 else if (type === 'password' && key === 'admin') newPassword = val;
             }
-            if (newStaff.length) staffList = newStaff;
-            if (newProducts.length) productList = newProducts;
-            if (newPresets.length) presetAmounts = newPresets;
+            // 合併雲端與本地資料（本地優先，但雲端有的本地沒有則加入）
+            const mergedStaffMap = new Map();
+            staffList.forEach(s => mergedStaffMap.set(s.code, s));
+            for (let [code, name] of cloudStaff.entries()) {
+                if (!mergedStaffMap.has(code)) mergedStaffMap.set(code, { code, name });
+            }
+            staffList = Array.from(mergedStaffMap.values());
+            const mergedProductMap = new Map();
+            productList.forEach(p => mergedProductMap.set(p.name, p));
+            for (let [name, price] of cloudProducts.entries()) {
+                if (!mergedProductMap.has(name)) mergedProductMap.set(name, { name, price, type: '普通' });
+            }
+            productList = Array.from(mergedProductMap.values());
+            const mergedPresets = new Set(presetAmounts);
+            for (let amt of cloudPresets) mergedPresets.add(amt);
+            presetAmounts = Array.from(mergedPresets).sort((a,b)=>a-b);
             if (newPassword) settingsPassword = newPassword;
             saveStaff(); saveProducts(); savePresets();
         }
