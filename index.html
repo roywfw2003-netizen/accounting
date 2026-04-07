@@ -64,7 +64,7 @@
         .settings-icon-small i { color: white; }
         .danger-btn { color: #b91c1c !important; }
         body.dark .danger-btn { color: #ff7b72 !important; }
-        /* 導航按鈕圖示顏色黑色 */
+        /* 導航按鈕圖示顏色改為黑色 */
         .nav-btn i { color: black; }
         body.dark .nav-btn i { color: #f3f4f6; }
 
@@ -137,7 +137,11 @@
             .btn-group { flex-direction: column; width: 120px; gap: 12px; margin-bottom: 0; }
             .nav-btn { width: 100%; padding: 16px 8px; }
             .page { flex: 1; overflow-y: auto; }
-            /* 橫屏時按鈕順序由 HTML 中的順序決定，我們將在 HTML 中調整順序 */
+            /* 橫屏時按順序: 客人消費(1) → 產品銷售(2) → 庫存管理(3) → 學生預約(4) */
+            .btn-group .nav-btn[data-page="consumption"] { order: 1; }
+            .btn-group .nav-btn[data-page="sales"] { order: 2; }
+            .btn-group .nav-btn[data-page="inventory"] { order: 3; }
+            .btn-group .nav-btn#studentBookingBtn { order: 4; }
         }
         @media (orientation: portrait), (max-width: 899px) {
             .btn-group { flex-direction: row; flex-wrap: wrap; margin-bottom: 12px; }
@@ -359,9 +363,8 @@
 
 <div class="app-container">
     <div class="btn-group">
-        <!-- 橫屏時順序由上而下：客人消費、產品銷售、庫存管理、學生預約 -->
-        <button class="nav-btn" data-page="consumption"><i class="fa-solid fa-user-group"></i><span>客人消費</span></button>
         <button class="nav-btn" data-page="sales"><i class="fa-solid fa-cube"></i><span>產品銷售</span></button>
+        <button class="nav-btn" data-page="consumption"><i class="fa-solid fa-user-group"></i><span>客人消費</span></button>
         <button class="nav-btn" data-page="inventory"><i class="fa-solid fa-boxes"></i><span>庫存管理</span></button>
         <button class="nav-btn" id="studentBookingBtn"><i class="fa-solid fa-school"></i><span>學生預約</span></button>
     </div>
@@ -397,7 +400,7 @@
     </div>
 
     <div id="inventoryPage" class="page">
-        <h3>📦 庫存管理 <button class="settings-icon-small" id="settingsIconInventory"><i class="fa-solid fa-gear"></i></button></h3>
+        <h3>📦 庫存管理 <button id="toggleCostPriceBtn" class="small-btn" style="margin-left:12px;">🔒 顯示來貨價</button></h3>
         <div id="inventoryTable"></div>
         <div style="margin-top:16px;"><button id="refreshInventoryBtn" class="small-btn">🔄 重新整理庫存</button></div>
     </div>
@@ -1090,16 +1093,11 @@ function renderPresetButtons() {
 function clearPresetHighlight() {
     document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
 }
-
-// 修改 updateRecentRecord：僅在有最新記錄時顯示，否則隱藏
 function updateRecentRecord(type) {
     const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
-    const recordsOfType = records.filter(r => r.type === type).sort((a,b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
-    const record = recordsOfType.length ? recordsOfType[0] : null;
-    if (type === 'sales') lastSalesRecord = record;
-    else lastConsumeRecord = record;
+    const record = (type === 'sales') ? lastSalesRecord : lastConsumeRecord;
     if (!record) {
-        if (div) div.style.display = 'none';
+        if(div) div.style.display = 'none';
         return;
     }
     div.style.display = 'flex';
@@ -1118,10 +1116,9 @@ function updateRecentRecord(type) {
     };
     delBtn.onclick = async () => {
         await deleteRecordById(record.id, { skipPassword: true });
-        updateRecentRecord(type);
+        // 刪除後會自動清除對應的 last 變數並隱藏 div，不需要再呼叫 updateRecentRecord
     };
 }
-
 function showEditModal(record) {
     const modal = document.createElement('div');
     modal.className = 'edit-modal';
@@ -1194,6 +1191,16 @@ function showEditModal(record) {
         content.appendChild(cancelBtn);
     }
     async function finalizeEdit(record, modal) {
+        // 如果修改的是目前顯示的最後一筆記錄，則清除對應的 last 變數並隱藏區域
+        if (record.type === 'sales' && lastSalesRecord && lastSalesRecord.id === record.id) {
+            lastSalesRecord = null;
+            const div = document.getElementById('salesRecent');
+            if (div) div.style.display = 'none';
+        } else if (record.type === 'consumption' && lastConsumeRecord && lastConsumeRecord.id === record.id) {
+            lastConsumeRecord = null;
+            const div = document.getElementById('consumeRecent');
+            if (div) div.style.display = 'none';
+        }
         saveRecords();
         if (gapiReady) {
             const sheetName = record.type === 'sales' ? '產品' : '客人';
@@ -1207,13 +1214,11 @@ function showEditModal(record) {
             }
         }
         renderRecordsTables();
-        // 修改後更新最近記錄（可能沒有最新記錄了）
-        updateRecentRecord(record.type === 'sales' ? 'sales' : 'consumption');
+        // 不重新呼叫 updateRecentRecord，因為已經清除顯示
         showToast("記錄已修改並同步雲端");
         modal.remove();
     }
 }
-
 async function renderRecordsTables() {
     const salesContainer = document.getElementById("salesRecordsTable");
     const consumeContainer = document.getElementById("consumeRecordsTable");
@@ -1277,7 +1282,7 @@ async function renderRecordsTables() {
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
             </tr>`;
         }
-        html += '</tbody></td>';
+        html += '</tbody></table>';
         consumeContainer.innerHTML = html;
         document.querySelectorAll('#consumeTable .sortable').forEach(th => {
             th.style.cursor = 'pointer';
@@ -1552,6 +1557,7 @@ async function addRecord(recordData) {
     records.unshift(newRecord);
     saveRecords();
     renderRecordsTables();
+    // 更新最後一筆記錄變數（新提交的訂單會成為最後一筆）
     if (recordData.type === 'sales') {
         lastSalesRecord = { ...newRecord };
         updateRecentRecord('sales');
@@ -1601,6 +1607,16 @@ async function editRecord(record, options = {}) {
         } else { alert("修改無效"); return false; }
     }
     Object.assign(record, newData);
+    // 如果修改的是目前顯示的最後一筆記錄，則清除對應的 last 變數並隱藏區域
+    if (record.type === 'sales' && lastSalesRecord && lastSalesRecord.id === record.id) {
+        lastSalesRecord = null;
+        const div = document.getElementById('salesRecent');
+        if (div) div.style.display = 'none';
+    } else if (record.type === 'consumption' && lastConsumeRecord && lastConsumeRecord.id === record.id) {
+        lastConsumeRecord = null;
+        const div = document.getElementById('consumeRecent');
+        if (div) div.style.display = 'none';
+    }
     saveRecords();
     if (gapiReady) {
         const sheetName = record.type === 'sales' ? '產品' : '客人';
@@ -1614,31 +1630,32 @@ async function editRecord(record, options = {}) {
         }
     }
     renderRecordsTables();
-    updateRecentRecord(record.type === 'sales' ? 'sales' : 'consumption');
+    // 不重新呼叫 updateRecentRecord，因為已經清除顯示
     showToast("記錄已修改並同步雲端");
     return true;
 }
 async function deleteRecordById(id, options = {}) {
     const recordToDelete = records.find(r => r.id === id);
     if (!recordToDelete) return false;
-    const sameType = records.filter(r => r.type === recordToDelete.type);
-    let isLatest = false;
-    if (sameType.length > 0) {
-        const latest = sameType.reduce((a,b) => new Date(b.createdAt || b.date) > new Date(a.createdAt || a.date) ? b : a);
-        isLatest = (latest.id === id);
+    // 如果刪除的是目前顯示的最後一筆記錄，則清除對應的 last 變數並隱藏區域
+    if (recordToDelete.type === 'sales' && lastSalesRecord && lastSalesRecord.id === id) {
+        lastSalesRecord = null;
+        const div = document.getElementById('salesRecent');
+        if (div) div.style.display = 'none';
+    } else if (recordToDelete.type === 'consumption' && lastConsumeRecord && lastConsumeRecord.id === id) {
+        lastConsumeRecord = null;
+        const div = document.getElementById('consumeRecent');
+        if (div) div.style.display = 'none';
     }
-    if (!isLatest) {
+    // 密碼驗證（如果是刪除最後一筆且使用快速刪除，可能需要驗證；這裡保留原有邏輯）
+    if (!options.skipPassword) {
         if (!await requirePassword()) return false;
     } else {
-        if (options.skipPassword) {
-            const now = Date.now();
-            if (now - lastQuickDeleteTime < 5000) {
-                if (!await requirePassword()) return false;
-            }
-            lastQuickDeleteTime = now;
-        } else {
+        const now = Date.now();
+        if (now - lastQuickDeleteTime < 5000) {
             if (!await requirePassword()) return false;
         }
+        lastQuickDeleteTime = now;
     }
     if (!confirm("確定要刪除此記錄嗎？此操作不可復原！")) return false;
     if (gapiReady) {
@@ -1656,17 +1673,6 @@ async function deleteRecordById(id, options = {}) {
     if (index !== -1) records.splice(index, 1);
     saveRecords();
     renderRecordsTables();
-    const type = recordToDelete.type === 'sales' ? 'sales' : 'consumption';
-    // 刪除後直接隱藏該類型的最近記錄區塊（不顯示前一筆）
-    if (type === 'sales') {
-        lastSalesRecord = null;
-        const div = document.getElementById('salesRecent');
-        if (div) div.style.display = 'none';
-    } else {
-        lastConsumeRecord = null;
-        const div = document.getElementById('consumeRecent');
-        if (div) div.style.display = 'none';
-    }
     showToast("記錄已刪除並同步雲端");
     return true;
 }
@@ -1758,10 +1764,9 @@ async function submitConsumption() {
     }
 }
 
-// 事件綁定
+// 事件綁定（確保提交按鈕綁定正確）
 document.getElementById("settingsIconSales").addEventListener("click", openSettingsPage);
 document.getElementById("settingsIconConsume").addEventListener("click", openSettingsPage);
-document.getElementById("settingsIconInventory").addEventListener("click", openSettingsPage);
 document.getElementById("changePasswordBtn").addEventListener("click", async () => {
     const newPwd = document.getElementById("newPassword").value, confirmPwd = document.getElementById("confirmPassword").value;
     if (!newPwd) { alert("請輸入新密碼"); return; }
@@ -2001,8 +2006,11 @@ document.querySelectorAll(".nav-btn").forEach(btn => {
 // 確保提交按鈕綁定（防止被覆蓋）
 document.getElementById("submitSales").onclick = submitSales;
 document.getElementById("submitConsume").onclick = submitConsumption;
-// 庫存管理頁的齒輪按鈕
-document.getElementById("settingsIconInventory").addEventListener("click", openSettingsPage);
+// 關閉 iframe 並清空資源，解決返回問題
+document.getElementById("closeIframeBtn").addEventListener("click", () => {
+    document.getElementById("iframeModal").style.display = "none";
+    document.getElementById("bookingIframe").src = "";
+});
 </script>
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
