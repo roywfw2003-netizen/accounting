@@ -64,6 +64,9 @@
         .settings-icon-small i { color: white; }
         .danger-btn { color: #b91c1c !important; }
         body.dark .danger-btn { color: #ff7b72 !important; }
+        /* 導航按鈕圖示顏色改為黑色 */
+        .nav-btn i { color: black; }
+        body.dark .nav-btn i { color: #f3f4f6; }
 
         #loginPanel {
             position: fixed;
@@ -1234,7 +1237,7 @@ async function renderRecordsTables() {
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
             </tr>`;
         }
-        html += '</tbody></table>';
+        html += '</tbody></td>';
         salesContainer.innerHTML = html;
         document.querySelectorAll('#salesTable .sortable').forEach(th => {
             th.style.cursor = 'pointer';
@@ -1264,7 +1267,7 @@ async function renderRecordsTables() {
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
             </tr>`;
         }
-        html += '</tbody></table>';
+        html += '</tbody></tr>';
         consumeContainer.innerHTML = html;
         document.querySelectorAll('#consumeTable .sortable').forEach(th => {
             th.style.cursor = 'pointer';
@@ -1750,7 +1753,7 @@ async function submitConsumption() {
     }
 }
 
-// 事件綁定
+// 事件綁定（確保提交按鈕綁定正確）
 document.getElementById("settingsIconSales").addEventListener("click", openSettingsPage);
 document.getElementById("settingsIconConsume").addEventListener("click", openSettingsPage);
 document.getElementById("changePasswordBtn").addEventListener("click", async () => {
@@ -1978,13 +1981,7 @@ function ensureInit() {
     } else setTimeout(ensureInit, 200);
 }
 window.addEventListener('load', () => { loadLocalData(); bindActivityEvents(); ensureInit(); });
-// 修復學生預約返回
-document.getElementById("closeIframeBtn").onclick = () => {
-    document.getElementById("iframeModal").style.display = "none";
-    document.getElementById("bookingIframe").src = "";
-    showPage("sales");
-};
-// 確保導航按鈕綁定
+// 確保導航按鈕綁定（不覆蓋提交按鈕）
 document.querySelectorAll(".nav-btn").forEach(btn => {
     if (btn.id === "studentBookingBtn") {
         btn.onclick = () => {
@@ -1995,6 +1992,9 @@ document.querySelectorAll(".nav-btn").forEach(btn => {
         btn.onclick = () => showPage(btn.dataset.page);
     }
 });
+// 確保提交按鈕綁定（防止被覆蓋）
+document.getElementById("submitSales").onclick = submitSales;
+document.getElementById("submitConsume").onclick = submitConsumption;
 </script>
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
