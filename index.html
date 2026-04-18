@@ -529,6 +529,59 @@ let passwordAuth = { verified: false };
 let lastQuickDeleteTime = 0;
 let idleTimer = null;
 
+// ---------- 新增：本地庫存快取 ----------
+let cachedInventory = [];  // 記憶體快取
+async function updateCachedInventory() {
+    if (!gapiReady) {
+        // 未登入時從 localStorage 讀取
+        const localInv = localStorage.getItem('cachedInventory');
+        if (localInv) cachedInventory = JSON.parse(localInv);
+        return;
+    }
+    try {
+        const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '庫存!A:G' });
+        const rows = resp.result.values || [];
+        const inventory = [];
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            if (row.length >= 4) {
+                inventory.push({
+                    product: row[0],
+                    stock: parseInt(row[1]) || 0,
+                    avgCost: parseFloat(row[2]) || 0,
+                    totalCost: parseFloat(row[3]) || 0,
+                    type: row[4] || '普通',
+                    lastUpdate: row[5] || '',
+                    unit: row[6] || ''
+                });
+            }
+        }
+        cachedInventory = inventory;
+        localStorage.setItem('cachedInventory', JSON.stringify(inventory));
+    } catch(e) {
+        console.error("更新庫存快取失敗", e);
+        // 失敗時保留舊快取
+    }
+}
+async function loadInventory() {
+    if (cachedInventory.length === 0) await updateCachedInventory();
+    return cachedInventory;
+}
+async function saveInventory(inventory) {
+    if (!gapiReady) return false;
+    try {
+        await ensureSheetExists('庫存', ['產品名稱','目前庫存','平均單價','總成本','類型','最後更新時間','單位']);
+        await clearSheetData('庫存');
+        for (let item of inventory) {
+            await appendToSheet('庫存', [item.product, item.stock, item.avgCost, item.totalCost, item.type, item.lastUpdate, item.unit]);
+        }
+        cachedInventory = inventory;
+        localStorage.setItem('cachedInventory', JSON.stringify(inventory));
+        return true;
+    } catch(e) { console.error("儲存庫存失敗", e); return false; }
+}
+// ---------- 庫存快取結束 ----------
+
 function resetIdleTimer() {
     if (idleTimer) clearTimeout(idleTimer);
     idleTimer = setTimeout(() => {
@@ -619,6 +672,29 @@ function loadLocalData() {
     if (storedRed) redThreshold = parseInt(storedRed);
     const storedGreen = localStorage.getItem('greenThreshold');
     if (storedGreen) greenThreshold = parseInt(storedGreen);
+    
+    // 恢復 UI 字體設定
+    const savedFontScale = localStorage.getItem('buttonFontScale');
+    if (savedFontScale) {
+        let v = parseFloat(savedFontScale);
+        document.documentElement.style.setProperty('--button-font-scale', v);
+        if(document.getElementById('fontScaleSlider')) document.getElementById('fontScaleSlider').value = v;
+        if(document.getElementById('fontScaleValue')) document.getElementById('fontScaleValue').innerText = Math.round(v*100)+'%';
+    }
+    const savedRecordsScale = localStorage.getItem('recordsFontScale');
+    if (savedRecordsScale) {
+        let v = parseFloat(savedRecordsScale);
+        document.documentElement.style.setProperty('--records-font-scale', v);
+        if(document.getElementById('recordsScaleSlider')) document.getElementById('recordsScaleSlider').value = v;
+        if(document.getElementById('recordsScaleValue')) document.getElementById('recordsScaleValue').innerText = Math.round(v*100)+'%';
+    }
+    const savedButtonTextScale = localStorage.getItem('buttonTextScale');
+    if (savedButtonTextScale) {
+        let v = parseFloat(savedButtonTextScale);
+        document.documentElement.style.setProperty('--button-text-scale', v);
+        if(document.getElementById('buttonTextSlider')) document.getElementById('buttonTextSlider').value = v;
+        if(document.getElementById('buttonTextValue')) document.getElementById('buttonTextValue').innerText = Math.round(v*100)+'%';
+    }
 }
 function saveStaff() { localStorage.setItem("staffList", JSON.stringify(staffList)); }
 function saveProducts() { localStorage.setItem("productList", JSON.stringify(productList)); }
@@ -669,7 +745,6 @@ async function appendToSheet(sheetName, values) {
 }
 async function clearSheetData(sheetName) {
     const range = `${sheetName}!A2:Z`;
-    // 嘗試清除，最多重試3次
     for (let i = 0; i < 3; i++) {
         try {
             await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId: SPREADSHEET_ID, range: range });
@@ -791,42 +866,7 @@ async function appendToBackup(sheetName, record, operationType) {
     }
 }
 
-// 庫存相關
-async function loadInventory() {
-    if (!gapiReady) return [];
-    try {
-        const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '庫存!A:G' });
-        const rows = resp.result.values || [];
-        if (rows.length <= 1) return [];
-        const inventory = [];
-        for (let i = 1; i < rows.length; i++) {
-            const row = rows[i];
-            if (row.length >= 4) {
-                inventory.push({
-                    product: row[0],
-                    stock: parseInt(row[1]) || 0,
-                    avgCost: parseFloat(row[2]) || 0,
-                    totalCost: parseFloat(row[3]) || 0,
-                    type: row[4] || '普通',
-                    lastUpdate: row[5] || '',
-                    unit: row[6] || ''
-                });
-            }
-        }
-        return inventory;
-    } catch(e) { console.error("讀取庫存失敗", e); return []; }
-}
-async function saveInventory(inventory) {
-    if (!gapiReady) return false;
-    try {
-        await ensureSheetExists('庫存', ['產品名稱','目前庫存','平均單價','總成本','類型','最後更新時間','單位']);
-        await clearSheetData('庫存');
-        for (let item of inventory) {
-            await appendToSheet('庫存', [item.product, item.stock, item.avgCost, item.totalCost, item.type, item.lastUpdate, item.unit]);
-        }
-        return true;
-    } catch(e) { console.error("儲存庫存失敗", e); return false; }
-}
+// 庫存相關 (已改用快取，但保留原本 updateStock 等)
 async function updateStock(productName, deltaQty, reason, extraCost = null, extraAmount = null, transactionDate = null) {
     let inventory = await loadInventory();
     let idx = inventory.findIndex(i => i.product === productName);
@@ -939,11 +979,11 @@ async function renderInventoryPage() {
     }));
 }
 
-// 渲染產品按鈕（文字顏色跟隨普通按鈕，圓圈燈號顯示數字）
+// 渲染產品按鈕（使用快取庫存）
 async function renderProducts() {
     const container = document.getElementById("productList");
     if (!container) return;
-    const inventory = await loadInventory();
+    const inventory = await loadInventory(); // 使用快取
     container.innerHTML = "";
     for (let p of productList) {
         const inv = inventory.find(i => i.product === p.name);
@@ -961,7 +1001,6 @@ async function renderProducts() {
         btn.style.justifyContent = "center";
         btn.style.position = "relative";
         btn.style.padding = "12px 8px";
-        // 左側圓圈
         const circleSpan = document.createElement("span");
         circleSpan.style.position = "absolute";
         circleSpan.style.left = "8px";
@@ -1048,15 +1087,13 @@ function showPage(pageId) {
         document.getElementById("buttonsPerRow").value = buttonsPerRow;
         document.getElementById("redThreshold").value = redThreshold;
         document.getElementById("greenThreshold").value = greenThreshold;
-        const currentScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--button-font-scale')) || 1.5;
-        document.getElementById("fontScaleSlider").value = currentScale;
-        document.getElementById("fontScaleValue").innerText = Math.round(currentScale * 100) + "%";
-        const currentRecordsScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--records-font-scale')) || 1;
-        document.getElementById("recordsScaleSlider").value = currentRecordsScale;
-        document.getElementById("recordsScaleValue").innerText = Math.round(currentRecordsScale * 100) + "%";
-        const currentButtonTextScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--button-text-scale')) || 1;
-        document.getElementById("buttonTextSlider").value = currentButtonTextScale;
-        document.getElementById("buttonTextValue").innerText = Math.round(currentButtonTextScale * 100) + "%";
+        // 從 localStorage 讀取滑塊值，確保設定正確顯示
+        const savedFontScale = localStorage.getItem('buttonFontScale');
+        if(savedFontScale) document.getElementById("fontScaleSlider").value = savedFontScale;
+        const savedRecordsScale = localStorage.getItem('recordsFontScale');
+        if(savedRecordsScale) document.getElementById("recordsScaleSlider").value = savedRecordsScale;
+        const savedButtonTextScale = localStorage.getItem('buttonTextScale');
+        if(savedButtonTextScale) document.getElementById("buttonTextSlider").value = savedButtonTextScale;
     }
 }
 
@@ -1146,7 +1183,6 @@ function updateRecentRecord(type) {
     };
     delBtn.onclick = async () => {
         await deleteRecordById(record.id, { skipPassword: true });
-        // 刪除後會自動清除對應的 last 變數並隱藏 div，不需要再呼叫 updateRecentRecord
     };
 }
 function showEditModal(record) {
@@ -1221,7 +1257,6 @@ function showEditModal(record) {
         content.appendChild(cancelBtn);
     }
     async function finalizeEdit(record, modal) {
-        // 如果修改的是目前顯示的最後一筆記錄，則清除對應的 last 變數並隱藏區域
         if (record.type === 'sales' && lastSalesRecord && lastSalesRecord.id === record.id) {
             lastSalesRecord = null;
             const div = document.getElementById('salesRecent');
@@ -1244,7 +1279,6 @@ function showEditModal(record) {
             }
         }
         renderRecordsTables();
-        // 不重新呼叫 updateRecentRecord，因為已經清除顯示
         showToast("記錄已修改並同步雲端");
         modal.remove();
     }
@@ -1280,7 +1314,7 @@ async function renderRecordsTables() {
                 <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
                 <td>${backupStatus}</td>
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
-             </tr>`;
+            </tr>`;
         }
         html += '</tbody></table>';
         salesContainer.innerHTML = html;
@@ -1310,7 +1344,7 @@ async function renderRecordsTables() {
                 <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
                 <td>${backupStatus}</td>
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
-             </tr>`;
+            </tr>`;
         }
         html += '</tbody></table>';
         consumeContainer.innerHTML = html;
@@ -1468,17 +1502,13 @@ async function syncConfigToSheet() {
     if (!gapiReady) return;
     try {
         await ensureSheetExists(CONFIG_SHEET, ["類型","鍵","值"]);
-        // 先清除整個工作表，再寫入乾淨的資料（去重後）
         await clearSheetData(CONFIG_SHEET);
-        // 員工去重（依工號）
         const uniqueStaff = new Map();
         staffList.forEach(s => uniqueStaff.set(s.code, s));
         for (let s of uniqueStaff.values()) await appendToSheet(CONFIG_SHEET, ['employee', s.code, s.name]);
-        // 產品去重（依名稱）
         const uniqueProducts = new Map();
         productList.forEach(p => uniqueProducts.set(p.name, p));
         for (let p of uniqueProducts.values()) await appendToSheet(CONFIG_SHEET, ['product', p.name, p.price.toString()]);
-        // 預設金額去重（依數值）
         const uniquePresets = [...new Set(presetAmounts)];
         for (let amt of uniquePresets) await appendToSheet(CONFIG_SHEET, ['preset', amt.toString(), amt.toString()]);
         await appendToSheet(CONFIG_SHEET, ['password', 'admin', settingsPassword]);
@@ -1490,8 +1520,8 @@ async function loadConfigFromSheet() {
         const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: 'staff!A:C' });
         if (resp.result.values && resp.result.values.length > 1) {
             const rows = resp.result.values.slice(1);
-            const cloudStaff = new Map();    // code -> name
-            const cloudProducts = new Map();  // name -> price
+            const cloudStaff = new Map();
+            const cloudProducts = new Map();
             const cloudPresets = new Set();
             let newPassword = null;
             for (let row of rows) {
@@ -1501,7 +1531,6 @@ async function loadConfigFromSheet() {
                 else if (type === 'preset') cloudPresets.add(parseFloat(val));
                 else if (type === 'password' && key === 'admin') newPassword = val;
             }
-            // 合併雲端與本地資料（本地優先，但雲端有的本地沒有則加入）
             const mergedStaffMap = new Map();
             staffList.forEach(s => mergedStaffMap.set(s.code, s));
             for (let [code, name] of cloudStaff.entries()) {
@@ -1597,6 +1626,36 @@ async function pullAllRecordsFromSheets() {
         return false;
     }
 }
+// 新增：重試失敗同步的函數
+async function retryFailedSync() {
+    if (!gapiReady) { showToast("未登入，無法重試同步"); return; }
+    const failedRecords = records.filter(r => r.syncStatus === 'failed');
+    if (failedRecords.length === 0) { showToast("沒有失敗的記錄"); return; }
+    let successCount = 0;
+    for (const rec of failedRecords) {
+        try {
+            const sheetName = rec.type === 'sales' ? '產品' : '客人';
+            await ensureSheetExists(sheetName, sheetName === '產品' ? ["年份","月份","日期","員工姓名","員工工號","產品名稱","金額","支付方式","時間","同步狀態","訂單編號"] : ["日期","員工姓名","員工工號","金額","支付方式","時間","同步狀態","訂單編號"]);
+            if (sheetName === '產品') {
+                const googleDate = toGoogleDate(rec.date);
+                const { year, month, day } = extractYearMonthDay(googleDate);
+                await appendToSheet(sheetName, [year, month, day, rec.staffName, rec.staffCode, rec.productName, rec.amount.toString(), rec.payment, getCurrentTime(), 'success', rec.id]);
+            } else {
+                await appendToSheet(sheetName, [toGoogleDate(rec.date), rec.staffName, rec.staffCode, rec.amount.toString(), rec.payment, getCurrentTime(), 'success', rec.id]);
+            }
+            await appendToBackup(sheetName, rec, "重試新增");
+            rec.syncStatus = 'success';
+            delete rec.syncError;
+            successCount++;
+        } catch(e) {
+            console.error(`重試記錄 ${rec.id} 失敗`, e);
+            rec.syncError = e.message;
+        }
+    }
+    saveRecords();
+    renderRecordsTables();
+    showToast(`重試完成：成功 ${successCount} 筆，失敗 ${failedRecords.length - successCount} 筆`);
+}
 async function addRecord(recordData) {
     const newId = Date.now() + "_" + Math.random().toString(36).substr(2, 6);
     const safeDate = ensureValidDate(recordData.date);
@@ -1611,7 +1670,6 @@ async function addRecord(recordData) {
     records.unshift(newRecord);
     saveRecords();
     renderRecordsTables();
-    // 更新最後一筆記錄變數（新提交的訂單會成為最後一筆）
     if (recordData.type === 'sales') {
         lastSalesRecord = { ...newRecord };
         updateRecentRecord('sales');
@@ -1619,20 +1677,30 @@ async function addRecord(recordData) {
         lastConsumeRecord = { ...newRecord };
         updateRecentRecord('consumption');
     }
+    // 嘗試同步，若失敗則標記為 failed
     if (gapiReady) {
-        const sheetName = newRecord.type === 'sales' ? '產品' : '客人';
-        await ensureSheetExists(sheetName, sheetName === '產品' ? ["年份","月份","日期","員工姓名","員工工號","產品名稱","金額","支付方式","時間","同步狀態","訂單編號"] : ["日期","員工姓名","員工工號","金額","支付方式","時間","同步狀態","訂單編號"]);
-        if (sheetName === '產品') {
-            const googleDate = toGoogleDate(newRecord.date);
-            const { year, month, day } = extractYearMonthDay(googleDate);
-            await appendToSheet(sheetName, [year, month, day, newRecord.staffName, newRecord.staffCode, newRecord.productName, newRecord.amount.toString(), newRecord.payment, getCurrentTime(), 'success', newRecord.id]);
-        } else {
-            await appendToSheet(sheetName, [toGoogleDate(newRecord.date), newRecord.staffName, newRecord.staffCode, newRecord.amount.toString(), newRecord.payment, getCurrentTime(), 'success', newRecord.id]);
+        try {
+            const sheetName = newRecord.type === 'sales' ? '產品' : '客人';
+            await ensureSheetExists(sheetName, sheetName === '產品' ? ["年份","月份","日期","員工姓名","員工工號","產品名稱","金額","支付方式","時間","同步狀態","訂單編號"] : ["日期","員工姓名","員工工號","金額","支付方式","時間","同步狀態","訂單編號"]);
+            if (sheetName === '產品') {
+                const googleDate = toGoogleDate(newRecord.date);
+                const { year, month, day } = extractYearMonthDay(googleDate);
+                await appendToSheet(sheetName, [year, month, day, newRecord.staffName, newRecord.staffCode, newRecord.productName, newRecord.amount.toString(), newRecord.payment, getCurrentTime(), 'success', newRecord.id]);
+            } else {
+                await appendToSheet(sheetName, [toGoogleDate(newRecord.date), newRecord.staffName, newRecord.staffCode, newRecord.amount.toString(), newRecord.payment, getCurrentTime(), 'success', newRecord.id]);
+            }
+            await appendToBackup(sheetName, newRecord, "新增");
+            newRecord.syncStatus = 'success';
+            saveRecords();
+            renderRecordsTables();
+        } catch(err) {
+            console.error("同步新記錄失敗", err);
+            newRecord.syncStatus = 'failed';
+            newRecord.syncError = err.message;
+            saveRecords();
+            renderRecordsTables();
+            showToast("記錄已儲存本地，但同步雲端失敗，稍後會自動重試");
         }
-        await appendToBackup(sheetName, newRecord, "新增");
-        newRecord.syncStatus = 'success';
-        saveRecords();
-        renderRecordsTables();
     }
     return newRecord;
 }
@@ -1661,7 +1729,6 @@ async function editRecord(record, options = {}) {
         } else { alert("修改無效"); return false; }
     }
     Object.assign(record, newData);
-    // 如果修改的是目前顯示的最後一筆記錄，則清除對應的 last 變數並隱藏區域
     if (record.type === 'sales' && lastSalesRecord && lastSalesRecord.id === record.id) {
         lastSalesRecord = null;
         const div = document.getElementById('salesRecent');
@@ -1684,14 +1751,12 @@ async function editRecord(record, options = {}) {
         }
     }
     renderRecordsTables();
-    // 不重新呼叫 updateRecentRecord，因為已經清除顯示
     showToast("記錄已修改並同步雲端");
     return true;
 }
 async function deleteRecordById(id, options = {}) {
     const recordToDelete = records.find(r => r.id === id);
     if (!recordToDelete) return false;
-    // 如果刪除的是目前顯示的最後一筆記錄，則清除對應的 last 變數並隱藏區域
     if (recordToDelete.type === 'sales' && lastSalesRecord && lastSalesRecord.id === id) {
         lastSalesRecord = null;
         const div = document.getElementById('salesRecent');
@@ -1701,7 +1766,6 @@ async function deleteRecordById(id, options = {}) {
         const div = document.getElementById('consumeRecent');
         if (div) div.style.display = 'none';
     }
-    // 密碼驗證（如果是刪除最後一筆且使用快速刪除，可能需要驗證；這裡保留原有邏輯）
     if (!options.skipPassword) {
         if (!await requirePassword()) return false;
     } else {
@@ -1818,7 +1882,7 @@ async function submitConsumption() {
     }
 }
 
-// 事件綁定（確保提交按鈕綁定正確）
+// 事件綁定
 document.getElementById("settingsIconSales").addEventListener("click", openSettingsPage);
 document.getElementById("settingsIconConsume").addEventListener("click", openSettingsPage);
 document.getElementById("changePasswordBtn").addEventListener("click", async () => {
@@ -1916,8 +1980,8 @@ document.getElementById("clearConsumeRecordsBtn").onclick = async () => {
         showToast("已清除");
     }
 };
-document.getElementById("retrySalesFailedSyncBtn").onclick = async () => { if (await requirePassword() && gapiReady) await fullSyncToSheets(); };
-document.getElementById("retryConsumeFailedSyncBtn").onclick = async () => { if (await requirePassword() && gapiReady) await fullSyncToSheets(); };
+document.getElementById("retrySalesFailedSyncBtn").onclick = async () => { if (await requirePassword() && gapiReady) await retryFailedSync(); };
+document.getElementById("retryConsumeFailedSyncBtn").onclick = async () => { if (await requirePassword() && gapiReady) await retryFailedSync(); };
 document.getElementById("repairSheetsBtn").onclick = async () => { if (await requirePassword() && gapiReady) await fullSyncToSheets(); };
 document.getElementById("manualSyncBtn").addEventListener("click", async () => { if (await requirePassword() && gapiReady) await pullAllRecordsFromSheets(); });
 document.getElementById("manualSyncBtnConsume").addEventListener("click", async () => { if (await requirePassword() && gapiReady) await pullAllRecordsFromSheets(); });
@@ -1992,9 +2056,11 @@ function attemptAutoLogin() {
         document.getElementById('loginPanel').style.display = 'none';
         document.querySelector('.app-container').style.display = 'flex';
         (async () => {
+            await updateCachedInventory(); // 先載入庫存快取
             await loadConfigFromSheet();
             await pullAllRecordsFromSheets();
             await syncProductTypesToInventory();
+            await retryFailedSync(); // 自動重試失敗的同步
             renderUI();
         })();
     };
@@ -2011,9 +2077,11 @@ document.getElementById('googleLoginBtn').onclick = () => {
         document.getElementById('loginPanel').style.display = 'none';
         document.querySelector('.app-container').style.display = 'flex';
         (async () => {
+            await updateCachedInventory();
             await loadConfigFromSheet();
             await pullAllRecordsFromSheets();
             await syncProductTypesToInventory();
+            await retryFailedSync();
             renderUI();
         })();
     };
@@ -2046,7 +2114,6 @@ function ensureInit() {
     } else setTimeout(ensureInit, 200);
 }
 window.addEventListener('load', () => { loadLocalData(); bindActivityEvents(); ensureInit(); });
-// 確保導航按鈕綁定（不覆蓋提交按鈕）
 document.querySelectorAll(".nav-btn").forEach(btn => {
     if (btn.id === "studentBookingBtn") {
         btn.onclick = () => {
@@ -2057,10 +2124,8 @@ document.querySelectorAll(".nav-btn").forEach(btn => {
         btn.onclick = () => showPage(btn.dataset.page);
     }
 });
-// 確保提交按鈕綁定（防止被覆蓋）
 document.getElementById("submitSales").onclick = submitSales;
 document.getElementById("submitConsume").onclick = submitConsumption;
-// 關閉 iframe 並清空資源，解決返回問題
 document.getElementById("closeIframeBtn").addEventListener("click", () => {
     document.getElementById("iframeModal").style.display = "none";
     document.getElementById("bookingIframe").src = "";
