@@ -533,7 +533,6 @@ let idleTimer = null;
 let cachedInventory = [];  // 記憶體快取
 async function updateCachedInventory() {
     if (!gapiReady) {
-        // 未登入時從 localStorage 讀取
         const localInv = localStorage.getItem('cachedInventory');
         if (localInv) cachedInventory = JSON.parse(localInv);
         return;
@@ -560,7 +559,6 @@ async function updateCachedInventory() {
         localStorage.setItem('cachedInventory', JSON.stringify(inventory));
     } catch(e) {
         console.error("更新庫存快取失敗", e);
-        // 失敗時保留舊快取
     }
 }
 async function loadInventory() {
@@ -715,7 +713,7 @@ function setDarkMode(enabled) {
 
 const CONFIG_SHEET = 'staff';
 
-// ---------- Google Sheets 操作 ----------
+// ---------- Google Sheets 操作 (加入重試機制) ----------
 async function ensureSheetExists(sheetName, headers) {
     try {
         const resp = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
@@ -735,13 +733,22 @@ async function ensureSheetExists(sheetName, headers) {
         }
     } catch(e) { console.error(`確保工作表 ${sheetName} 失敗`, e); }
 }
-async function appendToSheet(sheetName, values) {
-    await gapi.client.sheets.spreadsheets.values.append({
-        spreadsheetId: SPREADSHEET_ID,
-        range: `${sheetName}!A:Z`,
-        valueInputOption: 'USER_ENTERED',
-        resource: { values: [values] }
-    });
+async function appendToSheet(sheetName, values, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            await gapi.client.sheets.spreadsheets.values.append({
+                spreadsheetId: SPREADSHEET_ID,
+                range: `${sheetName}!A:Z`,
+                valueInputOption: 'USER_ENTERED',
+                resource: { values: [values] }
+            });
+            return;
+        } catch(e) {
+            console.warn(`appendToSheet 失敗 (${sheetName})，重試 ${i+1}/${retries}`, e);
+            if (i === retries - 1) throw e;
+            await new Promise(r => setTimeout(r, 500 * (i+1))); // 指數退避
+        }
+    }
 }
 async function clearSheetData(sheetName) {
     const range = `${sheetName}!A2:Z`;
@@ -866,7 +873,7 @@ async function appendToBackup(sheetName, record, operationType) {
     }
 }
 
-// 庫存相關 (已改用快取，但保留原本 updateStock 等)
+// 庫存相關 (已改用快取)
 async function updateStock(productName, deltaQty, reason, extraCost = null, extraAmount = null, transactionDate = null) {
     let inventory = await loadInventory();
     let idx = inventory.findIndex(i => i.product === productName);
@@ -983,7 +990,7 @@ async function renderInventoryPage() {
 async function renderProducts() {
     const container = document.getElementById("productList");
     if (!container) return;
-    const inventory = await loadInventory(); // 使用快取
+    const inventory = await loadInventory();
     container.innerHTML = "";
     for (let p of productList) {
         const inv = inventory.find(i => i.product === p.name);
@@ -1087,7 +1094,6 @@ function showPage(pageId) {
         document.getElementById("buttonsPerRow").value = buttonsPerRow;
         document.getElementById("redThreshold").value = redThreshold;
         document.getElementById("greenThreshold").value = greenThreshold;
-        // 從 localStorage 讀取滑塊值，確保設定正確顯示
         const savedFontScale = localStorage.getItem('buttonFontScale');
         if(savedFontScale) document.getElementById("fontScaleSlider").value = savedFontScale;
         const savedRecordsScale = localStorage.getItem('recordsFontScale');
@@ -1097,7 +1103,7 @@ function showPage(pageId) {
     }
 }
 
-// 原有渲染函數（保留完整）
+// 原有渲染函數
 function renderStaff(containerId, selectedCode, onChange) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -1296,8 +1302,12 @@ async function renderRecordsTables() {
             if (backupConsume.result.values) backupConsume.result.values.slice(1).forEach(row => { if(row[0]) backupIds.add(row[0]); });
         } catch(e) { console.warn("讀取備份狀態失敗", e); }
     }
-    const salesRecords = records.filter(r => r.type === 'sales');
-    const consumeRecords = records.filter(r => r.type === 'consumption');
+    let salesRecords = records.filter(r => r.type === 'sales');
+    let consumeRecords = records.filter(r => r.type === 'consumption');
+    // 依照日期降序排序（最新日期在上）
+    salesRecords.sort((a,b) => new Date(b.date) - new Date(a.date));
+    consumeRecords.sort((a,b) => new Date(b.date) - new Date(a.date));
+    
     if (salesRecords.length === 0) salesContainer.innerHTML = "<div>暫無產品銷售記錄</div>";
     else {
         let html = '<table class="records-table" id="salesTable"><thead><tr><th class="sortable" data-col="0" data-type="string">日子</th><th class="sortable" data-col="1" data-type="string">員工</th><th class="sortable" data-col="2" data-type="string">產品</th><th class="sortable" data-col="3" data-type="string">支付方式</th><th class="sortable" data-col="4" data-type="string">同步狀態</th><th class="sortable" data-col="5" data-type="string">備份狀態</th><th>操作</th></tr></thead><tbody>';
@@ -1616,6 +1626,8 @@ async function pullAllRecordsFromSheets() {
             }
         }
         records = Array.from(localMap.values());
+        // 合併後按日期降序排序
+        records.sort((a,b) => new Date(b.date) - new Date(a.date));
         saveRecords();
         renderRecordsTables();
         showToast(`已從雲端拉取 ${cloudRecords.length} 筆記錄，合併後本地共 ${records.length} 筆`);
@@ -1626,7 +1638,6 @@ async function pullAllRecordsFromSheets() {
         return false;
     }
 }
-// 新增：重試失敗同步的函數
 async function retryFailedSync() {
     if (!gapiReady) { showToast("未登入，無法重試同步"); return; }
     const failedRecords = records.filter(r => r.syncStatus === 'failed');
@@ -1668,6 +1679,8 @@ async function addRecord(recordData) {
         createdAt: new Date().toISOString()
     };
     records.unshift(newRecord);
+    // 新增後整體排序一次，確保顯示順序正確
+    records.sort((a,b) => new Date(b.date) - new Date(a.date));
     saveRecords();
     renderRecordsTables();
     if (recordData.type === 'sales') {
@@ -1677,7 +1690,6 @@ async function addRecord(recordData) {
         lastConsumeRecord = { ...newRecord };
         updateRecentRecord('consumption');
     }
-    // 嘗試同步，若失敗則標記為 failed
     if (gapiReady) {
         try {
             const sheetName = newRecord.type === 'sales' ? '產品' : '客人';
@@ -1739,6 +1751,8 @@ async function editRecord(record, options = {}) {
         if (div) div.style.display = 'none';
     }
     saveRecords();
+    // 修改後重新排序
+    records.sort((a,b) => new Date(b.date) - new Date(a.date));
     if (gapiReady) {
         const sheetName = record.type === 'sales' ? '產品' : '客人';
         const rowMap = await getRowMap(sheetName);
@@ -2056,11 +2070,11 @@ function attemptAutoLogin() {
         document.getElementById('loginPanel').style.display = 'none';
         document.querySelector('.app-container').style.display = 'flex';
         (async () => {
-            await updateCachedInventory(); // 先載入庫存快取
+            await updateCachedInventory();
             await loadConfigFromSheet();
             await pullAllRecordsFromSheets();
             await syncProductTypesToInventory();
-            await retryFailedSync(); // 自動重試失敗的同步
+            await retryFailedSync();
             renderUI();
         })();
     };
