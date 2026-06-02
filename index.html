@@ -313,18 +313,8 @@
             font-size: 0.8rem;
         }
         .daily-record-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             padding: 4px 0;
             border-bottom: 1px solid var(--border-color);
-        }
-        .daily-record-item .record-info {
-            flex: 1;
-        }
-        .daily-record-item .record-actions {
-            display: flex;
-            gap: 6px;
         }
         .settings-section { margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 24px; padding: 8px; }
         .settings-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
@@ -938,27 +928,27 @@ async function renderInventoryPage() {
     if (!container) return;
     const inventory = await loadInventory();
     if (inventory.length === 0) { container.innerHTML = "<div>暫無庫存資料</div>"; return; }
-    let html = '<table class="records-table"><thead><tr><th>產品</th><th>目前庫存</th><th>類型</th><th>平均單價</th><th>總成本</th><th>利潤</th><th>操作</th></tr></thead><tbody>';
+    let html = '<table class="records-table"><thead><tr><th>產品</th><th>目前庫存</th><th>類型</th><th>平均單價</th><th>總成本</th><th>利潤</th><th>操作</th><tr></thead><tbody>';
     for (let item of inventory) {
         const sellPrice = productList.find(p=>p.name===item.product)?.price || 0;
         const unitProfit = sellPrice - item.avgCost;
         const soldQty = records.filter(r=>r.type==='sales' && r.productName===item.product).length;
         const totalProfit = unitProfit * soldQty;
         html += `<tr>
-             <td>${item.product}</td>
-             <td>${item.stock}</td>
-             <td>${item.type}</td>
+              <td>${item.product}</td>
+              <td>${item.stock}</td>
+              <td>${item.type}</td>
             <td class="cost-price-col" style="${showCostPrice ? '' : 'filter: blur(4px);'}">${showCostPrice ? `$${item.avgCost.toFixed(2)}` : '●●●'}</td>
             <td class="cost-price-col" style="${showCostPrice ? '' : 'filter: blur(4px);'}">${showCostPrice ? `$${item.totalCost.toFixed(2)}` : '●●●'}</td>
             <td class="cost-price-col" style="${showCostPrice ? '' : 'filter: blur(4px);'}">${showCostPrice ? `$${totalProfit.toFixed(2)}` : '●●●'}</td>
-             <td>
+              <td>
                 <button class="small-btn replenish-btn" data-product="${item.product}">📦 補貨</button>
                 <button class="small-btn manual-btn" data-product="${item.product}">✏️ 手動調整</button>
                 ${item.type === '消耗品' ? `<button class="small-btn stocktake-btn" data-product="${item.product}">📋 盤點</button>` : ''}
-             </td>
-         </tr>`;
+              </td>
+          </tr>`;
     }
-    html += '</tbody></td>';
+    html += '</tbody></table>';
     container.innerHTML = html;
     document.querySelectorAll('.replenish-btn').forEach(btn => btn.addEventListener('click', async () => {
         if (!await requirePassword()) return;
@@ -1065,7 +1055,7 @@ function calcTotal() {
     return total;
 }
 
-// ---------- 新增：顯示當日所有記錄 ----------
+// ---------- 顯示當日所有記錄（無編輯/刪除按鈕） ----------
 function updateDailyRecords(type) {
     const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
     let dateStr = '';
@@ -1090,41 +1080,13 @@ function updateDailyRecords(type) {
     html += '<div class="daily-record-list">';
     filtered.forEach(rec => {
         if (type === 'sales') {
-            html += `<div class="daily-record-item" data-id="${rec.id}">
-                        <div class="record-info">📦 ${rec.productName} | 👤 ${rec.staffName} | 💰 $${rec.amount} | 💳 ${rec.payment}</div>
-                        <div class="record-actions">
-                            <button class="small-btn edit-daily-btn" data-id="${rec.id}" data-type="${type}">✏️</button>
-                            <button class="small-btn danger-btn delete-daily-btn" data-id="${rec.id}" data-type="${type}">🗑️</button>
-                        </div>
-                     </div>`;
+            html += `<div class="daily-record-item">📦 ${rec.productName} | 👤 ${rec.staffName} | 💰 $${rec.amount} | 💳 ${rec.payment}</div>`;
         } else {
-            html += `<div class="daily-record-item" data-id="${rec.id}">
-                        <div class="record-info">👤 ${rec.staffName} | 💰 $${rec.amount} | 💳 ${rec.payment}</div>
-                        <div class="record-actions">
-                            <button class="small-btn edit-daily-btn" data-id="${rec.id}" data-type="${type}">✏️</button>
-                            <button class="small-btn danger-btn delete-daily-btn" data-id="${rec.id}" data-type="${type}">🗑️</button>
-                        </div>
-                     </div>`;
+            html += `<div class="daily-record-item">👤 ${rec.staffName} | 💰 $${rec.amount} | 💳 ${rec.payment}</div>`;
         }
     });
     html += '</div>';
     div.innerHTML = html;
-    div.querySelectorAll('.edit-daily-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const id = btn.dataset.id;
-            const record = records.find(r => r.id === id);
-            if (record) showEditModal(record);
-        });
-    });
-    div.querySelectorAll('.delete-daily-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const id = btn.dataset.id;
-            await deleteRecordById(id, { skipPassword: true });
-            updateDailyRecords(type);
-        });
-    });
 }
 
 // 保留舊的 updateRecentRecord 以相容
@@ -1380,7 +1342,7 @@ async function renderRecordsTables() {
                 <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
                 <td>${backupStatus}</td>
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
-            </tr>`;
+             </tr>`;
         }
         html += '</tbody></table>';
         salesContainer.innerHTML = html;
@@ -1410,7 +1372,7 @@ async function renderRecordsTables() {
                 <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
                 <td>${backupStatus}</td>
                 <td class="action-btns"><button class="small-btn edit-btn" data-id="${rec.id}" data-type="edit">✏️ 修改</button><button class="small-btn danger-btn" data-id="${rec.id}" data-type="delete">🗑️ 刪除</button></td>
-            </tr>`;
+             </tr>`;
         }
         html += '</tbody></table>';
         consumeContainer.innerHTML = html;
