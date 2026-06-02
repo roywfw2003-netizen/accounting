@@ -143,14 +143,13 @@
             }
             .nav-btn { width: 100%; padding: 16px 8px; }
             .page { flex: 1; overflow-y: auto; }
-            /* 橫屏時按順序: 客人消費(1) → 產品銷售(2) → 庫存管理(3) → 學生預約(4) */
             .btn-group .nav-btn[data-page="consumption"] { order: 1; }
             .btn-group .nav-btn[data-page="sales"] { order: 2; }
             .btn-group .nav-btn[data-page="inventory"] { order: 3; }
             .btn-group .nav-btn#studentBookingBtn { order: 4; }
         }
 
-        /* 豎屏樣式: 前三個按鈕一排，第四個單獨一排，順序為 產品銷售 → 客人消費 → 庫存管理 → 學生預約 */
+        /* 豎屏樣式: 前三個按鈕一排，第四個單獨一排 */
         @media (orientation: portrait), (max-width: 899px) {
             .btn-group {
                 display: grid;
@@ -163,7 +162,6 @@
                 min-width: 0;
                 margin: 0;
             }
-            /* 學生預約按鈕強制佔滿整行 */
             .btn-group .nav-btn#studentBookingBtn {
                 grid-column: 1 / -1;
             }
@@ -302,13 +300,32 @@
             border-left: 4px solid var(--accent-orange);
             color: var(--text-primary);
             display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .daily-record-summary {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .daily-record-list {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+        }
+        .daily-record-item {
+            display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border-color);
         }
-        .recent-record span { flex: 1; word-break: break-word; }
-        .recent-record .action-btns { display: flex; gap: 8px; }
+        .daily-record-item .record-info {
+            flex: 1;
+        }
+        .daily-record-item .record-actions {
+            display: flex;
+            gap: 6px;
+        }
         .settings-section { margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 24px; padding: 8px; }
         .settings-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .settings-content { margin-top: 8px; }
@@ -485,7 +502,7 @@
 <div id="iframeModal" class="iframe-container"><button class="close-iframe" id="closeIframeBtn">✖ 關閉</button><iframe id="bookingIframe" src=""></iframe></div>
 
 <script>
-// ========== OAuth 設定（完全保留原始可登入版本） ==========
+// ========== OAuth 設定 ==========
 const CLIENT_ID = '448045465424-kg6sd2dhp0nu8bl4afnafhpmd9f8bhj2.apps.googleusercontent.com';
 const SPREADSHEET_ID = '1qqtTlgJoLdaDkNQVfzjyyEBbyvmcYB_3IQHRUnCPRMU';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
@@ -529,8 +546,8 @@ let passwordAuth = { verified: false };
 let lastQuickDeleteTime = 0;
 let idleTimer = null;
 
-// ---------- 新增：本地庫存快取 ----------
-let cachedInventory = [];  // 記憶體快取
+// 本地庫存快取
+let cachedInventory = [];
 async function updateCachedInventory() {
     if (!gapiReady) {
         const localInv = localStorage.getItem('cachedInventory');
@@ -578,7 +595,6 @@ async function saveInventory(inventory) {
         return true;
     } catch(e) { console.error("儲存庫存失敗", e); return false; }
 }
-// ---------- 庫存快取結束 ----------
 
 function resetIdleTimer() {
     if (idleTimer) clearTimeout(idleTimer);
@@ -603,7 +619,6 @@ async function requirePassword() {
     }
 }
 
-// 輔助函數
 function formatDisplayDate(dateStr) {
     if (!dateStr) return '日期遺失';
     const d = new Date(dateStr);
@@ -671,7 +686,6 @@ function loadLocalData() {
     const storedGreen = localStorage.getItem('greenThreshold');
     if (storedGreen) greenThreshold = parseInt(storedGreen);
     
-    // 恢復 UI 字體設定
     const savedFontScale = localStorage.getItem('buttonFontScale');
     if (savedFontScale) {
         let v = parseFloat(savedFontScale);
@@ -713,7 +727,7 @@ function setDarkMode(enabled) {
 
 const CONFIG_SHEET = 'staff';
 
-// ---------- Google Sheets 操作 (加入重試機制) ----------
+// Google Sheets 操作
 async function ensureSheetExists(sheetName, headers) {
     try {
         const resp = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
@@ -746,7 +760,7 @@ async function appendToSheet(sheetName, values, retries = 3) {
         } catch(e) {
             console.warn(`appendToSheet 失敗 (${sheetName})，重試 ${i+1}/${retries}`, e);
             if (i === retries - 1) throw e;
-            await new Promise(r => setTimeout(r, 500 * (i+1))); // 指數退避
+            await new Promise(r => setTimeout(r, 500 * (i+1)));
         }
     }
 }
@@ -873,7 +887,7 @@ async function appendToBackup(sheetName, record, operationType) {
     }
 }
 
-// 庫存相關 (已改用快取)
+// 庫存相關
 async function updateStock(productName, deltaQty, reason, extraCost = null, extraAmount = null, transactionDate = null) {
     let inventory = await loadInventory();
     let idx = inventory.findIndex(i => i.product === productName);
@@ -944,7 +958,7 @@ async function renderInventoryPage() {
              </td>
          </tr>`;
     }
-    html += '</tbody></table>';
+    html += '</tbody></td>';
     container.innerHTML = html;
     document.querySelectorAll('.replenish-btn').forEach(btn => btn.addEventListener('click', async () => {
         if (!await requirePassword()) return;
@@ -986,7 +1000,7 @@ async function renderInventoryPage() {
     }));
 }
 
-// 渲染產品按鈕（使用快取庫存）
+// 渲染產品按鈕
 async function renderProducts() {
     const container = document.getElementById("productList");
     if (!container) return;
@@ -1051,6 +1065,73 @@ function calcTotal() {
     return total;
 }
 
+// ---------- 新增：顯示當日所有記錄 ----------
+function updateDailyRecords(type) {
+    const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
+    let dateStr = '';
+    if (type === 'sales') {
+        dateStr = document.getElementById('salesDate').value;
+    } else {
+        dateStr = document.getElementById('consumeDate').value;
+    }
+    if (!dateStr) {
+        if (div) div.style.display = 'none';
+        return;
+    }
+    const filtered = records.filter(r => r.type === type && r.date === dateStr);
+    if (filtered.length === 0) {
+        div.style.display = 'none';
+        return;
+    }
+    div.style.display = 'flex';
+    let totalAmount = 0;
+    filtered.forEach(rec => { totalAmount += rec.amount; });
+    let html = `<div class="daily-record-summary">📅 ${formatDisplayDate(dateStr)} 共 ${filtered.length} 筆，總金額 $${totalAmount}</div>`;
+    html += '<div class="daily-record-list">';
+    filtered.forEach(rec => {
+        if (type === 'sales') {
+            html += `<div class="daily-record-item" data-id="${rec.id}">
+                        <div class="record-info">📦 ${rec.productName} | 👤 ${rec.staffName} | 💰 $${rec.amount} | 💳 ${rec.payment}</div>
+                        <div class="record-actions">
+                            <button class="small-btn edit-daily-btn" data-id="${rec.id}" data-type="${type}">✏️</button>
+                            <button class="small-btn danger-btn delete-daily-btn" data-id="${rec.id}" data-type="${type}">🗑️</button>
+                        </div>
+                     </div>`;
+        } else {
+            html += `<div class="daily-record-item" data-id="${rec.id}">
+                        <div class="record-info">👤 ${rec.staffName} | 💰 $${rec.amount} | 💳 ${rec.payment}</div>
+                        <div class="record-actions">
+                            <button class="small-btn edit-daily-btn" data-id="${rec.id}" data-type="${type}">✏️</button>
+                            <button class="small-btn danger-btn delete-daily-btn" data-id="${rec.id}" data-type="${type}">🗑️</button>
+                        </div>
+                     </div>`;
+        }
+    });
+    html += '</div>';
+    div.innerHTML = html;
+    div.querySelectorAll('.edit-daily-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.id;
+            const record = records.find(r => r.id === id);
+            if (record) showEditModal(record);
+        });
+    });
+    div.querySelectorAll('.delete-daily-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.id;
+            await deleteRecordById(id, { skipPassword: true });
+            updateDailyRecords(type);
+        });
+    });
+}
+
+// 保留舊的 updateRecentRecord 以相容
+function updateRecentRecord(type) {
+    updateDailyRecords(type);
+}
+
 // 頁面切換
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
@@ -1061,16 +1142,20 @@ function showPage(pageId) {
         else btn.classList.remove("active");
     });
     if (pageId === "sales") {
-        document.getElementById("salesDate").value = getTodayISO();
+        const salesDateInput = document.getElementById("salesDate");
+        salesDateInput.value = getTodayISO();
         renderProducts();
-        updateRecentRecord('sales');
+        updateDailyRecords('sales');
         renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
+        salesDateInput.onchange = () => updateDailyRecords('sales');
     }
     if (pageId === "consumption") {
-        document.getElementById("consumeDate").value = getTodayISO();
+        const consumeDateInput = document.getElementById("consumeDate");
+        consumeDateInput.value = getTodayISO();
         renderPresetButtons();
-        updateRecentRecord('consumption');
+        updateDailyRecords('consumption');
         renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
+        consumeDateInput.onchange = () => updateDailyRecords('consumption');
     }
     if (pageId === "inventory") {
         renderInventoryPage();
@@ -1166,31 +1251,6 @@ function renderPresetButtons() {
 function clearPresetHighlight() {
     document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
 }
-function updateRecentRecord(type) {
-    const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
-    const record = (type === 'sales') ? lastSalesRecord : lastConsumeRecord;
-    if (!record) {
-        if(div) div.style.display = 'none';
-        return;
-    }
-    div.style.display = 'flex';
-    let content = '';
-    if (type === 'sales') {
-        content = `📅 ${record.displayDate || formatDisplayDate(record.date)} | 👤 ${record.staffName} | 📦 ${record.productName} | 💳 ${record.payment}`;
-    } else {
-        content = `📅 ${record.displayDate || formatDisplayDate(record.date)} | 👤 ${record.staffName} | 💰 $${record.amount} | 💳 ${record.payment}`;
-    }
-    div.innerHTML = `<span>${content}</span><div class="action-btns"><button class="small-btn edit-recent-btn" data-type="${type}" data-id="${record.id}">✏️ 修改</button><button class="small-btn danger-btn delete-recent-btn" data-type="${type}" data-id="${record.id}">🗑️ 刪除</button></div>`;
-    const editBtn = div.querySelector('.edit-recent-btn');
-    const delBtn = div.querySelector('.delete-recent-btn');
-    editBtn.onclick = async () => {
-        const targetRecord = records.find(r => r.id === record.id);
-        if (targetRecord) showEditModal(targetRecord);
-    };
-    delBtn.onclick = async () => {
-        await deleteRecordById(record.id, { skipPassword: true });
-    };
-}
 function showEditModal(record) {
     const modal = document.createElement('div');
     modal.className = 'edit-modal';
@@ -1265,12 +1325,8 @@ function showEditModal(record) {
     async function finalizeEdit(record, modal) {
         if (record.type === 'sales' && lastSalesRecord && lastSalesRecord.id === record.id) {
             lastSalesRecord = null;
-            const div = document.getElementById('salesRecent');
-            if (div) div.style.display = 'none';
         } else if (record.type === 'consumption' && lastConsumeRecord && lastConsumeRecord.id === record.id) {
             lastConsumeRecord = null;
-            const div = document.getElementById('consumeRecent');
-            if (div) div.style.display = 'none';
         }
         saveRecords();
         if (gapiReady) {
@@ -1285,6 +1341,7 @@ function showEditModal(record) {
             }
         }
         renderRecordsTables();
+        updateDailyRecords(record.type === 'sales' ? 'sales' : 'consumption');
         showToast("記錄已修改並同步雲端");
         modal.remove();
     }
@@ -1304,7 +1361,6 @@ async function renderRecordsTables() {
     }
     let salesRecords = records.filter(r => r.type === 'sales');
     let consumeRecords = records.filter(r => r.type === 'consumption');
-    // 依照日期降序排序（最新日期在上）
     salesRecords.sort((a,b) => new Date(b.date) - new Date(a.date));
     consumeRecords.sort((a,b) => new Date(b.date) - new Date(a.date));
     
@@ -1626,7 +1682,6 @@ async function pullAllRecordsFromSheets() {
             }
         }
         records = Array.from(localMap.values());
-        // 合併後按日期降序排序
         records.sort((a,b) => new Date(b.date) - new Date(a.date));
         saveRecords();
         renderRecordsTables();
@@ -1679,16 +1734,15 @@ async function addRecord(recordData) {
         createdAt: new Date().toISOString()
     };
     records.unshift(newRecord);
-    // 新增後整體排序一次，確保顯示順序正確
     records.sort((a,b) => new Date(b.date) - new Date(a.date));
     saveRecords();
     renderRecordsTables();
     if (recordData.type === 'sales') {
         lastSalesRecord = { ...newRecord };
-        updateRecentRecord('sales');
+        updateDailyRecords('sales');
     } else {
         lastConsumeRecord = { ...newRecord };
-        updateRecentRecord('consumption');
+        updateDailyRecords('consumption');
     }
     if (gapiReady) {
         try {
@@ -1743,15 +1797,10 @@ async function editRecord(record, options = {}) {
     Object.assign(record, newData);
     if (record.type === 'sales' && lastSalesRecord && lastSalesRecord.id === record.id) {
         lastSalesRecord = null;
-        const div = document.getElementById('salesRecent');
-        if (div) div.style.display = 'none';
     } else if (record.type === 'consumption' && lastConsumeRecord && lastConsumeRecord.id === record.id) {
         lastConsumeRecord = null;
-        const div = document.getElementById('consumeRecent');
-        if (div) div.style.display = 'none';
     }
     saveRecords();
-    // 修改後重新排序
     records.sort((a,b) => new Date(b.date) - new Date(a.date));
     if (gapiReady) {
         const sheetName = record.type === 'sales' ? '產品' : '客人';
@@ -1765,6 +1814,7 @@ async function editRecord(record, options = {}) {
         }
     }
     renderRecordsTables();
+    updateDailyRecords(record.type === 'sales' ? 'sales' : 'consumption');
     showToast("記錄已修改並同步雲端");
     return true;
 }
@@ -1773,12 +1823,8 @@ async function deleteRecordById(id, options = {}) {
     if (!recordToDelete) return false;
     if (recordToDelete.type === 'sales' && lastSalesRecord && lastSalesRecord.id === id) {
         lastSalesRecord = null;
-        const div = document.getElementById('salesRecent');
-        if (div) div.style.display = 'none';
     } else if (recordToDelete.type === 'consumption' && lastConsumeRecord && lastConsumeRecord.id === id) {
         lastConsumeRecord = null;
-        const div = document.getElementById('consumeRecent');
-        if (div) div.style.display = 'none';
     }
     if (!options.skipPassword) {
         if (!await requirePassword()) return false;
@@ -1805,6 +1851,8 @@ async function deleteRecordById(id, options = {}) {
     if (index !== -1) records.splice(index, 1);
     saveRecords();
     renderRecordsTables();
+    const type = recordToDelete.type === 'sales' ? 'sales' : 'consumption';
+    updateDailyRecords(type);
     showToast("記錄已刪除並同步雲端");
     return true;
 }
@@ -1860,6 +1908,7 @@ async function submitSales() {
         document.getElementById("salesDate").value = getTodayISO();
         selectedSalesPayment = "現金";
         renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
+        updateDailyRecords('sales');
     } finally {
         submitting = false;
         submitBtn.classList.remove("disabled-btn");
@@ -1890,6 +1939,7 @@ async function submitConsumption() {
         showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
         document.getElementById("consumeAmount").value = "";
         clearPresetHighlight();
+        updateDailyRecords('consumption');
     } finally {
         submitting = false;
         submitBtn.classList.remove("disabled-btn");
@@ -2115,7 +2165,8 @@ function renderUI() {
     renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
     renderProducts(); renderPresetButtons(); renderRecordsTables();
     renderStaffManageList(); renderProductManageList(); renderPresetManageList();
-    updateRecentRecord('sales'); updateRecentRecord('consumption');
+    updateDailyRecords('sales');
+    updateDailyRecords('consumption');
     setDarkMode(darkMode);
     showPage("sales");
     setButtonsPerRow(buttonsPerRow);
