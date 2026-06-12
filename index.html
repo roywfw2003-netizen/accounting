@@ -131,14 +131,13 @@
         .records-table th, .records-table td { font-size: calc(0.8rem * var(--records-font-scale)); }
         .sync-badge { font-size: calc(0.7rem * var(--records-font-scale)); }
 
-        /* 橫屏樣式 (保持原有順序: 客人消費 → 產品銷售 → 庫存管理 → 學生預約) */
         @media (orientation: landscape) and (min-width: 900px) {
             .app-container { flex-direction: row; padding: 12px; gap: 16px; }
-            .btn-group { 
-                display: flex; 
-                flex-direction: column; 
-                width: 120px; 
-                gap: 12px; 
+            .btn-group {
+                display: flex;
+                flex-direction: column;
+                width: 120px;
+                gap: 12px;
                 margin-bottom: 0;
             }
             .nav-btn { width: 100%; padding: 16px 8px; }
@@ -149,7 +148,6 @@
             .btn-group .nav-btn#studentBookingBtn { order: 4; }
         }
 
-        /* 豎屏樣式: 前三個按鈕一排，第四個單獨一排 */
         @media (orientation: portrait), (max-width: 899px) {
             .btn-group {
                 display: grid;
@@ -504,6 +502,63 @@ let gapiReady = false;
 let settingsPassword = 'admin123';
 let darkMode = localStorage.getItem('darkMode') === 'true';
 
+// ========== Token 生命週期管理 ==========
+let tokenExpiryTime = 0;
+const TOKEN_REFRESH_MARGIN = 5 * 60 * 1000; // 提前 5 分鐘刷新
+let refreshTimer = null;
+let tokenRefreshInProgress = false;
+
+function setGapiToken(accessToken, expiresIn = 3600) {
+    gapi.client.setToken({ access_token: accessToken });
+    tokenExpiryTime = Date.now() + expiresIn * 1000;
+    console.log('Token 已設置，預計過期時間：', new Date(tokenExpiryTime).toLocaleTimeString());
+    scheduleTokenRefresh();
+}
+
+function scheduleTokenRefresh() {
+    if (refreshTimer) clearTimeout(refreshTimer);
+    const delay = tokenExpiryTime - Date.now() - TOKEN_REFRESH_MARGIN;
+    if (delay > 0) {
+        refreshTimer = setTimeout(() => {
+            console.log('Token 即將過期，嘗試靜默刷新...');
+            refreshAccessToken().catch(e => console.warn('背景刷新失敗', e));
+        }, delay);
+    } else {
+        refreshAccessToken().catch(e => console.warn('立即刷新失敗', e));
+    }
+}
+
+async function refreshAccessToken() {
+    if (tokenRefreshInProgress) return;
+    tokenRefreshInProgress = true;
+    return new Promise((resolve, reject) => {
+        tokenClient.callback = (resp) => {
+            tokenRefreshInProgress = false;
+            if (resp.error !== undefined) {
+                console.error('刷新 token 失敗', resp);
+                document.getElementById('loginPanel').style.display = 'flex';
+                document.querySelector('.app-container').style.display = 'none';
+                reject(resp.error);
+                return;
+            }
+            setGapiToken(resp.access_token, resp.expires_in || 3600);
+            resolve(resp.access_token);
+        };
+        tokenClient.requestAccessToken({ prompt: '' });
+    });
+}
+
+async function ensureToken() {
+    if (!gapiReady) return;
+    if (Date.now() < tokenExpiryTime - TOKEN_REFRESH_MARGIN) return;
+    await refreshAccessToken();
+}
+
+// 清除定時器避免記憶體洩漏
+window.addEventListener('beforeunload', () => {
+    if (refreshTimer) clearTimeout(refreshTimer);
+});
+
 let staffList = [
     { code: "1", name: "Roy" },
     { code: "2", name: "Ken" },
@@ -539,6 +594,7 @@ let idleTimer = null;
 // 本地庫存快取
 let cachedInventory = [];
 async function updateCachedInventory() {
+    await ensureToken();
     if (!gapiReady) {
         const localInv = localStorage.getItem('cachedInventory');
         if (localInv) cachedInventory = JSON.parse(localInv);
@@ -573,6 +629,7 @@ async function loadInventory() {
     return cachedInventory;
 }
 async function saveInventory(inventory) {
+    await ensureToken();
     if (!gapiReady) return false;
     try {
         await ensureSheetExists('庫存', ['產品名稱','目前庫存','平均單價','總成本','類型','最後更新時間','單位']);
@@ -675,7 +732,7 @@ function loadLocalData() {
     if (storedRed) redThreshold = parseInt(storedRed);
     const storedGreen = localStorage.getItem('greenThreshold');
     if (storedGreen) greenThreshold = parseInt(storedGreen);
-    
+
     const savedFontScale = localStorage.getItem('buttonFontScale');
     if (savedFontScale) {
         let v = parseFloat(savedFontScale);
@@ -719,6 +776,7 @@ const CONFIG_SHEET = 'staff';
 
 // Google Sheets 操作
 async function ensureSheetExists(sheetName, headers) {
+    await ensureToken();
     try {
         const resp = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
         const sheets = resp.result.sheets;
@@ -738,6 +796,7 @@ async function ensureSheetExists(sheetName, headers) {
     } catch(e) { console.error(`確保工作表 ${sheetName} 失敗`, e); }
 }
 async function appendToSheet(sheetName, values, retries = 3) {
+    await ensureToken();
     for (let i = 0; i < retries; i++) {
         try {
             await gapi.client.sheets.spreadsheets.values.append({
@@ -748,6 +807,11 @@ async function appendToSheet(sheetName, values, retries = 3) {
             });
             return;
         } catch(e) {
+            if (e.status === 401 || (e.message && e.message.includes('401'))) {
+                console.warn('appendToSheet 遇到 401，嘗試刷新 token...');
+                await refreshAccessToken();
+                continue;
+            }
             console.warn(`appendToSheet 失敗 (${sheetName})，重試 ${i+1}/${retries}`, e);
             if (i === retries - 1) throw e;
             await new Promise(r => setTimeout(r, 500 * (i+1)));
@@ -755,6 +819,7 @@ async function appendToSheet(sheetName, values, retries = 3) {
     }
 }
 async function clearSheetData(sheetName) {
+    await ensureToken();
     const range = `${sheetName}!A2:Z`;
     for (let i = 0; i < 3; i++) {
         try {
@@ -768,11 +833,13 @@ async function clearSheetData(sheetName) {
     throw new Error(`清除工作表 ${sheetName} 失敗`);
 }
 async function getSheetId(sheetName) {
+    await ensureToken();
     const resp = await gapi.client.sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
     const sheet = resp.result.sheets.find(s => s.properties.title === sheetName);
     return sheet.properties.sheetId;
 }
 async function deleteSheetRow(sheetName, rowIndex) {
+    await ensureToken();
     const sheetId = await getSheetId(sheetName);
     await gapi.client.sheets.spreadsheets.batchUpdate({
         spreadsheetId: SPREADSHEET_ID,
@@ -786,6 +853,7 @@ async function deleteSheetRow(sheetName, rowIndex) {
     });
 }
 async function updateSheetRow(sheetName, rowIndex, record) {
+    await ensureToken();
     let values;
     if (sheetName === '產品') {
         const googleDate = toGoogleDate(record.date);
@@ -805,6 +873,7 @@ async function updateSheetRow(sheetName, rowIndex, record) {
     });
 }
 async function getRowMap(sheetName) {
+    await ensureToken();
     const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${sheetName}!A:Z` });
     const rows = resp.result.values || [];
     if (rows.length <= 1) return new Map();
@@ -819,6 +888,7 @@ async function getRowMap(sheetName) {
     return map;
 }
 async function fullSyncToSheets() {
+    await ensureToken();
     if (!gapiReady) { showToast("未登入，無法同步"); return false; }
     try {
         await ensureSheetExists('產品', ["年份","月份","日期","員工姓名","員工工號","產品名稱","金額","支付方式","時間","同步狀態","訂單編號"]);
@@ -847,6 +917,7 @@ async function fullSyncToSheets() {
     }
 }
 async function appendToBackup(sheetName, record, operationType) {
+    await ensureToken();
     const backupSheetName = sheetName === '產品' ? '產品Backup' : '客人Backup';
     let headers = [];
     if (sheetName === '產品') {
@@ -879,6 +950,7 @@ async function appendToBackup(sheetName, record, operationType) {
 
 // 庫存相關
 async function updateStock(productName, deltaQty, reason, extraCost = null, extraAmount = null, transactionDate = null) {
+    await ensureToken();
     let inventory = await loadInventory();
     let idx = inventory.findIndex(i => i.product === productName);
     if (idx === -1) return false;
@@ -1055,7 +1127,6 @@ function calcTotal() {
     return total;
 }
 
-// ---------- 顯示當日所有記錄（無編輯/刪除按鈕） ----------
 function updateDailyRecords(type) {
     const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
     let dateStr = '';
@@ -1089,12 +1160,10 @@ function updateDailyRecords(type) {
     div.innerHTML = html;
 }
 
-// 保留舊的 updateRecentRecord 以相容
 function updateRecentRecord(type) {
     updateDailyRecords(type);
 }
 
-// 頁面切換
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     const targetPage = document.getElementById(pageId + "Page");
@@ -1150,7 +1219,6 @@ function showPage(pageId) {
     }
 }
 
-// 原有渲染函數
 function renderStaff(containerId, selectedCode, onChange) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -1309,6 +1377,7 @@ function showEditModal(record) {
     }
 }
 async function renderRecordsTables() {
+    await ensureToken();
     const salesContainer = document.getElementById("salesRecordsTable");
     const consumeContainer = document.getElementById("consumeRecordsTable");
     if (!salesContainer || !consumeContainer) return;
@@ -1325,7 +1394,7 @@ async function renderRecordsTables() {
     let consumeRecords = records.filter(r => r.type === 'consumption');
     salesRecords.sort((a,b) => new Date(b.date) - new Date(a.date));
     consumeRecords.sort((a,b) => new Date(b.date) - new Date(a.date));
-    
+
     if (salesRecords.length === 0) salesContainer.innerHTML = "<div>暫無產品銷售記錄</div>";
     else {
         let html = '<table class="records-table" id="salesTable"><thead><tr><th class="sortable" data-col="0" data-type="string">日子</th><th class="sortable" data-col="1" data-type="string">員工</th><th class="sortable" data-col="2" data-type="string">產品</th><th class="sortable" data-col="3" data-type="string">支付方式</th><th class="sortable" data-col="4" data-type="string">同步狀態</th><th class="sortable" data-col="5" data-type="string">備份狀態</th><th>操作</th></tr></thead><tbody>';
@@ -1527,6 +1596,7 @@ function renderPresetManageList() {
     });
 }
 async function syncConfigToSheet() {
+    await ensureToken();
     if (!gapiReady) return;
     try {
         await ensureSheetExists(CONFIG_SHEET, ["類型","鍵","值"]);
@@ -1543,6 +1613,7 @@ async function syncConfigToSheet() {
     } catch (err) { console.error("同步設定失敗", err); }
 }
 async function loadConfigFromSheet() {
+    await ensureToken();
     if (!gapiReady) return;
     try {
         const resp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: 'staff!A:C' });
@@ -1581,6 +1652,7 @@ async function loadConfigFromSheet() {
     } catch (err) { console.error("讀取設定失敗", err); }
 }
 async function pullAllRecordsFromSheets() {
+    await ensureToken();
     if (!gapiReady) { showToast("未登入，無法從雲端拉取"); return false; }
     try {
         const salesResp = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: '產品!A:K' });
@@ -1656,6 +1728,7 @@ async function pullAllRecordsFromSheets() {
     }
 }
 async function retryFailedSync() {
+    await ensureToken();
     if (!gapiReady) { showToast("未登入，無法重試同步"); return; }
     const failedRecords = records.filter(r => r.syncStatus === 'failed');
     if (failedRecords.length === 0) { showToast("沒有失敗的記錄"); return; }
@@ -2078,6 +2151,7 @@ function attemptAutoLogin() {
             alert("登入失敗：" + (resp.error_description || resp.error));
             return;
         }
+        setGapiToken(resp.access_token, resp.expires_in || 3600);
         if (autoLoginTimer) clearTimeout(autoLoginTimer);
         document.getElementById('loginPanel').style.display = 'none';
         document.querySelector('.app-container').style.display = 'flex';
@@ -2100,6 +2174,7 @@ document.getElementById('googleLoginBtn').onclick = () => {
             alert("登入失敗：" + (resp.error_description || resp.error));
             return;
         }
+        setGapiToken(resp.access_token, resp.expires_in || 3600);
         document.getElementById('loginPanel').style.display = 'none';
         document.querySelector('.app-container').style.display = 'flex';
         (async () => {
