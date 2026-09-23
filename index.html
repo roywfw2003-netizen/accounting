@@ -504,7 +504,7 @@ let darkMode = localStorage.getItem('darkMode') === 'true';
 
 // ========== Token 生命週期管理 ==========
 let tokenExpiryTime = 0;
-const TOKEN_REFRESH_MARGIN = 5 * 60 * 1000; // 提前 5 分鐘刷新
+const TOKEN_REFRESH_MARGIN = 5 * 60 * 1000;
 let refreshTimer = null;
 let tokenRefreshInProgress = false;
 
@@ -554,7 +554,6 @@ async function ensureToken() {
     await refreshAccessToken();
 }
 
-// 清除定時器避免記憶體洩漏
 window.addEventListener('beforeunload', () => {
     if (refreshTimer) clearTimeout(refreshTimer);
 });
@@ -580,6 +579,10 @@ let lastSalesRecord = null;
 let lastConsumeRecord = null;
 const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付"];
 const SALES_PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付", "公司"];
+
+// ========== 產品名稱別名對照表（新增） ==========
+// 格式：{ 舊名: 當前名 }，用於產品改名後仍能正確統計利潤
+let productAliases = {};
 
 let toggleStaff = false, toggleProduct = false, togglePreset = false;
 let toggleSalesRecords = false, toggleConsumeRecords = false;
@@ -733,6 +736,12 @@ function loadLocalData() {
     const storedGreen = localStorage.getItem('greenThreshold');
     if (storedGreen) greenThreshold = parseInt(storedGreen);
 
+    // 載入產品別名對照表（新增）
+    const storedAliases = localStorage.getItem('productAliases');
+    if (storedAliases) {
+        try { productAliases = JSON.parse(storedAliases); } catch(e) { productAliases = {}; }
+    }
+
     const savedFontScale = localStorage.getItem('buttonFontScale');
     if (savedFontScale) {
         let v = parseFloat(savedFontScale);
@@ -770,6 +779,48 @@ function setDarkMode(enabled) {
     if (enabled) document.body.classList.add('dark');
     else document.body.classList.remove('dark');
     localStorage.setItem('darkMode', enabled);
+}
+
+// ========== 產品別名相關函式（新增） ==========
+function saveAliases() {
+    localStorage.setItem('productAliases', JSON.stringify(productAliases));
+}
+// 將 oldName 改名為 newName，並更新所有指向 oldName 的別名
+function updateAliasMap(oldName, newName) {
+    if (oldName === newName) return;
+    // 把所有 value 是 oldName 的別名改成 newName
+    for (const key in productAliases) {
+        if (productAliases[key] === oldName) {
+            productAliases[key] = newName;
+        }
+    }
+    // 記錄舊名 → 新名
+    productAliases[oldName] = newName;
+    // 移除自身對應
+    if (productAliases[newName] === newName) delete productAliases[newName];
+    saveAliases();
+}
+// 把任意名稱解析成當前名稱
+function resolveProductName(name) {
+    let cur = name;
+    let guard = 0;
+    while (productAliases[cur] && productAliases[cur] !== cur && guard < 10) {
+        cur = productAliases[cur];
+        guard++;
+    }
+    return cur;
+}
+// 產品改名時同步庫存與別名（核心修正）
+async function renameInventoryProduct(oldName, newName) {
+    if (oldName === newName) return;
+    const inventory = await loadInventory();
+    const idx = inventory.findIndex(i => i.product === oldName);
+    if (idx !== -1) {
+        inventory[idx].product = newName;
+        inventory[idx].lastUpdate = getCurrentTime();
+        await saveInventory(inventory);
+    }
+    updateAliasMap(oldName, newName);
 }
 
 const CONFIG_SHEET = 'staff';
@@ -963,14 +1014,17 @@ async function updateStock(productName, deltaQty, reason, extraCost = null, extr
         const newQty = deltaQty;
         const newTotal = extraAmount;
         newTotalCost = item.totalCost + newTotal;
-        newAvgCost = newTotalCost / (item.stock + newQty);
-        newStock = item.stock + newQty;
+        const denom = item.stock + newQty;
+        newAvgCost = denom > 0 ? newTotalCost / denom : 0;
+        newStock = denom;
     } else if (reason === '銷售') {
         if (item.type === '消耗品') return true;
         newTotalCost = newStock * item.avgCost;
     } else if (reason === '手動調整' || reason === '盤點') {
         newTotalCost = newStock * item.avgCost;
     }
+    if (!isFinite(newAvgCost)) newAvgCost = 0;
+    if (!isFinite(newTotalCost)) newTotalCost = 0;
     item.stock = newStock;
     item.avgCost = newAvgCost;
     item.totalCost = newTotalCost;
@@ -994,24 +1048,39 @@ async function syncProductTypesToInventory() {
     await saveInventory(inventory);
 }
 
-// 渲染庫存頁面
+// 渲染庫存頁面（已修正 HTML 標籤與利潤計算）
 async function renderInventoryPage() {
     const container = document.getElementById("inventoryTable");
     if (!container) return;
     const inventory = await loadInventory();
     if (inventory.length === 0) { container.innerHTML = "<div>暫無庫存資料</div>"; return; }
-    let html = '<table class="records-table"><thead><tr><th>產品</th><th>目前庫存</th><th>類型</th><th>平均單價</th><th>總成本</th><th>利潤</th><th>操作</th><tr></thead><tbody>';
+
+    // 預先建立：當前名稱 → 銷售筆數（含歷史別名）
+    const salesCountMap = new Map();
+    for (const r of records) {
+        if (r.type !== 'sales') continue;
+        const curName = resolveProductName(r.productName);
+        salesCountMap.set(curName, (salesCountMap.get(curName) || 0) + 1);
+    }
+
+    let html = '<table class="records-table"><thead><tr>'
+        + '<th>產品</th><th>目前庫存</th><th>類型</th>'
+        + '<th>平均單價</th><th>總成本</th><th>利潤</th><th>操作</th>'
+        + '</tr></thead><tbody>';
+
     for (let item of inventory) {
-        const sellPrice = productList.find(p=>p.name===item.product)?.price || 0;
-        const unitProfit = sellPrice - item.avgCost;
-        const soldQty = records.filter(r=>r.type==='sales' && r.productName===item.product).length;
+        const sellPrice = productList.find(p => p.name === item.product)?.price || 0;
+        const avgCost = Number(item.avgCost) || 0;
+        const totalCost = Number(item.totalCost) || 0;
+        const unitProfit = sellPrice - avgCost;
+        const soldQty = salesCountMap.get(item.product) || 0;
         const totalProfit = unitProfit * soldQty;
         html += `<tr>
               <td>${item.product}</td>
               <td>${item.stock}</td>
               <td>${item.type}</td>
-            <td class="cost-price-col" style="${showCostPrice ? '' : 'filter: blur(4px);'}">${showCostPrice ? `$${item.avgCost.toFixed(2)}` : '●●●'}</td>
-            <td class="cost-price-col" style="${showCostPrice ? '' : 'filter: blur(4px);'}">${showCostPrice ? `$${item.totalCost.toFixed(2)}` : '●●●'}</td>
+            <td class="cost-price-col" style="${showCostPrice ? '' : 'filter: blur(4px);'}">${showCostPrice ? `$${avgCost.toFixed(2)}` : '●●●'}</td>
+            <td class="cost-price-col" style="${showCostPrice ? '' : 'filter: blur(4px);'}">${showCostPrice ? `$${totalCost.toFixed(2)}` : '●●●'}</td>
             <td class="cost-price-col" style="${showCostPrice ? '' : 'filter: blur(4px);'}">${showCostPrice ? `$${totalProfit.toFixed(2)}` : '●●●'}</td>
               <td>
                 <button class="small-btn replenish-btn" data-product="${item.product}">📦 補貨</button>
@@ -1032,6 +1101,7 @@ async function renderInventoryPage() {
                 let date = prompt("補貨日期 (YYYY-MM-DD)，留空則使用今天", getTodayISO());
                 if (!date) date = getTodayISO();
                 await updateStock(product, qty, '補貨', totalAmount/qty, totalAmount, date);
+                await updateCachedInventory();
                 await renderInventoryPage();
                 renderProducts();
             }
@@ -1043,6 +1113,7 @@ async function renderInventoryPage() {
         const delta = parseInt(prompt("調整數量 (正數增加，負數減少)"));
         if (!isNaN(delta)) {
             await updateStock(product, delta, '手動調整');
+            await updateCachedInventory();
             await renderInventoryPage();
             renderProducts();
         }
@@ -1056,6 +1127,7 @@ async function renderInventoryPage() {
             const item = inv.find(i=>i.product===product);
             const delta = newStock - item.stock;
             await updateStock(product, delta, '盤點');
+            await updateCachedInventory();
             await renderInventoryPage();
             renderProducts();
         }
@@ -1540,23 +1612,51 @@ function renderProductManageList() {
         editBtn.onclick = async () => {
             if (!await requirePassword()) return;
             if (!confirm(`確定要編輯產品 ${prod.name} 嗎？`)) return;
-            const newName = prompt("輸入新產品名稱", prod.name);
+            const oldName = prod.name;
+            const newName = (prompt("輸入新產品名稱", prod.name) || "").trim();
             const newPrice = parseFloat(prompt("輸入新價格", prod.price));
             const newType = prompt("輸入類型 (普通/消耗品)", prod.type);
-            if (newName && !isNaN(newPrice) && (newType === '普通' || newType === '消耗品')) {
-                prod.name = newName.trim(); prod.price = newPrice; prod.type = newType;
-                saveProducts(); renderProductManageList(); renderProducts();
-                await syncConfigToSheet();
-                await syncProductTypesToInventory();
-                showToast("產品已修改並同步雲端");
+            if (!newName || isNaN(newPrice) || (newType !== '普通' && newType !== '消耗品')) {
+                alert("修改無效"); return;
             }
+            if (newName !== oldName && productList.some(p => p.name === newName)) {
+                alert("產品名稱已存在，請使用其他名稱"); return;
+            }
+            prod.name = newName;
+            prod.price = newPrice;
+            prod.type = newType;
+            saveProducts();
+            renderProductManageList();
+            renderProducts();
+            if (oldName !== newName) {
+                await renameInventoryProduct(oldName, newName);
+                await updateCachedInventory();
+            }
+            await syncConfigToSheet();
+            await syncProductTypesToInventory();
+            await renderInventoryPage();
+            showToast("產品已修改並同步雲端");
         };
         delBtn.onclick = async () => {
             if (!await requirePassword()) return;
             if (!confirm(`確定要刪除產品 ${prod.name} 嗎？`)) return;
-            productList.splice(idx, 1); saveProducts(); renderProductManageList(); renderProducts();
+            const productName = prod.name;
+            const inventory = await loadInventory();
+            const inv = inventory.find(i => i.product === productName);
+            if (inv && inv.stock > 0) {
+                if (!confirm(`產品「${productName}」尚有庫存 ${inv.stock}，確定要一併刪除庫存記錄嗎？`)) return;
+            }
+            productList.splice(idx, 1);
+            saveProducts();
+            renderProductManageList();
+            renderProducts();
+            const invIdx = inventory.findIndex(i => i.product === productName);
+            if (invIdx !== -1) {
+                inventory.splice(invIdx, 1);
+                await saveInventory(inventory);
+            }
             await syncConfigToSheet();
-            await syncProductTypesToInventory();
+            await renderInventoryPage();
             showToast("產品已刪除並同步雲端");
         };
         container.appendChild(div);
@@ -1610,6 +1710,10 @@ async function syncConfigToSheet() {
         const uniquePresets = [...new Set(presetAmounts)];
         for (let amt of uniquePresets) await appendToSheet(CONFIG_SHEET, ['preset', amt.toString(), amt.toString()]);
         await appendToSheet(CONFIG_SHEET, ['password', 'admin', settingsPassword]);
+        // 新增：寫入產品別名對照表
+        for (const [oldN, newN] of Object.entries(productAliases)) {
+            await appendToSheet(CONFIG_SHEET, ['alias', oldN, newN]);
+        }
     } catch (err) { console.error("同步設定失敗", err); }
 }
 async function loadConfigFromSheet() {
@@ -1622,6 +1726,7 @@ async function loadConfigFromSheet() {
             const cloudStaff = new Map();
             const cloudProducts = new Map();
             const cloudPresets = new Set();
+            const cloudAliases = new Map();
             let newPassword = null;
             for (let row of rows) {
                 const type = row[0], key = row[1], val = row[2];
@@ -1629,6 +1734,7 @@ async function loadConfigFromSheet() {
                 else if (type === 'product') cloudProducts.set(key, parseFloat(val));
                 else if (type === 'preset') cloudPresets.add(parseFloat(val));
                 else if (type === 'password' && key === 'admin') newPassword = val;
+                else if (type === 'alias') cloudAliases.set(key, val);
             }
             const mergedStaffMap = new Map();
             staffList.forEach(s => mergedStaffMap.set(s.code, s));
@@ -1646,6 +1752,11 @@ async function loadConfigFromSheet() {
             for (let amt of cloudPresets) mergedPresets.add(amt);
             presetAmounts = Array.from(mergedPresets).sort((a,b)=>a-b);
             if (newPassword) settingsPassword = newPassword;
+            // 合併別名
+            for (let [oldN, newN] of cloudAliases.entries()) {
+                if (!productAliases[oldN]) productAliases[oldN] = newN;
+            }
+            saveAliases();
             saveStaff(); saveProducts(); savePresets();
         }
         renderUI();
