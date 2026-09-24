@@ -69,57 +69,35 @@
 
         #loginPanel {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-body);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2000; backdrop-filter: blur(4px);
         }
         .login-card {
-            background: var(--bg-card);
-            border-radius: 48px;
-            padding: 32px 24px;
-            text-align: center;
+            background: var(--bg-card); border-radius: 48px;
+            padding: 32px 24px; text-align: center;
             box-shadow: 0 20px 35px rgba(0,0,0,0.2);
-            width: 90%;
-            max-width: 360px;
+            width: 90%; max-width: 360px;
         }
         .login-card i { font-size: 4rem; color: var(--accent-orange); margin-bottom: 16px; }
         .login-card h2 { margin: 0 0 8px 0; }
         .login-card p { margin-bottom: 24px; font-size: 0.9rem; color: var(--text-secondary); }
         #googleLoginBtn {
-            background: var(--btn-primary-bg);
-            border: none;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 40px;
+            background: var(--btn-primary-bg); border: none; color: white;
+            padding: 12px 24px; border-radius: 40px;
             font-size: calc(1rem * var(--button-font-scale));
-            font-weight: bold;
-            width: 100%;
-            cursor: pointer;
+            font-weight: bold; width: 100%; cursor: pointer;
             box-shadow: 0 4px 0 var(--btn-primary-shadow);
             transition: 0.05s linear;
         }
         #googleLoginBtn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--btn-primary-shadow); }
 
         .app-container {
-            width: 100%;
-            max-width: 100%;
-            margin: 0 auto;
-            background: var(--bg-card);
-            border-radius: 0;
-            box-shadow: none;
-            overflow-y: auto;
-            padding: 12px;
-            transition: all 0.2s;
-            height: 100vh;
-            display: none;
-            flex-direction: column;
+            width: 100%; max-width: 100%; margin: 0 auto;
+            background: var(--bg-card); overflow-y: auto; padding: 12px;
+            transition: all 0.2s; height: 100vh;
+            display: none; flex-direction: column;
         }
 
         .nav-btn, .staff-btn, .payment-btn, .preset-btn, .product-btn, .small-btn, .submit-btn, #submitConsume, .settings-icon-small { font-size: calc(0.9rem * var(--button-font-scale)); }
@@ -128,18 +106,10 @@
         .staff-code, .product-price { font-size: calc(0.75rem * var(--button-text-scale)); }
         .record-item { font-size: calc(0.85rem * var(--button-font-scale)); }
         .records-table, .records-table th, .records-table td, .sync-badge { font-size: calc(0.8rem * var(--records-font-scale)); }
-        .records-table th, .records-table td { font-size: calc(0.8rem * var(--records-font-scale)); }
-        .sync-badge { font-size: calc(0.7rem * var(--records-font-scale)); }
 
         @media (orientation: landscape) and (min-width: 900px) {
             .app-container { flex-direction: row; padding: 12px; gap: 16px; }
-            .btn-group {
-                display: flex;
-                flex-direction: column;
-                width: 120px;
-                gap: 12px;
-                margin-bottom: 0;
-            }
+            .btn-group { display: flex; flex-direction: column; width: 120px; gap: 12px; margin-bottom: 0; }
             .nav-btn { width: 100%; padding: 16px 8px; }
             .page { flex: 1; overflow-y: auto; }
             .btn-group .nav-btn[data-page="consumption"] { order: 1; }
@@ -147,39 +117,18 @@
             .btn-group .nav-btn[data-page="inventory"] { order: 3; }
             .btn-group .nav-btn#studentBookingBtn { order: 4; }
         }
-
         @media (orientation: portrait), (max-width: 899px) {
-            .btn-group {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 12px;
-                margin-bottom: 12px;
-            }
-            .nav-btn {
-                width: auto;
-                min-width: 0;
-                margin: 0;
-            }
-            .btn-group .nav-btn#studentBookingBtn {
-                grid-column: 1 / -1;
-            }
+            .btn-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+            .nav-btn { width: auto; min-width: 0; margin: 0; }
+            .btn-group .nav-btn#studentBookingBtn { grid-column: 1 / -1; }
         }
 
         .btn-group { display: flex; gap: 12px; margin-bottom: 12px; }
         .nav-btn {
-            background: var(--btn-gray-bg);
-            border: none;
-            border-radius: 32px;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 12px 8px;
-            text-align: center;
-            transition: 0.05s linear;
-            box-shadow: 0 5px 0 var(--btn-gray-shadow);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
+            background: var(--btn-gray-bg); border: none; border-radius: 32px;
+            font-weight: bold; cursor: pointer; padding: 12px 8px; text-align: center;
+            transition: 0.05s linear; box-shadow: 0 5px 0 var(--btn-gray-shadow);
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
         }
         .nav-btn i { font-size: calc(1.8rem * var(--button-font-scale)); }
         .nav-btn span { font-size: calc(0.85rem * var(--button-font-scale)); }
@@ -194,36 +143,21 @@
         .date-with-settings { display: flex; gap: 10px; align-items: center; }
         .date-with-settings input { flex: 1; }
         .settings-icon-small {
-            background: var(--btn-primary-bg);
-            border: none;
-            border-radius: 40px;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 3px 0 var(--btn-primary-shadow);
+            background: var(--btn-primary-bg); border: none; border-radius: 40px;
+            width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 3px 0 var(--btn-primary-shadow);
             transition: 0.05s linear;
         }
         .settings-icon-small:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-primary-shadow); }
         .staff-group, .payment-group, .product-grid, .preset-grid { display: grid; gap: 8px; margin: 6px 0; }
         .staff-btn, .payment-btn, .preset-btn, .product-btn {
-            padding: 12px 8px;
-            min-height: 52px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            box-sizing: border-box;
-            background: var(--btn-gray-bg);
-            border: none;
-            border-radius: 40px;
-            cursor: pointer;
-            font-weight: bold;
+            padding: 12px 8px; min-height: 52px;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; box-sizing: border-box;
+            background: var(--btn-gray-bg); border: none; border-radius: 40px;
+            cursor: pointer; font-weight: bold;
             box-shadow: 0 3px 0 var(--btn-gray-shadow);
-            transition: 0.05s linear;
-            color: var(--text-primary);
+            transition: 0.05s linear; color: var(--text-primary);
             flex-direction: column;
         }
         .staff-btn:active, .payment-btn:active, .preset-btn:active, .product-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
@@ -244,76 +178,38 @@
         .small-btn { background: var(--btn-gray-bg); border: none; padding: 4px 10px; border-radius: 40px; cursor: pointer; box-shadow: 0 3px 0 var(--btn-gray-shadow); transition: 0.05s linear; color: var(--text-primary); }
         .small-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-gray-shadow); }
         .danger-btn { background: #fee2e2; color: #b91c1c; }
-        .edit-btn { background: var(--btn-gray-bg); color: var(--text-primary); margin-left: 6px; }
         hr { margin: 12px 0; border-color: var(--border-color); }
         .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--accent-orange);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 40px;
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--accent-orange); color: white;
+            padding: 8px 16px; border-radius: 40px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 1000;
-            transition: opacity 0.3s;
-            opacity: 1;
-            pointer-events: none;
-            white-space: pre-line;
-            text-align: center;
+            z-index: 1000; transition: opacity 0.3s; opacity: 1;
+            pointer-events: none; white-space: pre-line; text-align: center;
             font-size: calc(0.85rem * var(--button-font-scale));
         }
         .iframe-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 1000; display: none;
         }
         .iframe-container iframe { width: 90%; height: 90%; margin: 5% auto; display: block; background: white; border-radius: 20px; }
         .close-iframe {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            background: var(--accent-orange);
-            color: white;
-            border: none;
-            border-radius: 40px;
-            padding: 6px 12px;
-            cursor: pointer;
-            box-shadow: 0 3px 0 var(--accent-orange-shadow);
+            position: absolute; top: 20px; right: 30px;
+            background: var(--accent-orange); color: white;
+            border: none; border-radius: 40px; padding: 6px 12px;
+            cursor: pointer; box-shadow: 0 3px 0 var(--accent-orange-shadow);
             font-size: calc(0.9rem * var(--button-font-scale));
         }
         .close-iframe:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
         .recent-record {
-            background: var(--btn-gray-bg);
-            border-radius: 20px;
-            padding: 8px 12px;
-            margin-top: 10px;
-            text-align: left;
+            background: var(--btn-gray-bg); border-radius: 20px;
+            padding: 8px 12px; margin-top: 10px; text-align: left;
             border-left: 4px solid var(--accent-orange);
-            color: var(--text-primary);
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+            color: var(--text-primary); display: flex; flex-direction: column; gap: 6px;
         }
-        .daily-record-summary {
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-        .daily-record-list {
-            max-height: 200px;
-            overflow-y: auto;
-            font-size: 0.8rem;
-        }
-        .daily-record-item {
-            padding: 4px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
+        .daily-record-summary { font-weight: bold; margin-bottom: 4px; }
+        .daily-record-list { max-height: 200px; overflow-y: auto; font-size: 0.8rem; }
+        .daily-record-item { padding: 4px 0; border-bottom: 1px solid var(--border-color); }
         .settings-section { margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 24px; padding: 8px; }
         .settings-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .settings-content { margin-top: 8px; }
@@ -328,7 +224,6 @@
         .records-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
         .records-table th, .records-table td { border: 1px solid var(--border-color); padding: 6px; text-align: left; }
         .records-table th { background: var(--btn-gray-bg); }
-        .record-cell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; max-width: 120px; }
         .action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
         @media (max-width: 600px) { .records-table th, .records-table td { padding: 4px; } }
         .section-title { display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: bold; margin-bottom: 8px; }
@@ -338,35 +233,11 @@
         .font-scale-slider, .records-scale-slider, .button-text-slider { width: 100%; margin: 8px 0; }
         .scale-value { font-weight: bold; margin-left: 10px; }
         .disabled-btn { opacity: 0.6; pointer-events: none; }
-        .edit-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 3000;
-        }
-        .edit-modal-content { background: var(--bg-card); border-radius: 24px; padding: 20px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; }
-        .edit-modal-content h3 { margin-top: 0; text-align: center; }
-        .edit-option-grid { display: grid; gap: 8px; margin: 16px 0; }
-        .edit-option-btn { background: var(--btn-gray-bg); padding: 12px; border-radius: 40px; text-align: center; cursor: pointer; transition: 0.05s linear; font-weight: bold; }
-        .edit-option-btn:active { transform: scale(0.98); }
         .password-toggle-btn {
-            background: var(--btn-gray-bg);
-            border: none;
-            border-radius: 40px;
-            width: 44px;
-            height: 44px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            box-shadow: 0 2px 0 var(--btn-gray-shadow);
+            background: var(--btn-gray-bg); border: none; border-radius: 40px;
+            width: 44px; height: 44px; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; box-shadow: 0 2px 0 var(--btn-gray-shadow);
             transition: 0.05s linear;
         }
         .password-toggle-btn:active { transform: translateY(2px); box-shadow: 0 0px 0 var(--btn-gray-shadow); }
@@ -375,51 +246,29 @@
         .back-home-btn { margin-bottom: 12px; background: var(--accent-orange); color: white; box-shadow: 0 3px 0 var(--accent-orange-shadow); }
         .back-home-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
 
-        /* 懸浮更新按鈕 */
         #floatingRefresh {
-            position: fixed;
-            right: 16px;
-            bottom: 16px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: var(--accent-orange);
-            color: white;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            font-size: 1.3rem;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            z-index: 999;
+            position: fixed; right: 16px; bottom: 16px;
+            width: 56px; height: 56px; border-radius: 50%;
+            background: var(--accent-orange); color: white;
+            display: none; align-items: center; justify-content: center;
+            flex-direction: column; font-size: 1.3rem; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 999;
             transition: transform 0.15s, background 0.2s;
-            user-select: none;
-            border: none;
+            user-select: none; border: none;
         }
         #floatingRefresh:active { transform: scale(0.9); }
         #floatingRefresh.has-failed { background: var(--stock-red); }
         #floatingRefresh.spinning i { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         #floatingRefresh .badge {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            background: var(--stock-red);
-            color: white;
-            border-radius: 50%;
-            min-width: 20px;
-            height: 20px;
-            padding: 0 4px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            display: none;
-            align-items: center;
-            justify-content: center;
+            position: absolute; top: -4px; right: -4px;
+            background: var(--stock-red); color: white;
+            border-radius: 50%; min-width: 20px; height: 20px;
+            padding: 0 4px; font-size: 0.7rem; font-weight: bold;
+            display: none; align-items: center; justify-content: center;
             border: 2px solid var(--bg-card);
         }
         #floatingRefresh.has-pending .badge { display: flex; }
-        #floatingRefresh.has-failed { background: var(--stock-red); }
     </style>
 </head>
 <body>
@@ -561,7 +410,7 @@ let gapiReady = false;
 let settingsPassword = 'admin123';
 let darkMode = localStorage.getItem('darkMode') === 'true';
 
-// ========== Token 生命週期管理 ==========
+// ========== Token ==========
 let tokenExpiryTime = 0;
 const TOKEN_REFRESH_MARGIN = 5 * 60 * 1000;
 let refreshTimer = null;
@@ -570,54 +419,36 @@ let tokenRefreshInProgress = false;
 function setGapiToken(accessToken, expiresIn = 3600) {
     gapi.client.setToken({ access_token: accessToken });
     tokenExpiryTime = Date.now() + expiresIn * 1000;
-    console.log('Token 已設置，預計過期時間：', new Date(tokenExpiryTime).toLocaleTimeString());
     scheduleTokenRefresh();
 }
-
 function scheduleTokenRefresh() {
     if (refreshTimer) clearTimeout(refreshTimer);
     const delay = tokenExpiryTime - Date.now() - TOKEN_REFRESH_MARGIN;
     if (delay > 0) {
         refreshTimer = setTimeout(() => {
-            console.log('Token 即將過期，嘗試靜默刷新...');
             refreshAccessToken().catch(e => console.warn('背景刷新失敗', e));
         }, delay);
-    } else {
-        refreshAccessToken().catch(e => console.warn('立即刷新失敗', e));
     }
 }
-
 async function refreshAccessToken() {
     if (tokenRefreshInProgress) return;
     tokenRefreshInProgress = true;
     return new Promise((resolve, reject) => {
         tokenClient.callback = (resp) => {
             tokenRefreshInProgress = false;
-            if (resp.error !== undefined) {
-                console.error('刷新 token 失敗', resp);
-                reject(resp.error);
-                return;
-            }
+            if (resp.error !== undefined) { reject(resp.error); return; }
             setGapiToken(resp.access_token, resp.expires_in || 3600);
             resolve(resp.access_token);
         };
         tokenClient.requestAccessToken({ prompt: '' });
     });
 }
-
 async function ensureToken() {
     if (!gapiReady) return;
     if (Date.now() < tokenExpiryTime - TOKEN_REFRESH_MARGIN) return;
-    try {
-        await refreshAccessToken();
-    } catch(e) {
-        console.warn('ensureToken 刷新失敗', e);
-    }
+    try { await refreshAccessToken(); } catch(e) { console.warn('ensureToken 刷新失敗', e); }
 }
-
-window.addEventListener('beforeunload', () => {
-    if (refreshTimer) clearTimeout(refreshTimer);
-});
+window.addEventListener('beforeunload', () => { if (refreshTimer) clearTimeout(refreshTimer); });
 
 // ========== 全域狀態 ==========
 let staffList = [
@@ -631,9 +462,9 @@ let productList = [
     { name: "打底水", price: 148, type: "普通" }
 ];
 let presetAmounts = [50, 100, 150, 200];
-let records = [];          // 從 Sheet 讀取的記錄
-let cachedInventory = [];  // 從 Sheet 讀取的庫存
-let productAliases = {};   // { 舊名: 當前名 }
+let records = [];
+let cachedInventory = [];
+let productAliases = {};
 let selectedProducts = new Set();
 let selectedSalesStaff = null;
 let selectedConsumeStaff = null;
@@ -674,12 +505,10 @@ function openDB() {
         req.onerror = (e) => reject(e.target.error);
     });
 }
-
 async function dbAdd(item) {
     return new Promise((resolve, reject) => {
         const tx = db.transaction([STORE_NAME], 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        const req = store.put(item);
+        const req = tx.objectStore(STORE_NAME).put(item);
         req.onsuccess = () => resolve();
         req.onerror = (e) => reject(e.target.error);
     });
@@ -687,8 +516,7 @@ async function dbAdd(item) {
 async function dbDelete(id) {
     return new Promise((resolve, reject) => {
         const tx = db.transaction([STORE_NAME], 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        const req = store.delete(id);
+        const req = tx.objectStore(STORE_NAME).delete(id);
         req.onsuccess = () => resolve();
         req.onerror = (e) => reject(e.target.error);
     });
@@ -696,23 +524,12 @@ async function dbDelete(id) {
 async function dbGetAll() {
     return new Promise((resolve, reject) => {
         const tx = db.transaction([STORE_NAME], 'readonly');
-        const store = tx.objectStore(STORE_NAME);
-        const req = store.getAll();
+        const req = tx.objectStore(STORE_NAME).getAll();
         req.onsuccess = () => resolve(req.result || []);
         req.onerror = (e) => reject(e.target.error);
     });
 }
-async function dbClear() {
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction([STORE_NAME], 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        const req = store.clear();
-        req.onsuccess = () => resolve();
-        req.onerror = (e) => reject(e.target.error);
-    });
-}
 
-// localStorage 備援
 function lsGetPending() {
     try { return JSON.parse(localStorage.getItem('pendingQueue') || '[]'); }
     catch(e) { return []; }
@@ -722,32 +539,27 @@ function lsSetPending(arr) {
     catch(e) { console.warn('localStorage 寫入失敗', e); }
 }
 
-// ========== 佇列操作 ==========
 function genId() {
     return 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
 }
-
 async function addToQueue(item) {
     item.id = item.id || genId();
     item.status = 'pending';
     item.retryCount = 0;
     item.createdAt = item.createdAt || Date.now();
     try { await dbAdd(item); } catch(e) { console.warn('IndexedDB 寫入失敗', e); }
-    // 備援
     const lsQueue = lsGetPending();
     lsQueue.push(item);
     lsSetPending(lsQueue);
     updateFloatingBadge();
     return item.id;
 }
-
 async function removeFromQueue(id) {
     try { await dbDelete(id); } catch(e) { console.warn('IndexedDB 刪除失敗', e); }
     const lsQueue = lsGetPending().filter(x => x.id !== id);
     lsSetPending(lsQueue);
     updateFloatingBadge();
 }
-
 async function getQueue() {
     const dbQueue = await dbGetAll();
     const lsQueue = lsGetPending();
@@ -756,12 +568,12 @@ async function getQueue() {
     lsQueue.forEach(x => { if (!map.has(x.id)) map.set(x.id, x); });
     return Array.from(map.values());
 }
-
 async function updateFloatingBadge() {
     const queue = await getQueue();
     const pending = queue.filter(x => x.status === 'pending' || x.status === 'failed');
     const failed = queue.filter(x => x.status === 'failed');
     const btn = document.getElementById('floatingRefresh');
+    if (!btn) return;
     const badge = btn.querySelector('.badge');
     if (pending.length > 0) {
         btn.classList.add('has-pending');
@@ -769,14 +581,11 @@ async function updateFloatingBadge() {
     } else {
         btn.classList.remove('has-pending');
     }
-    if (failed.length > 0) {
-        btn.classList.add('has-failed');
-    } else {
-        btn.classList.remove('has-failed');
-    }
+    if (failed.length > 0) btn.classList.add('has-failed');
+    else btn.classList.remove('has-failed');
 }
 
-// ========== 格式化工具 ==========
+// ========== 格式化 ==========
 function formatDisplayDate(dateStr) {
     if (!dateStr) return '日期遺失';
     const d = new Date(dateStr);
@@ -802,9 +611,7 @@ function getCurrentTime() {
     const now = new Date();
     return `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
 }
-function getTodayISO() {
-    return new Date().toISOString().slice(0,10);
-}
+function getTodayISO() { return new Date().toISOString().slice(0,10); }
 function ensureValidDate(dateStr) {
     if (!dateStr) return getTodayISO();
     const d = new Date(dateStr);
@@ -868,22 +675,12 @@ function loadLocalData() {
     if (storedRed) redThreshold = parseInt(storedRed);
     const storedGreen = localStorage.getItem('greenThreshold');
     if (storedGreen) greenThreshold = parseInt(storedGreen);
-
     const savedFontScale = localStorage.getItem('buttonFontScale');
-    if (savedFontScale) {
-        let v = parseFloat(savedFontScale);
-        document.documentElement.style.setProperty('--button-font-scale', v);
-    }
+    if (savedFontScale) document.documentElement.style.setProperty('--button-font-scale', parseFloat(savedFontScale));
     const savedRecordsScale = localStorage.getItem('recordsFontScale');
-    if (savedRecordsScale) {
-        let v = parseFloat(savedRecordsScale);
-        document.documentElement.style.setProperty('--records-font-scale', v);
-    }
+    if (savedRecordsScale) document.documentElement.style.setProperty('--records-font-scale', parseFloat(savedRecordsScale));
     const savedButtonTextScale = localStorage.getItem('buttonTextScale');
-    if (savedButtonTextScale) {
-        let v = parseFloat(savedButtonTextScale);
-        document.documentElement.style.setProperty('--button-text-scale', v);
-    }
+    if (savedButtonTextScale) document.documentElement.style.setProperty('--button-text-scale', parseFloat(savedButtonTextScale));
 }
 function saveStaff() { localStorage.setItem("staffList", JSON.stringify(staffList)); }
 function saveProducts() { localStorage.setItem("productList", JSON.stringify(productList)); }
@@ -927,7 +724,7 @@ async function requirePassword() {
     }
 }
 
-// ========== Google Sheets 操作 ==========
+// ========== Google Sheets ==========
 async function ensureSheetExists(sheetName, headers) {
     await ensureToken();
     try {
@@ -949,13 +746,24 @@ async function ensureSheetExists(sheetName, headers) {
     } catch(e) { console.error(`確保工作表 ${sheetName} 失敗`, e); }
 }
 
+// ⚠️ 關鍵修正：append 範圍由 A:Z 改為 A:G（避免 J 欄干擾）
 async function appendToSheet(sheetName, values, retries = 3) {
     await ensureToken();
+    // 依工作表限定 append 欄位範圍
+    let range;
+    if (sheetName === '庫存異動') range = '庫存異動!A:G';
+    else if (sheetName === '產品Backup') range = '產品Backup!A:M';
+    else if (sheetName === '客人Backup') range = '客人Backup!A:J';
+    else if (sheetName === '產品') range = '產品!A:K';
+    else if (sheetName === '客人') range = '客人!A:H';
+    else if (sheetName === 'staff') range = 'staff!A:C';
+    else range = `${sheetName}!A:G`;
+    
     for (let i = 0; i < retries; i++) {
         try {
             await gapi.client.sheets.spreadsheets.values.append({
                 spreadsheetId: SPREADSHEET_ID,
-                range: `${sheetName}!A:Z`,
+                range: range,
                 valueInputOption: 'USER_ENTERED',
                 insertDataOption: 'INSERT_ROWS',
                 resource: { values: [values] }
@@ -963,7 +771,6 @@ async function appendToSheet(sheetName, values, retries = 3) {
             return;
         } catch(e) {
             if (e.status === 401 || (e.message && e.message.includes('401'))) {
-                console.warn('appendToSheet 遇到 401，嘗試刷新 token...');
                 try { await refreshAccessToken(); } catch(re) { throw re; }
                 continue;
             }
@@ -974,7 +781,7 @@ async function appendToSheet(sheetName, values, retries = 3) {
     }
 }
 
-// ========== 從 Sheet 讀取資料 ==========
+// ========== 讀取 Sheet ==========
 async function fetchInventoryFromSheet() {
     await ensureToken();
     try {
@@ -997,9 +804,7 @@ async function fetchInventoryFromSheet() {
         }
         cachedInventory = inventory;
         saveInventory();
-    } catch(e) {
-        console.error("讀取庫存失敗", e);
-    }
+    } catch(e) { console.error("讀取庫存失敗", e); }
 }
 
 async function fetchSalesRecordsFromSheet() {
@@ -1033,10 +838,7 @@ async function fetchSalesRecordsFromSheet() {
             });
         }
         return out;
-    } catch(e) {
-        console.error("讀取銷售記錄失敗", e);
-        return [];
-    }
+    } catch(e) { console.error("讀取銷售記錄失敗", e); return []; }
 }
 
 async function fetchConsumeRecordsFromSheet() {
@@ -1067,10 +869,7 @@ async function fetchConsumeRecordsFromSheet() {
             });
         }
         return out;
-    } catch(e) {
-        console.error("讀取消費記錄失敗", e);
-        return [];
-    }
+    } catch(e) { console.error("讀取消費記錄失敗", e); return []; }
 }
 
 async function fetchConfigFromSheet() {
@@ -1092,7 +891,6 @@ async function fetchConfigFromSheet() {
             else if (type === 'password' && key === 'admin') newPassword = val;
             else if (type === 'alias' && key) cloudAliases.set(key, val);
         }
-        // 以 Sheet 為準：完全取代本地
         if (cloudStaff.size > 0) {
             staffList = Array.from(cloudStaff.entries()).map(([code, name]) => ({ code, name }));
         }
@@ -1114,30 +912,22 @@ async function fetchConfigFromSheet() {
         }
         saveAliases();
         saveStaff(); saveProducts(); savePresets();
-    } catch(e) {
-        console.error("讀取設定失敗", e);
-    }
+    } catch(e) { console.error("讀取設定失敗", e); }
 }
 
-// ========== 合併 Sheet + 佇列 ==========
 async function getMergedRecords() {
     const sheetSales = await fetchSalesRecordsFromSheet();
     const sheetConsume = await fetchConsumeRecordsFromSheet();
     const queue = await getQueue();
-    
     const queueRecords = queue
         .filter(q => q.status !== 'success')
         .map(q => {
             if (q.type === 'sales') {
                 return {
-                    id: q.id,
-                    type: 'sales',
-                    date: q.payload.date,
-                    staffCode: q.payload.staffCode,
-                    staffName: q.payload.staffName,
+                    id: q.id, type: 'sales', date: q.payload.date,
+                    staffCode: q.payload.staffCode, staffName: q.payload.staffName,
                     productName: q.payload.productName,
-                    productPrice: q.payload.productPrice,
-                    amount: q.payload.amount,
+                    productPrice: q.payload.productPrice, amount: q.payload.amount,
                     payment: q.payload.payment,
                     syncStatus: q.status === 'failed' ? 'failed' : 'pending',
                     createdAt: new Date(q.createdAt).toISOString(),
@@ -1146,13 +936,9 @@ async function getMergedRecords() {
                 };
             } else if (q.type === 'consumption') {
                 return {
-                    id: q.id,
-                    type: 'consumption',
-                    date: q.payload.date,
-                    staffName: q.payload.staffName,
-                    staffCode: q.payload.staffCode,
-                    amount: q.payload.amount,
-                    payment: q.payload.payment,
+                    id: q.id, type: 'consumption', date: q.payload.date,
+                    staffName: q.payload.staffName, staffCode: q.payload.staffCode,
+                    amount: q.payload.amount, payment: q.payload.payment,
                     syncStatus: q.status === 'failed' ? 'failed' : 'pending',
                     createdAt: new Date(q.createdAt).toISOString(),
                     displayDate: formatDisplayDate(q.payload.date),
@@ -1162,7 +948,6 @@ async function getMergedRecords() {
             return null;
         })
         .filter(x => x !== null);
-    
     const allRecords = [...sheetSales, ...sheetConsume, ...queueRecords];
     allRecords.sort((a,b) => new Date(b.date) - new Date(a.date));
     records = allRecords;
@@ -1170,7 +955,7 @@ async function getMergedRecords() {
     return allRecords;
 }
 
-// ========== 上傳佇列 ==========
+// ========== 上傳佇列（含 Backup） ==========
 let uploading = false;
 async function processQueue() {
     if (uploading) return;
@@ -1179,7 +964,6 @@ async function processQueue() {
         const queue = await getQueue();
         const pending = queue.filter(q => q.status === 'pending' || q.status === 'failed');
         if (pending.length === 0) { uploading = false; return; }
-        
         for (const item of pending) {
             if (!gapiReady) break;
             try {
@@ -1187,22 +971,31 @@ async function processQueue() {
                 if (item.type === 'sales') {
                     const googleDate = toGoogleDate(item.payload.date);
                     const { year, month, day } = extractYearMonthDay(googleDate);
+                    const now = getCurrentTime();
+                    // 主表
                     await ensureSheetExists('產品', ["年份","月份","日期","員工姓名","員工工號","產品名稱","金額","支付方式","時間","同步狀態","訂單編號"]);
-                    await appendToSheet('產品', [year, month, day, item.payload.staffName, item.payload.staffCode, item.payload.productName, item.payload.amount.toString(), item.payload.payment, getCurrentTime(), 'success', item.id]);
+                    await appendToSheet('產品', [year, month, day, item.payload.staffName, item.payload.staffCode, item.payload.productName, item.payload.amount.toString(), item.payload.payment, now, 'success', item.id]);
+                    // 備份表
+                    await ensureSheetExists('產品Backup', ["年份","月份","日期","員工姓名","員工工號","產品名稱","金額","支付方式","時間","同步狀態","訂單編號","操作類型","操作時間"]);
+                    await appendToSheet('產品Backup', [year, month, day, item.payload.staffName, item.payload.staffCode, item.payload.productName, item.payload.amount.toString(), item.payload.payment, now, 'success', item.id, '新增', now]);
                     // 庫存異動
                     if (item.payload.productType !== '消耗品') {
                         await ensureSheetExists('庫存異動', ['時間','產品名稱','變動數量','變動後庫存','變動後平均單價','原因','備註']);
-                        await appendToSheet('庫存異動', [getCurrentTime(), item.payload.productName, -1, '', '', '銷售', item.id]);
+                        await appendToSheet('庫存異動', [now, item.payload.productName, -1, '', '', '銷售', item.id]);
                     }
                 } else if (item.type === 'consumption') {
+                    const googleDate = toGoogleDate(item.payload.date);
+                    const now = getCurrentTime();
                     await ensureSheetExists('客人', ["日期","員工姓名","員工工號","金額","支付方式","時間","同步狀態","訂單編號"]);
-                    await appendToSheet('客人', [toGoogleDate(item.payload.date), item.payload.staffName, item.payload.staffCode, item.payload.amount.toString(), item.payload.payment, getCurrentTime(), 'success', item.id]);
+                    await appendToSheet('客人', [googleDate, item.payload.staffName, item.payload.staffCode, item.payload.amount.toString(), item.payload.payment, now, 'success', item.id]);
+                    await ensureSheetExists('客人Backup', ["日期","員工姓名","員工工號","金額","支付方式","時間","同步狀態","訂單編號","操作類型","操作時間"]);
+                    await appendToSheet('客人Backup', [googleDate, item.payload.staffName, item.payload.staffCode, item.payload.amount.toString(), item.payload.payment, now, 'success', item.id, '新增', now]);
                 } else if (item.type === 'staff_add') {
                     await ensureSheetExists('staff', ["類型","鍵","值"]);
                     await appendToSheet('staff', [item.payload.kind, item.payload.key, item.payload.value]);
                 }
                 await removeFromQueue(item.id);
-                await new Promise(r => setTimeout(r, 500)); // 節流
+                await new Promise(r => setTimeout(r, 500));
             } catch(e) {
                 console.error('上傳失敗', item.id, e);
                 item.status = 'failed';
@@ -1220,7 +1013,6 @@ async function processQueue() {
     }
 }
 
-// 自動重試（指數退避）
 async function autoRetry() {
     const queue = await getQueue();
     const pending = queue.filter(q => q.status === 'pending' || q.status === 'failed');
@@ -1233,7 +1025,7 @@ async function autoRetry() {
     }, delay);
 }
 
-// ========== 提交銷售 ==========
+// ========== 提交 ==========
 async function submitSales() {
     if (submitting) { showToast("請稍後，正在處理中..."); return; }
     submitting = true;
@@ -1249,10 +1041,8 @@ async function submitSales() {
         productList.forEach(p => { if (selectedProducts.has(p.name)) { selected.push(p); total += p.price; } });
         if (selected.length === 0 && payment !== "公司") { alert("請至少選擇一件產品"); return; }
         if (payment === "公司") total = 0;
-        
-        // 立即寫入佇列（不等待雲端）
         for (const prod of selected) {
-            const itemId = await addToQueue({
+            await addToQueue({
                 type: 'sales',
                 payload: {
                     date: date,
@@ -1281,8 +1071,6 @@ async function submitSales() {
                 }
             });
         }
-        
-        // 立即更新畫面
         showToast(`✅ 訂單已完成！總共 ${selected.length} 件產品，總金額 ${total} 元`);
         selectedProducts.clear();
         renderProducts();
@@ -1292,8 +1080,6 @@ async function submitSales() {
         await getMergedRecords();
         updateDailyRecords('sales');
         await updateFloatingBadge();
-        
-        // 背景上傳（不等待）
         processQueue();
     } finally {
         submitting = false;
@@ -1301,7 +1087,6 @@ async function submitSales() {
     }
 }
 
-// ========== 提交消費 ==========
 async function submitConsumption() {
     if (submitting) { showToast("請稍後，正在處理中..."); return; }
     submitting = true;
@@ -1314,7 +1099,6 @@ async function submitConsumption() {
         let amount = parseFloat(document.getElementById("consumeAmount").value);
         if (isNaN(amount) || amount <= 0) { alert("請輸入正確金額或點選預設金額按鈕"); return; }
         const payment = selectedConsumePayment;
-        
         await addToQueue({
             type: 'consumption',
             payload: {
@@ -1325,14 +1109,12 @@ async function submitConsumption() {
                 payment: payment
             }
         });
-        
         showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
         document.getElementById("consumeAmount").value = "";
         clearPresetHighlight();
         await getMergedRecords();
         updateDailyRecords('consumption');
         await updateFloatingBadge();
-        
         processQueue();
     } finally {
         submitting = false;
@@ -1345,19 +1127,13 @@ async function renderInventoryPage() {
     const container = document.getElementById("inventoryTable");
     if (!container) return;
     if (cachedInventory.length === 0) { container.innerHTML = "<div>暫無庫存資料</div>"; return; }
-    
     const salesCountMap = new Map();
     for (const r of records) {
         if (r.type !== 'sales') continue;
         const curName = resolveProductName(r.productName);
         salesCountMap.set(curName, (salesCountMap.get(curName) || 0) + 1);
     }
-    
-    let html = '<table class="records-table"><thead><tr>'
-        + '<th>產品</th><th>目前庫存</th><th>類型</th>'
-        + '<th>平均單價</th><th>總成本</th><th>利潤</th>'
-        + '</tr></thead><tbody>';
-    
+    let html = '<table class="records-table"><thead><tr><th>產品</th><th>目前庫存</th><th>類型</th><th>平均單價</th><th>總成本</th><th>利潤</th></tr></thead><tbody>';
     for (let item of cachedInventory) {
         const sellPrice = productList.find(p => p.name === item.product)?.price || 0;
         const avgCost = Number(item.avgCost) || 0;
@@ -1423,12 +1199,9 @@ function calcTotal() {
     document.getElementById("totalAmount").innerText = total;
     return total;
 }
-
 function updateDailyRecords(type) {
     const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
-    let dateStr = type === 'sales'
-        ? document.getElementById('salesDate').value
-        : document.getElementById('consumeDate').value;
+    let dateStr = type === 'sales' ? document.getElementById('salesDate').value : document.getElementById('consumeDate').value;
     if (!dateStr) { if (div) div.style.display = 'none'; return; }
     const filtered = records.filter(r => r.type === type && r.date === dateStr);
     if (filtered.length === 0) { div.style.display = 'none'; return; }
@@ -1437,16 +1210,12 @@ function updateDailyRecords(type) {
     filtered.forEach(rec => { totalAmount += rec.amount; });
     let html = `<div class="daily-record-summary">📅 ${formatDisplayDate(dateStr)} 共 ${filtered.length} 筆，總金額 $${totalAmount}</div><div class="daily-record-list">`;
     filtered.forEach(rec => {
-        if (type === 'sales') {
-            html += `<div class="daily-record-item">📦 ${rec.productName} | 👤 ${rec.staffName} | 💰 $${rec.amount} | 💳 ${rec.payment}</div>`;
-        } else {
-            html += `<div class="daily-record-item">👤 ${rec.staffName} | 💰 $${rec.amount} | 💳 ${rec.payment}</div>`;
-        }
+        if (type === 'sales') html += `<div class="daily-record-item">📦 ${rec.productName} | 👤 ${rec.staffName} | 💰 $${rec.amount} | 💳 ${rec.payment}</div>`;
+        else html += `<div class="daily-record-item">👤 ${rec.staffName} | 💰 $${rec.amount} | 💳 ${rec.payment}</div>`;
     });
     html += '</div>';
     div.innerHTML = html;
 }
-
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     const targetPage = document.getElementById(pageId + "Page");
@@ -1471,9 +1240,7 @@ function showPage(pageId) {
         renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
         consumeDateInput.onchange = () => updateDailyRecords('consumption');
     }
-    if (pageId === "inventory") {
-        renderInventoryPage();
-    }
+    if (pageId === "inventory") renderInventoryPage();
     if (pageId === "settings") {
         renderStaffManageList();
         renderProductManageList();
@@ -1495,7 +1262,6 @@ function showPage(pageId) {
         document.getElementById("greenThreshold").value = greenThreshold;
     }
 }
-
 function renderStaff(containerId, selectedCode, onChange) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -1513,7 +1279,6 @@ function renderStaff(containerId, selectedCode, onChange) {
     });
     container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
 }
-
 function renderPayment(containerId, selected, onChange, isSales = false) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -1534,7 +1299,6 @@ function renderPayment(containerId, selected, onChange, isSales = false) {
     });
     container.style.gridTemplateColumns = `repeat(${buttonsPerRow}, 1fr)`;
 }
-
 function renderPresetButtons() {
     const container = document.getElementById("presetAmounts");
     if (!container) return;
@@ -1560,17 +1324,14 @@ function renderPresetButtons() {
 function clearPresetHighlight() {
     document.querySelectorAll("#presetAmounts .preset-btn").forEach(btn => btn.classList.remove("active"));
 }
-
 async function renderRecordsTables() {
     const salesContainer = document.getElementById("salesRecordsTable");
     const consumeContainer = document.getElementById("consumeRecordsTable");
     if (!salesContainer || !consumeContainer) return;
-    
     let salesRecords = records.filter(r => r.type === 'sales');
     let consumeRecords = records.filter(r => r.type === 'consumption');
     salesRecords.sort((a,b) => new Date(b.date) - new Date(a.date));
     consumeRecords.sort((a,b) => new Date(b.date) - new Date(a.date));
-    
     if (salesRecords.length === 0) salesContainer.innerHTML = "<div>暫無產品銷售記錄</div>";
     else {
         let html = '<table class="records-table"><thead><tr><th>日子</th><th>員工</th><th>產品</th><th>支付方式</th><th>同步狀態</th></tr></thead><tbody>';
@@ -1578,13 +1339,7 @@ async function renderRecordsTables() {
             let statusClass = 'sync-pending', statusText = '待上傳';
             if (rec.syncStatus === 'success') { statusClass = 'sync-success'; statusText = '已同步'; }
             else if (rec.syncStatus === 'failed') { statusClass = 'sync-failed'; statusText = '上傳失敗'; }
-            html += `<tr>
-                <td>${rec.displayDate || formatDisplayDate(rec.date)}</td>
-                <td>${rec.staffName}</td>
-                <td>${rec.productName}</td>
-                <td>${rec.payment}</td>
-                <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
-             </tr>`;
+            html += `<tr><td>${rec.displayDate || formatDisplayDate(rec.date)}</td><td>${rec.staffName}</td><td>${rec.productName}</td><td>${rec.payment}</td><td><span class="sync-badge ${statusClass}">${statusText}</span></td></tr>`;
         }
         html += '</tbody></table>';
         salesContainer.innerHTML = html;
@@ -1596,20 +1351,12 @@ async function renderRecordsTables() {
             let statusClass = 'sync-pending', statusText = '待上傳';
             if (rec.syncStatus === 'success') { statusClass = 'sync-success'; statusText = '已同步'; }
             else if (rec.syncStatus === 'failed') { statusClass = 'sync-failed'; statusText = '上傳失敗'; }
-            html += `<tr>
-                <td>${rec.displayDate || formatDisplayDate(rec.date)}</td>
-                <td>${rec.staffName}</td>
-                <td>${rec.staffCode || ''}</td>
-                <td>${rec.amount}</td>
-                <td>${rec.payment}</td>
-                <td><span class="sync-badge ${statusClass}">${statusText}</span></td>
-             </tr>`;
+            html += `<tr><td>${rec.displayDate || formatDisplayDate(rec.date)}</td><td>${rec.staffName}</td><td>${rec.staffCode || ''}</td><td>${rec.amount}</td><td>${rec.payment}</td><td><span class="sync-badge ${statusClass}">${statusText}</span></td></tr>`;
         }
         html += '</tbody></table>';
         consumeContainer.innerHTML = html;
     }
 }
-
 function renderStaffManageList() {
     const container = document.getElementById("staffManageList");
     if (!container) return;
@@ -1621,7 +1368,6 @@ function renderStaffManageList() {
         container.appendChild(div);
     });
 }
-
 function renderProductManageList() {
     const container = document.getElementById("productManageList");
     if (!container) return;
@@ -1633,7 +1379,6 @@ function renderProductManageList() {
         container.appendChild(div);
     });
 }
-
 function renderPresetManageList() {
     const container = document.getElementById("presetManageList");
     if (!container) return;
@@ -1652,19 +1397,12 @@ async function manualRefresh() {
     if (btn.classList.contains('spinning')) return;
     btn.classList.add('spinning');
     try {
-        // 先嘗試上傳佇列
         if (gapiReady) {
             await processQueue();
-        }
-        // 再重讀 Sheet
-        if (gapiReady) {
             await fetchConfigFromSheet();
             await fetchInventoryFromSheet();
             await getMergedRecords();
         }
-        // 檢查別名（偵測產品改名）
-        checkProductRenames();
-        
         renderUI();
         await updateFloatingBadge();
         showToast("✅ 已從雲端更新");
@@ -1676,15 +1414,6 @@ async function manualRefresh() {
     }
 }
 
-// 偵測產品改名（以 Sheet staff 表的產品為準）
-function checkProductRenames() {
-    const currentNames = new Set(productList.map(p => p.name));
-    // 若本地有舊名稱，且新名稱存在，嘗試建立別名
-    // 這個邏輯簡化：如果 productAliases 有舊名指向新名，保留
-    // 若 productList 中沒有某個舊名，但別名對照指向的名稱在 productList 中，就保留
-}
-
-// ========== 顯示 Toast ==========
 function showToast(msg) {
     const toast = document.createElement('div');
     toast.className = 'toast';
@@ -1693,7 +1422,6 @@ function showToast(msg) {
     setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
 }
 
-// ========== 渲染 UI ==========
 function renderUI() {
     renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
     renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
@@ -1731,7 +1459,6 @@ setInterval(() => {
     }
 }, 60000);
 
-// 輸入中偵測
 function markTyping() {
     isUserTyping = true;
     if (typingTimer) clearTimeout(typingTimer);
@@ -1781,7 +1508,6 @@ document.getElementById("saveThresholdBtn").addEventListener("click", () => {
     renderProducts();
     showToast("閾值已儲存");
 });
-
 document.getElementById("addStaffBtn").onclick = async () => {
     if (!await requirePassword()) return;
     const name = document.getElementById("newStaffName").value.trim();
@@ -1823,12 +1549,10 @@ document.getElementById("addPresetBtn").onclick = async () => {
         processQueue();
     }
 };
-
-document.getElementById("retrySalesFailedSyncBtn").onclick = async () => { if (await requirePassword()) { processQueue(); } };
-document.getElementById("retryConsumeFailedSyncBtn").onclick = async () => { if (await requirePassword()) { processQueue(); } };
+document.getElementById("retrySalesFailedSyncBtn").onclick = async () => { if (await requirePassword()) processQueue(); };
+document.getElementById("retryConsumeFailedSyncBtn").onclick = async () => { if (await requirePassword()) processQueue(); };
 document.getElementById("manualSyncBtn").addEventListener("click", async () => { if (await requirePassword()) await manualRefresh(); });
 document.getElementById("manualSyncBtnConsume").addEventListener("click", async () => { if (await requirePassword()) await manualRefresh(); });
-
 document.getElementById("applyButtonsPerRow").addEventListener("click", () => {
     let val = parseInt(document.getElementById("buttonsPerRow").value);
     if (isNaN(val) || val < 1) val = 3;
@@ -1847,18 +1571,13 @@ document.getElementById("togglePreset").addEventListener("click", () => { toggle
 document.getElementById("toggleSalesRecords").addEventListener("click", () => { toggleSalesRecords = !toggleSalesRecords; document.getElementById("toggleSalesRecords").classList.toggle("active", toggleSalesRecords); document.getElementById("salesRecordsContent").classList.toggle("hidden-content", !toggleSalesRecords); saveToggles(); });
 document.getElementById("toggleConsumeRecords").addEventListener("click", () => { toggleConsumeRecords = !toggleConsumeRecords; document.getElementById("toggleConsumeRecords").classList.toggle("active", toggleConsumeRecords); document.getElementById("consumeRecordsContent").classList.toggle("hidden-content", !toggleConsumeRecords); saveToggles(); });
 document.getElementById("toggleDarkMode").addEventListener("click", () => { setDarkMode(!darkMode); document.getElementById("toggleDarkMode").classList.toggle("active", darkMode); });
-
 const btnSlider = document.getElementById("fontScaleSlider");
 btnSlider.addEventListener("input", (e) => { let v = parseFloat(e.target.value); document.documentElement.style.setProperty('--button-font-scale', v); localStorage.setItem('buttonFontScale', v); document.getElementById("fontScaleValue").innerText = Math.round(v*100)+"%"; });
 const recordsSlider = document.getElementById("recordsScaleSlider");
 recordsSlider.addEventListener("input", (e) => { let v = parseFloat(e.target.value); document.documentElement.style.setProperty('--records-font-scale', v); localStorage.setItem('recordsFontScale', v); document.getElementById("recordsScaleValue").innerText = Math.round(v*100)+"%"; });
 const buttonTextSlider = document.getElementById("buttonTextSlider");
 buttonTextSlider.addEventListener("input", (e) => { let v = parseFloat(e.target.value); document.documentElement.style.setProperty('--button-text-scale', v); localStorage.setItem('buttonTextScale', v); document.getElementById("buttonTextValue").innerText = Math.round(v*100)+"%"; });
-
-// 懸浮更新按鈕
-document.getElementById('floatingRefresh').addEventListener('click', () => {
-    manualRefresh();
-});
+document.getElementById('floatingRefresh').addEventListener('click', () => { manualRefresh(); });
 
 async function openSettingsPage() {
     if (passwordAuth.verified) {
@@ -1902,10 +1621,7 @@ function maybeEnableButtons() {
 function attemptAutoLogin() {
     autoLoginTimer = setTimeout(() => { document.getElementById('loginPanel').style.display = 'flex'; }, 2000);
     tokenClient.callback = (resp) => {
-        if (resp.error !== undefined) {
-            console.error(resp);
-            return;
-        }
+        if (resp.error !== undefined) return;
         setGapiToken(resp.access_token, resp.expires_in || 3600);
         if (autoLoginTimer) clearTimeout(autoLoginTimer);
         document.getElementById('loginPanel').style.display = 'none';
@@ -1928,7 +1644,6 @@ document.getElementById('googleLoginBtn').onclick = () => {
     if (autoLoginTimer) clearTimeout(autoLoginTimer);
     tokenClient.callback = (resp) => {
         if (resp.error !== undefined) {
-            console.error(resp);
             alert("登入失敗：" + (resp.error_description || resp.error));
             return;
         }
@@ -1949,14 +1664,12 @@ document.getElementById('googleLoginBtn').onclick = () => {
     };
     tokenClient.requestAccessToken();
 };
-
 function ensureInit() {
     if (typeof gapi !== 'undefined' && typeof google !== 'undefined' && typeof google.accounts !== 'undefined') {
         if (!gapiInited) gapiLoaded();
         if (!gisInited) gisLoaded();
     } else setTimeout(ensureInit, 200);
 }
-
 window.addEventListener('load', async () => {
     await openDB();
     loadLocalData();
@@ -1964,7 +1677,6 @@ window.addEventListener('load', async () => {
     ensureInit();
     await updateFloatingBadge();
 });
-
 document.querySelectorAll(".nav-btn").forEach(btn => {
     if (btn.id === "studentBookingBtn") {
         btn.onclick = () => {
