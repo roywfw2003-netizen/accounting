@@ -68,8 +68,7 @@
         body.dark .nav-btn i { color: #f3f4f6; }
 
         #loginPanel {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-body);
             display: flex; align-items: center; justify-content: center;
             z-index: 2000; backdrop-filter: blur(4px);
@@ -140,13 +139,30 @@
         .form-group { margin-bottom: 10px; }
         label { display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-primary); }
         select, input { width: 100%; padding: 8px 12px; border-radius: 40px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); }
-        .date-with-settings { display: flex; gap: 10px; align-items: center; }
+        .date-with-settings { display: flex; gap: 8px; align-items: center; }
         .date-with-settings input { flex: 1; }
+        .today-btn {
+            background: var(--btn-success-bg);
+            border: none;
+            border-radius: 40px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--btn-success-shadow);
+            transition: 0.05s linear;
+            color: white;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .today-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-success-shadow); }
         .settings-icon-small {
             background: var(--btn-primary-bg); border: none; border-radius: 40px;
             width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
             cursor: pointer; box-shadow: 0 3px 0 var(--btn-primary-shadow);
-            transition: 0.05s linear;
+            transition: 0.05s linear; flex-shrink: 0;
         }
         .settings-icon-small:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-primary-shadow); }
         .staff-group, .payment-group, .product-grid, .preset-grid { display: grid; gap: 8px; margin: 6px 0; }
@@ -294,6 +310,7 @@
             <label>📅 日期</label>
             <div class="date-with-settings">
                 <input type="date" id="salesDate">
+                <button class="today-btn" id="salesTodayBtn" title="回到今天">📅</button>
                 <button class="settings-icon-small" id="settingsIconSales"><i class="fa-solid fa-gear"></i></button>
             </div>
         </div>
@@ -309,6 +326,7 @@
             <label>📅 日期</label>
             <div class="date-with-settings">
                 <input type="date" id="consumeDate">
+                <button class="today-btn" id="consumeTodayBtn" title="回到今天">📅</button>
                 <button class="settings-icon-small" id="settingsIconConsume"><i class="fa-solid fa-gear"></i></button>
             </div>
         </div>
@@ -529,7 +547,6 @@ async function dbGetAll() {
         req.onerror = (e) => reject(e.target.error);
     });
 }
-
 function lsGetPending() {
     try { return JSON.parse(localStorage.getItem('pendingQueue') || '[]'); }
     catch(e) { return []; }
@@ -538,7 +555,6 @@ function lsSetPending(arr) {
     try { localStorage.setItem('pendingQueue', JSON.stringify(arr)); }
     catch(e) { console.warn('localStorage 寫入失敗', e); }
 }
-
 function genId() {
     return 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
 }
@@ -611,7 +627,14 @@ function getCurrentTime() {
     const now = new Date();
     return `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
 }
-function getTodayISO() { return new Date().toISOString().slice(0,10); }
+// ⚠️ 關鍵：以本地時間為準，避免 UTC 時差
+function getTodayISO() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth()+1).padStart(2,'0');
+    const d = String(now.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+}
 function ensureValidDate(dateStr) {
     if (!dateStr) return getTodayISO();
     const d = new Date(dateStr);
@@ -746,10 +769,8 @@ async function ensureSheetExists(sheetName, headers) {
     } catch(e) { console.error(`確保工作表 ${sheetName} 失敗`, e); }
 }
 
-// ⚠️ 關鍵修正：append 範圍由 A:Z 改為 A:G（避免 J 欄干擾）
 async function appendToSheet(sheetName, values, retries = 3) {
     await ensureToken();
-    // 依工作表限定 append 欄位範圍
     let range;
     if (sheetName === '庫存異動') range = '庫存異動!A:G';
     else if (sheetName === '產品Backup') range = '產品Backup!A:M';
@@ -758,7 +779,6 @@ async function appendToSheet(sheetName, values, retries = 3) {
     else if (sheetName === '客人') range = '客人!A:H';
     else if (sheetName === 'staff') range = 'staff!A:C';
     else range = `${sheetName}!A:G`;
-    
     for (let i = 0; i < retries; i++) {
         try {
             await gapi.client.sheets.spreadsheets.values.append({
@@ -806,7 +826,6 @@ async function fetchInventoryFromSheet() {
         saveInventory();
     } catch(e) { console.error("讀取庫存失敗", e); }
 }
-
 async function fetchSalesRecordsFromSheet() {
     await ensureToken();
     try {
@@ -840,7 +859,6 @@ async function fetchSalesRecordsFromSheet() {
         return out;
     } catch(e) { console.error("讀取銷售記錄失敗", e); return []; }
 }
-
 async function fetchConsumeRecordsFromSheet() {
     await ensureToken();
     try {
@@ -871,7 +889,6 @@ async function fetchConsumeRecordsFromSheet() {
         return out;
     } catch(e) { console.error("讀取消費記錄失敗", e); return []; }
 }
-
 async function fetchConfigFromSheet() {
     await ensureToken();
     try {
@@ -955,7 +972,7 @@ async function getMergedRecords() {
     return allRecords;
 }
 
-// ========== 上傳佇列（含 Backup） ==========
+// ========== 上傳佇列 ==========
 let uploading = false;
 async function processQueue() {
     if (uploading) return;
@@ -972,13 +989,10 @@ async function processQueue() {
                     const googleDate = toGoogleDate(item.payload.date);
                     const { year, month, day } = extractYearMonthDay(googleDate);
                     const now = getCurrentTime();
-                    // 主表
                     await ensureSheetExists('產品', ["年份","月份","日期","員工姓名","員工工號","產品名稱","金額","支付方式","時間","同步狀態","訂單編號"]);
                     await appendToSheet('產品', [year, month, day, item.payload.staffName, item.payload.staffCode, item.payload.productName, item.payload.amount.toString(), item.payload.payment, now, 'success', item.id]);
-                    // 備份表
                     await ensureSheetExists('產品Backup', ["年份","月份","日期","員工姓名","員工工號","產品名稱","金額","支付方式","時間","同步狀態","訂單編號","操作類型","操作時間"]);
                     await appendToSheet('產品Backup', [year, month, day, item.payload.staffName, item.payload.staffCode, item.payload.productName, item.payload.amount.toString(), item.payload.payment, now, 'success', item.id, '新增', now]);
-                    // 庫存異動
                     if (item.payload.productType !== '消耗品') {
                         await ensureSheetExists('庫存異動', ['時間','產品名稱','變動數量','變動後庫存','變動後平均單價','原因','備註']);
                         await appendToSheet('庫存異動', [now, item.payload.productName, -1, '', '', '銷售', item.id]);
@@ -1012,7 +1026,6 @@ async function processQueue() {
         updateFloatingBadge();
     }
 }
-
 async function autoRetry() {
     const queue = await getQueue();
     const pending = queue.filter(q => q.status === 'pending' || q.status === 'failed');
@@ -1074,6 +1087,7 @@ async function submitSales() {
         showToast(`✅ 訂單已完成！總共 ${selected.length} 件產品，總金額 ${total} 元`);
         selectedProducts.clear();
         renderProducts();
+        // ⚠️ 提交完成後，日期自動跳回今天
         document.getElementById("salesDate").value = getTodayISO();
         selectedSalesPayment = "現金";
         renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
@@ -1112,6 +1126,8 @@ async function submitConsumption() {
         showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
         document.getElementById("consumeAmount").value = "";
         clearPresetHighlight();
+        // ⚠️ 提交完成後，日期自動跳回今天
+        document.getElementById("consumeDate").value = getTodayISO();
         await getMergedRecords();
         updateDailyRecords('consumption');
         await updateFloatingBadge();
@@ -1153,7 +1169,6 @@ async function renderInventoryPage() {
     html += '</tbody></table>';
     container.innerHTML = html;
 }
-
 async function renderProducts() {
     const container = document.getElementById("productList");
     if (!container) return;
@@ -1216,6 +1231,8 @@ function updateDailyRecords(type) {
     html += '</div>';
     div.innerHTML = html;
 }
+
+// ⚠️ 關鍵：切換頁面時，銷售/消費頁的日期一律設為今天
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     const targetPage = document.getElementById(pageId + "Page");
@@ -1225,20 +1242,18 @@ function showPage(pageId) {
         else btn.classList.remove("active");
     });
     if (pageId === "sales") {
-        const salesDateInput = document.getElementById("salesDate");
-        if (!salesDateInput.value) salesDateInput.value = getTodayISO();
+        // ⚠️ 一律重置為今天
+        document.getElementById("salesDate").value = getTodayISO();
         renderProducts();
         updateDailyRecords('sales');
         renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
-        salesDateInput.onchange = () => updateDailyRecords('sales');
     }
     if (pageId === "consumption") {
-        const consumeDateInput = document.getElementById("consumeDate");
-        if (!consumeDateInput.value) consumeDateInput.value = getTodayISO();
+        // ⚠️ 一律重置為今天
+        document.getElementById("consumeDate").value = getTodayISO();
         renderPresetButtons();
         updateDailyRecords('consumption');
         renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
-        consumeDateInput.onchange = () => updateDailyRecords('consumption');
     }
     if (pageId === "inventory") renderInventoryPage();
     if (pageId === "settings") {
@@ -1413,7 +1428,6 @@ async function manualRefresh() {
         btn.classList.remove('spinning');
     }
 }
-
 function showToast(msg) {
     const toast = document.createElement('div');
     toast.className = 'toast';
@@ -1421,8 +1435,10 @@ function showToast(msg) {
     document.body.appendChild(toast);
     setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
 }
-
 function renderUI() {
+    // 銷售/消費頁的日期一律重置為今天
+    document.getElementById("salesDate").value = getTodayISO();
+    document.getElementById("consumeDate").value = getTodayISO();
     renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
     renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
     renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
@@ -1459,6 +1475,21 @@ setInterval(() => {
     }
 }, 60000);
 
+// 每分鐘檢查：如果日期不是今天，且使用者沒在編輯，就自動重置為今天
+setInterval(() => {
+    if (isUserTyping) return;
+    const salesDateInput = document.getElementById("salesDate");
+    const consumeDateInput = document.getElementById("consumeDate");
+    const today = getTodayISO();
+    // 只在使用者沒有 focus 在日期欄位時才重置
+    if (salesDateInput && document.activeElement !== salesDateInput) {
+        if (salesDateInput.value !== today) salesDateInput.value = today;
+    }
+    if (consumeDateInput && document.activeElement !== consumeDateInput) {
+        if (consumeDateInput.value !== today) consumeDateInput.value = today;
+    }
+}, 60000);
+
 function markTyping() {
     isUserTyping = true;
     if (typingTimer) clearTimeout(typingTimer);
@@ -1471,6 +1502,17 @@ function markTyping() {
 // ========== 事件綁定 ==========
 document.getElementById("settingsIconSales").addEventListener("click", openSettingsPage);
 document.getElementById("settingsIconConsume").addEventListener("click", openSettingsPage);
+// ⚠️ 今天按鈕
+document.getElementById("salesTodayBtn").addEventListener("click", () => {
+    document.getElementById("salesDate").value = getTodayISO();
+    updateDailyRecords('sales');
+    showToast("📅 已設為今天");
+});
+document.getElementById("consumeTodayBtn").addEventListener("click", () => {
+    document.getElementById("consumeDate").value = getTodayISO();
+    updateDailyRecords('consumption');
+    showToast("📅 已設為今天");
+});
 document.getElementById("changePasswordBtn").addEventListener("click", async () => {
     const newPwd = document.getElementById("newPassword").value, confirmPwd = document.getElementById("confirmPassword").value;
     if (!newPwd) { alert("請輸入新密碼"); return; }
