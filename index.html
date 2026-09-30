@@ -502,6 +502,10 @@ let submitting = false;
 let isUserTyping = false;
 let typingTimer = null;
 
+// ⚠️ 日期變化追蹤
+let lastSalesDateValue = '';
+let lastConsumeDateValue = '';
+
 // ========== IndexedDB 佇列 ==========
 const DB_NAME = 'hairworld_queue';
 const DB_VERSION = 1;
@@ -627,7 +631,6 @@ function getCurrentTime() {
     const now = new Date();
     return `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
 }
-// ⚠️ 以本地時間為準
 function getTodayISO() {
     const now = new Date();
     const y = now.getFullYear();
@@ -635,17 +638,13 @@ function getTodayISO() {
     const d = String(now.getDate()).padStart(2,'0');
     return `${y}-${m}-${d}`;
 }
-// ⚠️ 統一日期格式為 YYYY-MM-DD
 function normalizeDate(dateStr) {
     if (!dateStr) return '';
-    // 若已是 YYYY-MM-DD，直接回傳
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-    // 若是 YYYY-M-D，補零
     const m1 = dateStr.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
     if (m1) {
         return `${m1[1]}-${m1[2].padStart(2,'0')}-${m1[3].padStart(2,'0')}`;
     }
-    // 其他格式，交給 Date 解析
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
     const y = d.getFullYear();
@@ -1110,8 +1109,10 @@ async function submitSales() {
         showToast(`✅ 訂單已完成！總共 ${selected.length} 件產品，總金額 ${total} 元`);
         selectedProducts.clear();
         renderProducts();
-        // ⚠️ 提交完成後，日期自動跳回今天
-        document.getElementById("salesDate").value = getTodayISO();
+        // 提交後日期跳回今天
+        const input = document.getElementById("salesDate");
+        input.value = getTodayISO();
+        lastSalesDateValue = input.value;
         selectedSalesPayment = "現金";
         renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
         await getMergedRecords();
@@ -1148,8 +1149,10 @@ async function submitConsumption() {
         showToast(`✅ 消費記錄已完成！\n金額: $${amount}\n支付: ${payment}`);
         document.getElementById("consumeAmount").value = "";
         clearPresetHighlight();
-        // ⚠️ 提交完成後，日期自動跳回今天
-        document.getElementById("consumeDate").value = getTodayISO();
+        // 提交後日期跳回今天
+        const input = document.getElementById("consumeDate");
+        input.value = getTodayISO();
+        lastConsumeDateValue = input.value;
         await getMergedRecords();
         updateDailyRecords('consumption');
         await updateFloatingBadge();
@@ -1236,7 +1239,6 @@ function calcTotal() {
     document.getElementById("totalAmount").innerText = total;
     return total;
 }
-// ⚠️ 修正：用 normalizeDate 統一比對
 function updateDailyRecords(type) {
     const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
     const dateInput = document.getElementById(type === 'sales' ? 'salesDate' : 'consumeDate');
@@ -1265,13 +1267,17 @@ function showPage(pageId) {
         else btn.classList.remove("active");
     });
     if (pageId === "sales") {
-        document.getElementById("salesDate").value = getTodayISO();
+        const input = document.getElementById("salesDate");
+        input.value = getTodayISO();
+        lastSalesDateValue = input.value;
         renderProducts();
         updateDailyRecords('sales');
         renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
     }
     if (pageId === "consumption") {
-        document.getElementById("consumeDate").value = getTodayISO();
+        const input = document.getElementById("consumeDate");
+        input.value = getTodayISO();
+        lastConsumeDateValue = input.value;
         renderPresetButtons();
         updateDailyRecords('consumption');
         renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
@@ -1457,8 +1463,16 @@ function showToast(msg) {
     setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
 }
 function renderUI() {
-    document.getElementById("salesDate").value = getTodayISO();
-    document.getElementById("consumeDate").value = getTodayISO();
+    const salesInput = document.getElementById("salesDate");
+    const consumeInput = document.getElementById("consumeDate");
+    if (salesInput) {
+        salesInput.value = getTodayISO();
+        lastSalesDateValue = salesInput.value;
+    }
+    if (consumeInput) {
+        consumeInput.value = getTodayISO();
+        lastConsumeDateValue = consumeInput.value;
+    }
     renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
     renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
     renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
@@ -1495,25 +1509,38 @@ setInterval(() => {
     }
 }, 60000);
 
-// 每分鐘檢查：如果日期不是今天，且使用者沒在編輯，就自動重置為今天
+// ⚠️ 核心修正：跨瀏覽器日期變化監聽（iPhone Safari 也能用）
+// 初始化追蹤值
+setTimeout(() => {
+    const s = document.getElementById('salesDate');
+    const c = document.getElementById('consumeDate');
+    if (s) lastSalesDateValue = s.value;
+    if (c) lastConsumeDateValue = c.value;
+}, 200);
+
+// 每 500ms 檢查日期欄位是否變化
 setInterval(() => {
-    if (isUserTyping) return;
-    const salesDateInput = document.getElementById("salesDate");
-    const consumeDateInput = document.getElementById("consumeDate");
-    const today = getTodayISO();
-    if (salesDateInput && document.activeElement !== salesDateInput) {
-        if (salesDateInput.value !== today) {
-            salesDateInput.value = today;
+    const salesInput = document.getElementById('salesDate');
+    const consumeInput = document.getElementById('consumeDate');
+    
+    if (salesInput) {
+        const v = salesInput.value;
+        if (v !== lastSalesDateValue) {
+            lastSalesDateValue = v;
+            console.log('[DEBUG] 銷售日期變化偵測:', v);
             updateDailyRecords('sales');
         }
     }
-    if (consumeDateInput && document.activeElement !== consumeDateInput) {
-        if (consumeDateInput.value !== today) {
-            consumeDateInput.value = today;
+    
+    if (consumeInput) {
+        const v = consumeInput.value;
+        if (v !== lastConsumeDateValue) {
+            lastConsumeDateValue = v;
+            console.log('[DEBUG] 消費日期變化偵測:', v);
             updateDailyRecords('consumption');
         }
     }
-}, 60000);
+}, 500);
 
 function markTyping() {
     isUserTyping = true;
@@ -1528,50 +1555,22 @@ function markTyping() {
 document.getElementById("settingsIconSales").addEventListener("click", openSettingsPage);
 document.getElementById("settingsIconConsume").addEventListener("click", openSettingsPage);
 
-// ⚠️ 核心修正：日期欄位變更時，立刻更新底部顯示
-// 同時綁定 change 和 input 事件
-(function bindDateEvents() {
-    const salesDateInput = document.getElementById("salesDate");
-    const consumeDateInput = document.getElementById("consumeDate");
-    
-    // 銷售日期
-    salesDateInput.addEventListener('change', () => {
-        console.log('[DEBUG] 銷售日期變更為:', salesDateInput.value);
-        updateDailyRecords('sales');
-    });
-    salesDateInput.addEventListener('input', () => {
-        console.log('[DEBUG] 銷售日期輸入:', salesDateInput.value);
-        updateDailyRecords('sales');
-    });
-    salesDateInput.addEventListener('blur', () => {
-        updateDailyRecords('sales');
-    });
-    
-    // 消費日期
-    consumeDateInput.addEventListener('change', () => {
-        console.log('[DEBUG] 消費日期變更為:', consumeDateInput.value);
-        updateDailyRecords('consumption');
-    });
-    consumeDateInput.addEventListener('input', () => {
-        console.log('[DEBUG] 消費日期輸入:', consumeDateInput.value);
-        updateDailyRecords('consumption');
-    });
-    consumeDateInput.addEventListener('blur', () => {
-        updateDailyRecords('consumption');
-    });
-})();
-
-// ⚠️ 今天按鈕
+// 今天按鈕
 document.getElementById("salesTodayBtn").addEventListener("click", () => {
-    document.getElementById("salesDate").value = getTodayISO();
+    const input = document.getElementById("salesDate");
+    input.value = getTodayISO();
+    lastSalesDateValue = input.value;
     updateDailyRecords('sales');
     showToast("📅 已設為今天");
 });
 document.getElementById("consumeTodayBtn").addEventListener("click", () => {
-    document.getElementById("consumeDate").value = getTodayISO();
+    const input = document.getElementById("consumeDate");
+    input.value = getTodayISO();
+    lastConsumeDateValue = input.value;
     updateDailyRecords('consumption');
     showToast("📅 已設為今天");
 });
+
 document.getElementById("changePasswordBtn").addEventListener("click", async () => {
     const newPwd = document.getElementById("newPassword").value, confirmPwd = document.getElementById("confirmPassword").value;
     if (!newPwd) { alert("請輸入新密碼"); return; }
