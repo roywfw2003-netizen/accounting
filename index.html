@@ -627,7 +627,7 @@ function getCurrentTime() {
     const now = new Date();
     return `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
 }
-// ⚠️ 關鍵：以本地時間為準，避免 UTC 時差
+// ⚠️ 以本地時間為準
 function getTodayISO() {
     const now = new Date();
     const y = now.getFullYear();
@@ -635,10 +635,27 @@ function getTodayISO() {
     const d = String(now.getDate()).padStart(2,'0');
     return `${y}-${m}-${d}`;
 }
+// ⚠️ 統一日期格式為 YYYY-MM-DD
+function normalizeDate(dateStr) {
+    if (!dateStr) return '';
+    // 若已是 YYYY-MM-DD，直接回傳
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    // 若是 YYYY-M-D，補零
+    const m1 = dateStr.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (m1) {
+        return `${m1[1]}-${m1[2].padStart(2,'0')}-${m1[3].padStart(2,'0')}`;
+    }
+    // 其他格式，交給 Date 解析
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${dd}`;
+}
 function ensureValidDate(dateStr) {
     if (!dateStr) return getTodayISO();
-    const d = new Date(dateStr);
-    return isNaN(d.getTime()) ? getTodayISO() : dateStr;
+    return normalizeDate(dateStr) || getTodayISO();
 }
 function setButtonsPerRow(count) {
     buttonsPerRow = count;
@@ -768,7 +785,6 @@ async function ensureSheetExists(sheetName, headers) {
         }
     } catch(e) { console.error(`確保工作表 ${sheetName} 失敗`, e); }
 }
-
 async function appendToSheet(sheetName, values, retries = 3) {
     await ensureToken();
     let range;
@@ -838,7 +854,10 @@ async function fetchSalesRecordsFromSheet() {
             const year = row[0], month = row[1], day = row[2];
             let isoDate = getTodayISO();
             if (year && month && day) {
-                isoDate = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                const y = String(year).trim();
+                const m = String(month).trim().padStart(2,'0');
+                const d = String(day).trim().padStart(2,'0');
+                isoDate = `${y}-${m}-${d}`;
             }
             out.push({
                 id: row[10] || `sheet_sales_${i}`,
@@ -871,7 +890,12 @@ async function fetchConsumeRecordsFromSheet() {
             const googleDate = row[0] || '';
             let isoDate = getTodayISO();
             const parts = googleDate.split('/');
-            if (parts.length === 3) isoDate = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+            if (parts.length === 3) {
+                const d = String(parts[0]).trim().padStart(2,'0');
+                const m = String(parts[1]).trim().padStart(2,'0');
+                const y = String(parts[2]).trim();
+                isoDate = `${y}-${m}-${d}`;
+            }
             out.push({
                 id: row[7] || `sheet_consume_${i}`,
                 type: 'consumption',
@@ -931,7 +955,6 @@ async function fetchConfigFromSheet() {
         saveStaff(); saveProducts(); savePresets();
     } catch(e) { console.error("讀取設定失敗", e); }
 }
-
 async function getMergedRecords() {
     const sheetSales = await fetchSalesRecordsFromSheet();
     const sheetConsume = await fetchConsumeRecordsFromSheet();
@@ -941,7 +964,7 @@ async function getMergedRecords() {
         .map(q => {
             if (q.type === 'sales') {
                 return {
-                    id: q.id, type: 'sales', date: q.payload.date,
+                    id: q.id, type: 'sales', date: normalizeDate(q.payload.date),
                     staffCode: q.payload.staffCode, staffName: q.payload.staffName,
                     productName: q.payload.productName,
                     productPrice: q.payload.productPrice, amount: q.payload.amount,
@@ -953,7 +976,7 @@ async function getMergedRecords() {
                 };
             } else if (q.type === 'consumption') {
                 return {
-                    id: q.id, type: 'consumption', date: q.payload.date,
+                    id: q.id, type: 'consumption', date: normalizeDate(q.payload.date),
                     staffName: q.payload.staffName, staffCode: q.payload.staffCode,
                     amount: q.payload.amount, payment: q.payload.payment,
                     syncStatus: q.status === 'failed' ? 'failed' : 'pending',
@@ -1100,7 +1123,6 @@ async function submitSales() {
         submitBtn.classList.remove("disabled-btn");
     }
 }
-
 async function submitConsumption() {
     if (submitting) { showToast("請稍後，正在處理中..."); return; }
     submitting = true;
@@ -1214,11 +1236,14 @@ function calcTotal() {
     document.getElementById("totalAmount").innerText = total;
     return total;
 }
+// ⚠️ 修正：用 normalizeDate 統一比對
 function updateDailyRecords(type) {
     const div = document.getElementById(type === 'sales' ? 'salesRecent' : 'consumeRecent');
-    let dateStr = type === 'sales' ? document.getElementById('salesDate').value : document.getElementById('consumeDate').value;
+    const dateInput = document.getElementById(type === 'sales' ? 'salesDate' : 'consumeDate');
+    const rawDate = dateInput ? dateInput.value : '';
+    const dateStr = normalizeDate(rawDate);
     if (!dateStr) { if (div) div.style.display = 'none'; return; }
-    const filtered = records.filter(r => r.type === type && r.date === dateStr);
+    const filtered = records.filter(r => r.type === type && normalizeDate(r.date) === dateStr);
     if (filtered.length === 0) { div.style.display = 'none'; return; }
     div.style.display = 'flex';
     let totalAmount = 0;
@@ -1231,8 +1256,6 @@ function updateDailyRecords(type) {
     html += '</div>';
     div.innerHTML = html;
 }
-
-// ⚠️ 關鍵：切換頁面時，銷售/消費頁的日期一律設為今天
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     const targetPage = document.getElementById(pageId + "Page");
@@ -1242,14 +1265,12 @@ function showPage(pageId) {
         else btn.classList.remove("active");
     });
     if (pageId === "sales") {
-        // ⚠️ 一律重置為今天
         document.getElementById("salesDate").value = getTodayISO();
         renderProducts();
         updateDailyRecords('sales');
         renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
     }
     if (pageId === "consumption") {
-        // ⚠️ 一律重置為今天
         document.getElementById("consumeDate").value = getTodayISO();
         renderPresetButtons();
         updateDailyRecords('consumption');
@@ -1436,7 +1457,6 @@ function showToast(msg) {
     setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
 }
 function renderUI() {
-    // 銷售/消費頁的日期一律重置為今天
     document.getElementById("salesDate").value = getTodayISO();
     document.getElementById("consumeDate").value = getTodayISO();
     renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
@@ -1481,12 +1501,17 @@ setInterval(() => {
     const salesDateInput = document.getElementById("salesDate");
     const consumeDateInput = document.getElementById("consumeDate");
     const today = getTodayISO();
-    // 只在使用者沒有 focus 在日期欄位時才重置
     if (salesDateInput && document.activeElement !== salesDateInput) {
-        if (salesDateInput.value !== today) salesDateInput.value = today;
+        if (salesDateInput.value !== today) {
+            salesDateInput.value = today;
+            updateDailyRecords('sales');
+        }
     }
     if (consumeDateInput && document.activeElement !== consumeDateInput) {
-        if (consumeDateInput.value !== today) consumeDateInput.value = today;
+        if (consumeDateInput.value !== today) {
+            consumeDateInput.value = today;
+            updateDailyRecords('consumption');
+        }
     }
 }, 60000);
 
@@ -1502,6 +1527,40 @@ function markTyping() {
 // ========== 事件綁定 ==========
 document.getElementById("settingsIconSales").addEventListener("click", openSettingsPage);
 document.getElementById("settingsIconConsume").addEventListener("click", openSettingsPage);
+
+// ⚠️ 核心修正：日期欄位變更時，立刻更新底部顯示
+// 同時綁定 change 和 input 事件
+(function bindDateEvents() {
+    const salesDateInput = document.getElementById("salesDate");
+    const consumeDateInput = document.getElementById("consumeDate");
+    
+    // 銷售日期
+    salesDateInput.addEventListener('change', () => {
+        console.log('[DEBUG] 銷售日期變更為:', salesDateInput.value);
+        updateDailyRecords('sales');
+    });
+    salesDateInput.addEventListener('input', () => {
+        console.log('[DEBUG] 銷售日期輸入:', salesDateInput.value);
+        updateDailyRecords('sales');
+    });
+    salesDateInput.addEventListener('blur', () => {
+        updateDailyRecords('sales');
+    });
+    
+    // 消費日期
+    consumeDateInput.addEventListener('change', () => {
+        console.log('[DEBUG] 消費日期變更為:', consumeDateInput.value);
+        updateDailyRecords('consumption');
+    });
+    consumeDateInput.addEventListener('input', () => {
+        console.log('[DEBUG] 消費日期輸入:', consumeDateInput.value);
+        updateDailyRecords('consumption');
+    });
+    consumeDateInput.addEventListener('blur', () => {
+        updateDailyRecords('consumption');
+    });
+})();
+
 // ⚠️ 今天按鈕
 document.getElementById("salesTodayBtn").addEventListener("click", () => {
     document.getElementById("salesDate").value = getTodayISO();
