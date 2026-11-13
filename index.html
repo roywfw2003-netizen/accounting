@@ -115,11 +115,13 @@
             .btn-group .nav-btn[data-page="sales"] { order: 2; }
             .btn-group .nav-btn[data-page="inventory"] { order: 3; }
             .btn-group .nav-btn#studentBookingBtn { order: 4; }
+            .btn-group .nav-btn#couponBtn { order: 5; }
         }
         @media (orientation: portrait), (max-width: 899px) {
             .btn-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
             .nav-btn { width: auto; min-width: 0; margin: 0; }
             .btn-group .nav-btn#studentBookingBtn { grid-column: 1 / -1; }
+            .btn-group .nav-btn#couponBtn { grid-column: 1 / -1; }
         }
 
         .btn-group { display: flex; gap: 12px; margin-bottom: 12px; }
@@ -303,6 +305,7 @@
         <button class="nav-btn" data-page="consumption"><i class="fa-solid fa-user-group"></i><span>客人消費</span></button>
         <button class="nav-btn" data-page="inventory"><i class="fa-solid fa-boxes"></i><span>庫存管理</span></button>
         <button class="nav-btn" id="studentBookingBtn"><i class="fa-solid fa-school"></i><span>學生預約</span></button>
+        <button class="nav-btn" id="couponBtn"><i class="fa-solid fa-ticket"></i><span>優惠券</span></button>
     </div>
 
     <div id="salesPage" class="page">
@@ -408,7 +411,10 @@
     </div>
 </div>
 
-<div id="iframeModal" class="iframe-container"><button class="close-iframe" id="closeIframeBtn">✖ 關閉</button><iframe id="bookingIframe" src=""></iframe></div>
+<div id="iframeModal" class="iframe-container">
+    <button class="close-iframe" id="closeIframeBtn">🏠 返回主頁</button>
+    <iframe id="bookingIframe" src=""></iframe>
+</div>
 
 <button id="floatingRefresh" title="立即從雲端更新">
     <i class="fa-solid fa-rotate"></i>
@@ -1781,6 +1787,11 @@ document.querySelectorAll(".nav-btn").forEach(btn => {
     if (btn.id === "studentBookingBtn") {
         btn.onclick = () => {
             document.getElementById("bookingIframe").src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html";
+            document.getElementById("iframeModal").style.display = "block";
+        };
+    } else if (btn.id === "couponBtn") {
+        btn.onclick = () => {
+            document.getElementById("bookingIframe").src = "https://roywfw2003-netizen.github.io/hairworld-coupon/index.html";
             document.getElementById("iframeModal").style.display = "block";
         };
     } else {
