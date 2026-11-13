@@ -114,14 +114,11 @@
             .btn-group .nav-btn[data-page="consumption"] { order: 1; }
             .btn-group .nav-btn[data-page="sales"] { order: 2; }
             .btn-group .nav-btn[data-page="inventory"] { order: 3; }
-            .btn-group .nav-btn#studentBookingBtn { order: 4; }
-            .btn-group .nav-btn#couponBtn { order: 5; }
         }
         @media (orientation: portrait), (max-width: 899px) {
             .btn-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
             .nav-btn { width: auto; min-width: 0; margin: 0; }
-            .btn-group .nav-btn#studentBookingBtn { grid-column: 1 / -1; }
-            .btn-group .nav-btn#couponBtn { grid-column: 1 / -1; }
+            .btn-group .nav-btn.nav-custom { grid-column: 1 / -1; }
         }
 
         .btn-group { display: flex; gap: 12px; margin-bottom: 12px; }
@@ -217,6 +214,7 @@
             border: none; border-radius: 40px; padding: 6px 12px;
             cursor: pointer; box-shadow: 0 3px 0 var(--accent-orange-shadow);
             font-size: calc(0.9rem * var(--button-font-scale));
+            z-index: 1001;
         }
         .close-iframe:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-orange-shadow); }
         .recent-record {
@@ -231,7 +229,7 @@
         .settings-section { margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 24px; padding: 8px; }
         .settings-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .settings-content { margin-top: 8px; }
-        .toggle-switch { width: 44px; height: 24px; background: #ccc; border-radius: 24px; position: relative; cursor: pointer; transition: 0.2s; }
+        .toggle-switch { width: 44px; height: 24px; background: #ccc; border-radius: 24px; position: relative; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
         .toggle-switch.active { background: var(--accent-orange); }
         .toggle-switch::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; }
         .toggle-switch.active::after { left: 22px; }
@@ -287,6 +285,8 @@
             border: 2px solid var(--bg-card);
         }
         #floatingRefresh.has-pending .badge { display: flex; }
+
+        .nav-custom-row { border-bottom: 1px solid var(--border-color); padding-bottom: 8px; align-items: center; }
     </style>
 </head>
 <body>
@@ -300,13 +300,7 @@
 </div>
 
 <div class="app-container">
-    <div class="btn-group">
-        <button class="nav-btn" data-page="sales"><i class="fa-solid fa-cube"></i><span>產品銷售</span></button>
-        <button class="nav-btn" data-page="consumption"><i class="fa-solid fa-user-group"></i><span>客人消費</span></button>
-        <button class="nav-btn" data-page="inventory"><i class="fa-solid fa-boxes"></i><span>庫存管理</span></button>
-        <button class="nav-btn" id="studentBookingBtn"><i class="fa-solid fa-school"></i><span>學生預約</span></button>
-        <button class="nav-btn" id="couponBtn"><i class="fa-solid fa-ticket"></i><span>優惠券</span></button>
-    </div>
+    <div class="btn-group" id="navBtnGroup"></div>
 
     <div id="salesPage" class="page">
         <div class="form-group">
@@ -369,6 +363,28 @@
             <div class="settings-header"><h4>🔴🟡🟢 庫存燈號閾值</h4></div>
             <div><label>紅色上限 (≤): <input type="number" id="redThreshold" value="3" step="1" style="width:80px;"></label><label style="margin-left:12px;">綠色下限 (≥): <input type="number" id="greenThreshold" value="8" step="1" style="width:80px;"></label><button id="saveThresholdBtn" class="small-btn">儲存</button><div style="font-size:0.7rem;">庫存 ≤ 紅 = 紅色燈；介於之間 = 黃色燈；≥ 綠 = 綠色燈</div></div>
         </div>
+
+        <div class="settings-section">
+            <div class="settings-header"><h4>🧩 自訂導航按鈕</h4><div class="toggle-switch" id="toggleNavCustom"></div></div>
+            <div id="navCustomContent" class="settings-content hidden-content">
+                <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:8px;">
+                    💡 開啟後可新增／修改／刪除主頁左側按鈕。每個按鈕可自訂名稱、Icon（Font Awesome class）及連結 URL，並用右側 toggle 控制是否顯示在主頁。
+                </div>
+                <div id="navCustomList"></div>
+                <hr>
+                <div style="font-weight:bold; margin-bottom:6px;">➕ 新增按鈕</div>
+                <div class="setting-row">
+                    <input type="text" id="newNavLabel" placeholder="名稱（如：優惠券）" style="flex:2; min-width:110px;">
+                    <input type="text" id="newNavIcon" placeholder="Icon (如 fa-solid fa-ticket)" style="flex:2; min-width:150px;">
+                    <input type="text" id="newNavUrl" placeholder="連結 URL（https://...）" style="flex:3; min-width:180px;">
+                    <button class="small-btn" id="addNavBtn">➕ 新增</button>
+                </div>
+                <div style="font-size:0.7rem; color:var(--text-secondary);">
+                    Icon 參考：<code>fa-solid fa-link</code>、<code>fa-solid fa-star</code>、<code>fa-solid fa-gift</code>、<code>fa-solid fa-ticket</code>、<code>fa-solid fa-school</code>、<code>fa-solid fa-calendar</code> 等（Font Awesome 6 Free 皆可使用）
+                </div>
+            </div>
+        </div>
+
         <div class="settings-section">
             <div class="settings-header"><h4>👥 員工管理</h4><div class="toggle-switch" id="toggleStaff"></div></div>
             <div id="staffContent" class="settings-content hidden-content"><div id="staffManageList"></div><div class="setting-row"><input type="text" id="newStaffName" placeholder="員工姓名" style="flex:2;"><input type="text" id="newStaffCode" placeholder="工號" style="flex:1;"><button class="small-btn" id="addStaffBtn">➕ 新增</button></div><div style="font-size:0.7rem; color:#b91c1c;">⚠️ 修改/刪除請至 Google Sheet 的 staff 表手動操作</div></div>
@@ -498,7 +514,7 @@ const PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付"];
 const SALES_PAYMENTS = ["現金", "轉數快", "支付寶", "PayMe", "微信支付", "公司"];
 
 let toggleStaff = false, toggleProduct = false, togglePreset = false;
-let toggleSalesRecords = false, toggleConsumeRecords = false;
+let toggleSalesRecords = false, toggleConsumeRecords = false, toggleNavCustom = false;
 let buttonsPerRow = 3;
 let redThreshold = 3, greenThreshold = 8;
 let showCostPrice = false;
@@ -507,10 +523,85 @@ let idleTimer = null;
 let submitting = false;
 let isUserTyping = false;
 let typingTimer = null;
+let currentPageId = 'sales';
 
 // ⚠️ 日期變化追蹤
 let lastSalesDateValue = '';
 let lastConsumeDateValue = '';
+
+// ========== 導航按鈕設定 ==========
+let navItems = [];
+
+function getDefaultNavItems() {
+    return [
+        { id: 'sales', label: '產品銷售', icon: 'fa-solid fa-cube', fixed: true, page: 'sales' },
+        { id: 'consumption', label: '客人消費', icon: 'fa-solid fa-user-group', fixed: true, page: 'consumption' },
+        { id: 'inventory', label: '庫存管理', icon: 'fa-solid fa-boxes', fixed: true, page: 'inventory' },
+        { id: 'studentBooking', label: '學生預約', icon: 'fa-solid fa-school', url: 'https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html', visible: true, fixed: false },
+        { id: 'coupon', label: '優惠券', icon: 'fa-solid fa-ticket', url: 'https://roywfw2003-netizen.github.io/hairworld-coupon/index.html', visible: true, fixed: false }
+    ];
+}
+function loadNavItems() {
+    const defaults = getDefaultNavItems();
+    const fixedItems = defaults.filter(d => d.fixed);
+    let customItems = defaults.filter(d => !d.fixed);
+    const stored = localStorage.getItem('navItems');
+    if (stored) {
+        try {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) {
+                customItems = parsed
+                    .filter(x => x && x.id && !x.fixed)
+                    .map(x => ({
+                        id: x.id,
+                        label: x.label || '未命名',
+                        icon: x.icon || 'fa-solid fa-link',
+                        url: x.url || '',
+                        visible: x.visible !== false,
+                        fixed: false
+                    }));
+            }
+        } catch(e) { console.warn('讀取 navItems 失敗', e); }
+    }
+    navItems = [...fixedItems, ...customItems];
+}
+function saveNavItems() {
+    localStorage.setItem('navItems', JSON.stringify(navItems.filter(x => !x.fixed)));
+}
+function escapeAttr(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+function renderNavButtons() {
+    const group = document.getElementById('navBtnGroup');
+    if (!group) return;
+    group.innerHTML = '';
+    let customOrder = 4;
+    navItems.forEach(item => {
+        if (!item.fixed && item.visible === false) return;
+        const btn = document.createElement('button');
+        btn.className = 'nav-btn' + (item.fixed ? '' : ' nav-custom');
+        btn.id = 'nav_' + item.id;
+        if (item.page) btn.dataset.page = item.page;
+        btn.innerHTML = `<i class="${escapeAttr(item.icon)}"></i><span>${escapeAttr(item.label)}</span>`;
+        if (!item.fixed) btn.style.order = customOrder++;
+        btn.addEventListener('click', () => {
+            if (item.page) showPage(item.page);
+            else if (item.url) openIframe(item.url);
+        });
+        group.appendChild(btn);
+    });
+    updateNavActive();
+}
+function updateNavActive() {
+    document.querySelectorAll('.nav-btn').forEach(b => {
+        if (b.dataset.page && b.dataset.page === currentPageId) b.classList.add('active');
+        else b.classList.remove('active');
+    });
+}
 
 // ========== IndexedDB 佇列 ==========
 const DB_NAME = 'hairworld_queue';
@@ -712,6 +803,7 @@ function loadLocalData() {
             togglePreset = toggles.preset || false;
             toggleSalesRecords = toggles.salesRecords || false;
             toggleConsumeRecords = toggles.consumeRecords || false;
+            toggleNavCustom = toggles.navCustom || false;
         } catch(e){}
     }
     const storedPerRow = localStorage.getItem('buttonsPerRow');
@@ -735,7 +827,8 @@ function saveInventory() { localStorage.setItem("cachedInventory", JSON.stringif
 function saveToggles() {
     localStorage.setItem("settingsToggles", JSON.stringify({
         staff: toggleStaff, product: toggleProduct, preset: togglePreset,
-        salesRecords: toggleSalesRecords, consumeRecords: toggleConsumeRecords
+        salesRecords: toggleSalesRecords, consumeRecords: toggleConsumeRecords,
+        navCustom: toggleNavCustom
     }));
 }
 function setDarkMode(enabled) {
@@ -1268,10 +1361,8 @@ function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     const targetPage = document.getElementById(pageId + "Page");
     if (targetPage) targetPage.classList.add("active");
-    document.querySelectorAll(".nav-btn").forEach(btn => {
-        if (btn.dataset.page === pageId) btn.classList.add("active");
-        else btn.classList.remove("active");
-    });
+    currentPageId = pageId;
+    updateNavActive();
     if (pageId === "sales") {
         const input = document.getElementById("salesDate");
         input.value = getTodayISO();
@@ -1294,16 +1385,19 @@ function showPage(pageId) {
         renderProductManageList();
         renderPresetManageList();
         renderRecordsTables();
+        renderNavCustomList();
         document.getElementById("toggleStaff").classList.toggle("active", toggleStaff);
         document.getElementById("toggleProduct").classList.toggle("active", toggleProduct);
         document.getElementById("togglePreset").classList.toggle("active", togglePreset);
         document.getElementById("toggleSalesRecords").classList.toggle("active", toggleSalesRecords);
         document.getElementById("toggleConsumeRecords").classList.toggle("active", toggleConsumeRecords);
+        document.getElementById("toggleNavCustom").classList.toggle("active", toggleNavCustom);
         document.getElementById("staffContent").classList.toggle("hidden-content", !toggleStaff);
         document.getElementById("productContent").classList.toggle("hidden-content", !toggleProduct);
         document.getElementById("presetContent").classList.toggle("hidden-content", !togglePreset);
         document.getElementById("salesRecordsContent").classList.toggle("hidden-content", !toggleSalesRecords);
         document.getElementById("consumeRecordsContent").classList.toggle("hidden-content", !toggleConsumeRecords);
+        document.getElementById("navCustomContent").classList.toggle("hidden-content", !toggleNavCustom);
         document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
         document.getElementById("buttonsPerRow").value = buttonsPerRow;
         document.getElementById("redThreshold").value = redThreshold;
@@ -1439,6 +1533,60 @@ function renderPresetManageList() {
     });
 }
 
+// ========== 自訂導航按鈕管理 ==========
+function renderNavCustomList() {
+    const container = document.getElementById("navCustomList");
+    if (!container) return;
+    container.innerHTML = '';
+
+    const fixedItems = navItems.filter(x => x.fixed);
+    const customItems = navItems.filter(x => !x.fixed);
+
+    if (fixedItems.length > 0) {
+        const title = document.createElement('div');
+        title.style.cssText = 'font-size:0.8rem; font-weight:bold; margin-bottom:4px;';
+        title.textContent = '固定項目（不可修改／刪除）';
+        container.appendChild(title);
+
+        fixedItems.forEach(it => {
+            const row = document.createElement('div');
+            row.className = 'setting-row';
+            row.innerHTML = `
+                <i class="${escapeAttr(it.icon)}" style="font-size:1.3rem; width:28px; text-align:center;"></i>
+                <span style="flex:1;">${escapeAttr(it.label)}</span>
+                <span style="font-size:0.7rem; color:var(--text-secondary);">固定</span>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    const title2 = document.createElement('div');
+    title2.style.cssText = 'font-size:0.8rem; font-weight:bold; margin:10px 0 4px;';
+    title2.textContent = '可自訂項目';
+    container.appendChild(title2);
+
+    if (customItems.length === 0) {
+        const empty = document.createElement('div');
+        empty.style.cssText = 'font-size:0.8rem; color:var(--text-secondary); margin-bottom:6px;';
+        empty.textContent = '暫無自訂項目，可在下方新增。';
+        container.appendChild(empty);
+    }
+
+    customItems.forEach(it => {
+        const row = document.createElement('div');
+        row.className = 'setting-row nav-custom-row';
+        row.innerHTML = `
+            <i class="${escapeAttr(it.icon)}" style="font-size:1.4rem; width:28px; text-align:center;"></i>
+            <input type="text" data-id="${escapeAttr(it.id)}" data-field="label" value="${escapeAttr(it.label)}" placeholder="名稱" style="flex:2; min-width:90px;">
+            <input type="text" data-id="${escapeAttr(it.id)}" data-field="icon" value="${escapeAttr(it.icon)}" placeholder="icon class" style="flex:2; min-width:150px;">
+            <input type="text" data-id="${escapeAttr(it.id)}" data-field="url" value="${escapeAttr(it.url || '')}" placeholder="https://..." style="flex:3; min-width:180px;">
+            <div class="toggle-switch ${it.visible !== false ? 'active' : ''}" data-toggle="${escapeAttr(it.id)}" title="是否顯示在主頁"></div>
+            <button class="small-btn danger-btn" data-del="${escapeAttr(it.id)}" title="刪除">🗑️</button>
+        `;
+        container.appendChild(row);
+    });
+}
+
 // ========== 手動更新 ==========
 async function manualRefresh() {
     const btn = document.getElementById('floatingRefresh');
@@ -1479,12 +1627,14 @@ function renderUI() {
         consumeInput.value = getTodayISO();
         lastConsumeDateValue = consumeInput.value;
     }
+    renderNavButtons();
     renderStaff("salesStaff", selectedSalesStaff?.code, (c,n) => selectedSalesStaff = { code:c, name:n });
     renderStaff("consumeStaff", selectedConsumeStaff?.code, (c,n) => selectedConsumeStaff = { code:c, name:n });
     renderPayment("salesPayment", selectedSalesPayment, (p) => selectedSalesPayment = p, true);
     renderPayment("consumePayment", selectedConsumePayment, (p) => selectedConsumePayment = p, false);
     renderProducts(); renderPresetButtons(); renderRecordsTables();
     renderStaffManageList(); renderProductManageList(); renderPresetManageList();
+    renderNavCustomList();
     updateDailyRecords('sales');
     updateDailyRecords('consumption');
     setDarkMode(darkMode);
@@ -1492,6 +1642,36 @@ function renderUI() {
     setButtonsPerRow(buttonsPerRow);
     document.getElementById("toggleDarkMode").classList.toggle("active", darkMode);
 }
+
+// ========== iframe 開啟／關閉 ==========
+function openIframe(url) {
+    if (!url) return;
+    const iframe = document.getElementById('bookingIframe');
+    iframe.src = url;
+    document.getElementById('iframeModal').style.display = 'block';
+}
+function closeIframe() {
+    document.getElementById('iframeModal').style.display = 'none';
+    document.getElementById('bookingIframe').src = '';
+}
+document.getElementById('bookingIframe').addEventListener('load', () => {
+    const iframe = document.getElementById('bookingIframe');
+    if (!iframe.src || iframe.src === 'about:blank') return;
+    try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!doc || !doc.body) return;
+        if (doc.getElementById('__hw_back_btn__')) return;
+        const btn = doc.createElement('button');
+        btn.id = '__hw_back_btn__';
+        btn.type = 'button';
+        btn.textContent = '🏠 返回主頁';
+        btn.style.cssText = 'position:fixed;top:12px;left:12px;z-index:2147483647;background:#f97316;color:#fff;border:none;border-radius:40px;padding:10px 16px;font-size:15px;font-weight:bold;cursor:pointer;box-shadow:0 3px 0 #b45309;font-family:system-ui,sans-serif;';
+        btn.addEventListener('click', () => closeIframe());
+        doc.body.appendChild(btn);
+    } catch (e) {
+        // 跨域，無法注入；使用外層返回按鈕
+    }
+});
 
 // ========== 每日 10 點更新 ==========
 function checkDailyRefresh() {
@@ -1516,7 +1696,6 @@ setInterval(() => {
 }, 60000);
 
 // ⚠️ 核心修正：跨瀏覽器日期變化監聽（iPhone Safari 也能用）
-// 初始化追蹤值
 setTimeout(() => {
     const s = document.getElementById('salesDate');
     const c = document.getElementById('consumeDate');
@@ -1524,25 +1703,20 @@ setTimeout(() => {
     if (c) lastConsumeDateValue = c.value;
 }, 200);
 
-// 每 500ms 檢查日期欄位是否變化
 setInterval(() => {
     const salesInput = document.getElementById('salesDate');
     const consumeInput = document.getElementById('consumeDate');
-    
     if (salesInput) {
         const v = salesInput.value;
         if (v !== lastSalesDateValue) {
             lastSalesDateValue = v;
-            console.log('[DEBUG] 銷售日期變化偵測:', v);
             updateDailyRecords('sales');
         }
     }
-    
     if (consumeInput) {
         const v = consumeInput.value;
         if (v !== lastConsumeDateValue) {
             lastConsumeDateValue = v;
-            console.log('[DEBUG] 消費日期變化偵測:', v);
             updateDailyRecords('consumption');
         }
     }
@@ -1561,7 +1735,6 @@ function markTyping() {
 document.getElementById("settingsIconSales").addEventListener("click", openSettingsPage);
 document.getElementById("settingsIconConsume").addEventListener("click", openSettingsPage);
 
-// 今天按鈕
 document.getElementById("salesTodayBtn").addEventListener("click", () => {
     const input = document.getElementById("salesDate");
     input.value = getTodayISO();
@@ -1676,6 +1849,7 @@ document.getElementById("toggleProduct").addEventListener("click", () => { toggl
 document.getElementById("togglePreset").addEventListener("click", () => { togglePreset = !togglePreset; document.getElementById("togglePreset").classList.toggle("active", togglePreset); document.getElementById("presetContent").classList.toggle("hidden-content", !togglePreset); saveToggles(); });
 document.getElementById("toggleSalesRecords").addEventListener("click", () => { toggleSalesRecords = !toggleSalesRecords; document.getElementById("toggleSalesRecords").classList.toggle("active", toggleSalesRecords); document.getElementById("salesRecordsContent").classList.toggle("hidden-content", !toggleSalesRecords); saveToggles(); });
 document.getElementById("toggleConsumeRecords").addEventListener("click", () => { toggleConsumeRecords = !toggleConsumeRecords; document.getElementById("toggleConsumeRecords").classList.toggle("active", toggleConsumeRecords); document.getElementById("consumeRecordsContent").classList.toggle("hidden-content", !toggleConsumeRecords); saveToggles(); });
+document.getElementById("toggleNavCustom").addEventListener("click", () => { toggleNavCustom = !toggleNavCustom; document.getElementById("toggleNavCustom").classList.toggle("active", toggleNavCustom); document.getElementById("navCustomContent").classList.toggle("hidden-content", !toggleNavCustom); saveToggles(); });
 document.getElementById("toggleDarkMode").addEventListener("click", () => { setDarkMode(!darkMode); document.getElementById("toggleDarkMode").classList.toggle("active", darkMode); });
 const btnSlider = document.getElementById("fontScaleSlider");
 btnSlider.addEventListener("input", (e) => { let v = parseFloat(e.target.value); document.documentElement.style.setProperty('--button-font-scale', v); localStorage.setItem('buttonFontScale', v); document.getElementById("fontScaleValue").innerText = Math.round(v*100)+"%"; });
@@ -1684,6 +1858,73 @@ recordsSlider.addEventListener("input", (e) => { let v = parseFloat(e.target.val
 const buttonTextSlider = document.getElementById("buttonTextSlider");
 buttonTextSlider.addEventListener("input", (e) => { let v = parseFloat(e.target.value); document.documentElement.style.setProperty('--button-text-scale', v); localStorage.setItem('buttonTextScale', v); document.getElementById("buttonTextValue").innerText = Math.round(v*100)+"%"; });
 document.getElementById('floatingRefresh').addEventListener('click', () => { manualRefresh(); });
+
+// ===== 自訂導航按鈕管理事件 =====
+document.getElementById('navCustomList').addEventListener('input', (e) => {
+    const t = e.target;
+    if (!t.dataset || !t.dataset.field) return;
+    const id = t.dataset.id;
+    const field = t.dataset.field;
+    const item = navItems.find(x => x.id === id);
+    if (!item) return;
+    item[field] = t.value;
+    if (field === 'icon') {
+        const row = t.closest('.setting-row');
+        if (row) {
+            const iconEl = row.querySelector('i');
+            if (iconEl) iconEl.className = t.value;
+        }
+    }
+    saveNavItems();
+    renderNavButtons();
+    updateNavActive();
+});
+document.getElementById('navCustomList').addEventListener('click', (e) => {
+    const toggle = e.target.closest('[data-toggle]');
+    if (toggle) {
+        const id = toggle.dataset.toggle;
+        const item = navItems.find(x => x.id === id);
+        if (item) {
+            item.visible = !(item.visible !== false);
+            toggle.classList.toggle('active', item.visible);
+            saveNavItems();
+            renderNavButtons();
+            updateNavActive();
+        }
+        return;
+    }
+    const del = e.target.closest('[data-del]');
+    if (del) {
+        const id = del.dataset.del;
+        if (confirm('確定刪除此導航按鈕？')) {
+            navItems = navItems.filter(x => x.id !== id);
+            saveNavItems();
+            renderNavCustomList();
+            renderNavButtons();
+            updateNavActive();
+            showToast('已刪除');
+        }
+    }
+});
+document.getElementById('addNavBtn').onclick = () => {
+    const label = document.getElementById('newNavLabel').value.trim();
+    let icon = document.getElementById('newNavIcon').value.trim();
+    const url = document.getElementById('newNavUrl').value.trim();
+    if (!label) { alert('請輸入名稱'); return; }
+    if (!url) { alert('請輸入連結 URL'); return; }
+    if (!icon) icon = 'fa-solid fa-link';
+    else if (!icon.includes('fa-')) icon = 'fa-solid ' + icon;
+    const id = 'nav_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+    navItems.push({ id, label, icon, url, visible: true, fixed: false });
+    saveNavItems();
+    renderNavCustomList();
+    renderNavButtons();
+    updateNavActive();
+    document.getElementById('newNavLabel').value = '';
+    document.getElementById('newNavIcon').value = '';
+    document.getElementById('newNavUrl').value = '';
+    showToast('✅ 已新增導航按鈕');
+};
 
 async function openSettingsPage() {
     if (passwordAuth.verified) {
@@ -1779,31 +2020,16 @@ function ensureInit() {
 window.addEventListener('load', async () => {
     await openDB();
     loadLocalData();
+    loadNavItems();
+    renderNavButtons();
     bindActivityEvents();
     ensureInit();
     await updateFloatingBadge();
 });
-document.querySelectorAll(".nav-btn").forEach(btn => {
-    if (btn.id === "studentBookingBtn") {
-        btn.onclick = () => {
-            document.getElementById("bookingIframe").src = "https://roywfw2003-netizen.github.io/hairworld-booking/staff-tablet.html";
-            document.getElementById("iframeModal").style.display = "block";
-        };
-    } else if (btn.id === "couponBtn") {
-        btn.onclick = () => {
-            document.getElementById("bookingIframe").src = "https://roywfw2003-netizen.github.io/hairworld-coupon/index.html";
-            document.getElementById("iframeModal").style.display = "block";
-        };
-    } else {
-        btn.onclick = () => showPage(btn.dataset.page);
-    }
-});
+
 document.getElementById("submitSales").onclick = submitSales;
 document.getElementById("submitConsume").onclick = submitConsumption;
-document.getElementById("closeIframeBtn").addEventListener("click", () => {
-    document.getElementById("iframeModal").style.display = "none";
-    document.getElementById("bookingIframe").src = "";
-});
+document.getElementById("closeIframeBtn").addEventListener("click", closeIframe);
 </script>
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
